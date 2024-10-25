@@ -1,0 +1,37 @@
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+
+# Frontend
+frontend/node_modules/
+frontend/.svelte-kit/
+frontend/build/
+frontend/package/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+frontend/vite.config.js.timestamp-*
+frontend/vite.config.ts.timestamp-*
+
+# Backend
+backend/target/
+backend/!.mvn/wrapper/maven-wrapper.jar
+backend/!**/src/main/**/target/
+backend/!**/src/test/**/target/
+backend/*.log
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# System files
+.DS_Store
+*.log
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
