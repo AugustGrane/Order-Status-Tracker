@@ -1,16 +1,18 @@
-package gruppe2.backend.model;
+package gruppe2.backend.domain.order;
 
-public class Item {
+import gruppe2.backend.domain.product.ProductType;
+
+public class OrderItem {
     private int id;
     private String name;
     private int amount;
     private String product;
     private ProductType productType;
 
-    public Item() {
+    public OrderItem() {
     }
 
-    public Item(int id, String name, int amount, String product) {
+    public OrderItem(int id, String name, int amount, String product) {
         this.id = id;
         this.name = name;
         this.amount = amount;

@@ -1,13 +1,15 @@
-package gruppe2.backend.model;
+package gruppe2.backend.domain.order;
 
+import gruppe2.backend.domain.common.Notifiable;
+import gruppe2.backend.domain.status.Status;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Order implements INotifiable {
+public class Order implements Notifiable {
     private int id;
     private String customerName;
     private int date;
-    private List<Item> items;
+    private List<OrderItem> items;
     private int priority;
     private String notes;
     private int totalEstimatedTime;
@@ -33,7 +35,7 @@ public class Order implements INotifiable {
 
     private void calculateTotalEstimatedTime() {
         int total = 0;
-        for (Item item : items) {
+        for (OrderItem item : items) {
             if (item.getProductType() != null && !item.getProductType().getStatuses().isEmpty()) {
                 Status currentStatus = item.getProductType().getStatuses().get(0); // Get first status
                 total += currentStatus.getEstimatedTime() * item.getAmount();
@@ -66,11 +68,11 @@ public class Order implements INotifiable {
         this.date = date;
     }
 
-    public List<Item> getItems() {
+    public List<OrderItem> getItems() {
         return items;
     }
 
-    public void setItems(List<Item> items) {
+    public void setItems(List<OrderItem> items) {
         this.items = items;
         calculateTotalEstimatedTime();
     }

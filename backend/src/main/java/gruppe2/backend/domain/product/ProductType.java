@@ -1,5 +1,7 @@
-package gruppe2.backend.model;
+package gruppe2.backend.domain.product;
 
+import gruppe2.backend.domain.status.Status;
+import gruppe2.backend.domain.status.StatusHistory;
 import java.util.ArrayList;
 import java.util.List;
 

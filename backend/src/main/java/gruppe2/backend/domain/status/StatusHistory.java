@@ -1,4 +1,4 @@
-package gruppe2.backend.model;
+package gruppe2.backend.domain.status;
 
 import java.util.Date;
 
