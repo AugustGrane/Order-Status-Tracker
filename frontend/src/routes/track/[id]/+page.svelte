@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores'; // For accessing the page store
     import { onMount } from 'svelte'; // Importing onMount
+    import ItemComponent from './components/ItemComponent.svelte'; // Import the Item component
 
     // Declare a variable to hold the ID
     let id;
@@ -47,3 +48,34 @@
 {:else}
     <p>Loading order details...</p>
 {/if}
+
+<div class="main2">
+    <div class="background2">
+        <div class="logo2"></div>
+        <div class="order-box-main">
+            <div class="title-wrapper">
+                <div class="order-number-text">Ordrenummer: #{id}</div>
+                <div class="circle-explanations">
+                    <div class="circle-explanation">
+                        <div class="circle"></div>
+                        <div class="circle-text">Færdig</div>
+                    </div>
+                    <div class="circle-explanation">
+                        <div class="current-circle"></div>
+                        <div class="circle-text">Igangsat</div>
+                    </div>
+                    <div class="circle-explanation">
+                        <div class="circle-2"></div>
+                        <div class="circle-text">Afventer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
+            <div class="order-box-items">
+                <ItemComponent productType="T-shirt" id="22324" quantity="25" />
+                <ItemComponent productType="Banner" id="22325" quantity="10" />
+                <ItemComponent productType="Folie" id="22326" quantity="2" />
+            </div>
+        </div>
+    </div>
+</div>
