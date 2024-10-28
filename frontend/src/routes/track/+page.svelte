@@ -30,37 +30,19 @@
     }
 </script>
 
-<form on:submit={handleSubmit}>
-    <label for="orderInput">Enter Text:</label>
-    <input
-            id="orderInput"
-            type="text"
-            bind:value={orderInput}
-            placeholder="Type only numbers here"
-            required
-    />
-    <button type="submit">Submit</button>
-
-    {#if errorMessage}
-        <p style="color: red;">{errorMessage}</p>
-    {/if}
-</form>
-
-
-<!--<div class="main">
+<div class="main">
     <div class="background">
         <div class="focus-box">
             <div class="logo"></div>
             <div class="title">Se din proces</div>
             <div class="form-wrapper">
                 <form on:submit={handleSubmit}>
-                    <label for="orderInput">Enter Text:</label>
                     <input
                             id="orderInput"
                             type="text"
                             class="input-field"
                             bind:value={orderInput}
-                            placeholder="Type only numbers here"
+                            placeholder="Indtast ordrenummer"
                             required
                     />
                     <button type="submit" class="button">Spor din ordres proces</button>
@@ -68,14 +50,6 @@
                     {#if errorMessage}
                         <p style="color: red;">{errorMessage}</p>
                     {/if}
-                </form>
-                <form>
-                    <input
-                            id="orderInput"
-                            type="text"
-                            placeholder="Indtast ordrenummer"
-                            required
-                    />
                 </form>
             </div>
             <div class="icon-boxes">
@@ -86,4 +60,4 @@
             </div>
         </div>
     </div>
-</div>-->
+</div>
