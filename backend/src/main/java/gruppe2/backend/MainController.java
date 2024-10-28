@@ -14,4 +14,3 @@ public class MainController {
         return ("Hello World from Spring Boot!");
     }
 }
-
