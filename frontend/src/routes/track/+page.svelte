@@ -26,6 +26,7 @@
             }
         } catch (error) {
             errorMessage = 'Network error: Could not connect to the backend.';
+            console.log("Error:", error);
         }
     }
 </script>
