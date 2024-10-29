@@ -47,6 +47,7 @@ public class OrderController {
         Item item = new Item();
         item.setName(itemDTO.name());
         item.setProductTypeId(itemDTO.productTypeId());
+        item.setImage(itemDTO.item_image());
 
         return ResponseEntity.ok(itemRepository.save(item));
     }
@@ -59,7 +60,6 @@ public class OrderController {
         order.setPriority(orderDTO.priority());
         order.setNotes(orderDTO.notes());
         order.setOrderCreated(LocalDateTime.now());
-        //order.setItemMapping(orderDTO.items());
 
         // 2. Calculate total estimated time
         int totalTime = calculateEstimatedTime(orderDTO.items());
@@ -71,6 +71,7 @@ public class OrderController {
 
         // 3. For each item in the order, create an OrderDetails
         orderDTO.items().forEach((itemId, quantity) -> {
+            // Find the item
             Item item = itemRepository.findById(itemId)
                     .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
 
@@ -81,8 +82,8 @@ public class OrderController {
             // Create OrderDetails
             OrderDetails orderDetails = new OrderDetails();
             orderDetails.setOrderId(orderId);
-            orderDetails.setItemId(itemId);
-            orderDetails.setName(productType.getName());
+            orderDetails.setItem(item);  // Set the Item entity instead of just the ID
+            orderDetails.setProduct_type(productType.getName());
             orderDetails.setItemAmount(quantity);
 
             // Create a new array instead of using the reference directly
