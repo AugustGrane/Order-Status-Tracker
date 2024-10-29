@@ -18,8 +18,8 @@
 
         if (id) { // Only fetch if id is present
             try {
-                const response = await fetch(`http://localhost:8080/endpoints/${id}`, {
-                    method: 'POST', // Set the method to POST to match the backend's expectation
+                const response = await fetch(`http://localhost:8080/api/orders/${id}`, {
+                    method: 'GET', // Set the method to POST to match the backend's expectation
                     headers: {
                         'Content-Type': 'application/json' // Optional, depending on backend requirements
                     }
@@ -29,32 +29,6 @@
                     console.log(`Order Data: ${JSON.stringify(orderData, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
-                }
-
-                const response2 = await fetch(`http://localhost:8080/api/orders/1/product-types`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (response2.ok) {
-                    orderData2 = await response2.json();
-                    console.log(`Order Data 2: ${JSON.stringify(orderData2, null, 2)}`)
-                } else {
-                    errorMessage = 'Failed to retrieve order data 2.';
-                }
-
-                const response3 = await fetch(`http://localhost:8080/api/orders/1/product-types`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                if (response3.ok) {
-                    orderData3 = await response3.json();
-                    console.log(`Order Data 2: ${JSON.stringify(orderData3, null, 2)}`)
-                } else {
-                    errorMessage = 'Failed to retrieve order data 3.';
                 }
             } catch (error) {
                 errorMessage = 'Network error: Could not connect to the backend.';
