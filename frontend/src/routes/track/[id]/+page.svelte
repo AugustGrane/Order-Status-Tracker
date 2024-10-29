@@ -7,8 +7,6 @@
     let id:any;
     // ANY TYPES NEED DEFINING WHEN WE KNOW WHAT TYPE RESPONSE IS
     let orderData:any; // To store fetched order data
-    let orderData2:any;
-    let orderData3:any;
     let errorMessage:any; // To hold any error messages
 
     // Reactive statement to access the ID from the URL
@@ -75,7 +73,7 @@
 {:else if errorMessage}
     <p style="color: red;">{errorMessage}</p>
 {:else}
-    <p>Loading order details...</p>
+    <p>Waiting for order details...</p>
 {/if}
 
 <div class="main2">
@@ -108,3 +106,168 @@
         </div>
     </div>
 </div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    :root {
+        font-size: 16px;
+        --font-primary: 'Roboto', Arial, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
+    }
+
+    .main2 {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        align-items: center;
+        gap: 10px;
+        /*padding: 0px 2%;*/
+        position: relative;
+        background-color: #ffffff;
+    }
+
+    .background2 {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0px 10%;
+        position: relative;
+        flex: 1;
+        align-self: stretch;
+        width: 100%;
+        background-color: #dbdbdb4c;
+    }
+
+    .logo2 {
+        position: relative;
+        width: 12rem;
+        height: 7rem;
+        margin: 18px;
+        object-fit: cover;
+        background: url('/gtryk_logo.png') no-repeat center;
+        background-size: contain;
+    }
+
+    .order-box-main {
+        align-items: flex-start;
+        padding: 15px 20px;
+        background-color: #ffffff;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 1px solid;
+        border-color: #00000026;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        align-self: stretch;
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .title-wrapper {
+        gap: 10px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        position: relative;
+        align-self: stretch;
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .order-number-text {
+        position: relative;
+        width: fit-content;
+        margin-top: -1.00px;
+        font-family: var(--font-primary);
+        font-size: 2.0rem;
+        font-weight: 500;
+        color: #000000;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .total-estimate {
+        position: relative;
+        width: fit-content;
+        font-family: var(--font-primary);
+        font-size: 1.0rem;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.8);
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .order-box-items {
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0px 52px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        align-self: stretch;
+        width: 100%;
+        flex: 0 0 auto;
+    }
+
+    .circle-explanations {
+        display: flex;
+        width: 200px;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .circle-explanation {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex: 1 0 0;
+    }
+
+    .circle {
+        position: relative;
+        width: 25px;
+        height: 25px;
+        background-color: #24a147;
+        border-radius: 15px;
+        transform: rotate(180deg);
+    }
+
+    .current-circle {
+        position: relative;
+        width: 25px;
+        height: 25px;
+        background-color: #1166ee;
+        border-radius: 15px;
+        transform: rotate(180deg);
+    }
+
+    .circle-2 {
+        position: relative;
+        width: 25px;
+        height: 25px;
+        background-color: #aaaaaa;
+        border-radius: 15px;
+        transform: rotate(180deg);
+    }
+
+    .circle-text {
+        color: #000;
+        font-family: var(--font-primary);
+        font-size: 0.9rem;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+</style>
