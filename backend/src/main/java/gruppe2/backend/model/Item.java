@@ -14,7 +14,10 @@ public class Item {
     
     @Column(name = "product_type_id")
     private Long productTypeId;
-    
+
+    @Column(name = "item_image")
+    private String image;
+
     public Item() {}
     
     public Item(Long id, String name, Long productTypeId) {
@@ -24,6 +27,16 @@ public class Item {
     }
     
     // Getters and Setters
+
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
