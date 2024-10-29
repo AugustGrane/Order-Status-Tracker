@@ -56,6 +56,12 @@
         --font-primary: 'Roboto', Arial, sans-serif;
     }
 
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
+    }
+
     .step {
         display: flex;
         align-items: flex-start;

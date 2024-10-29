@@ -1,6 +1,8 @@
 <script lang="ts">
+    // import { orderData } from '/+page.svelte';
     import StepComponent from "./StepComponent.svelte";
 
+    // console.log($orderData);
     export let productType:string;
     export let id:number;
     export let quantity:number;
@@ -26,6 +28,12 @@
     :root {
         font-size: 16px;
         --font-primary: 'Roboto', Arial, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
     }
 
     .item {

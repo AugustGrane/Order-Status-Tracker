@@ -1,14 +1,14 @@
 <script lang="ts">
     import { page } from '$app/stores'; // For accessing the page store
     import { onMount } from 'svelte'; // Importing onMount
+    import { writable } from 'svelte/store'; // Import writable store
     import ItemComponent from './components/ItemComponent.svelte'; // Import the Item component
 
     // Declare a variable to hold the ID
     let id:any;
     // ANY TYPES NEED DEFINING WHEN WE KNOW WHAT TYPE RESPONSE IS
-    let orderData:any; // To store fetched order data
+    export const orderData = writable(null); // To store fetched order data
     let errorMessage:any; // To hold any error messages
-
     // Reactive statement to access the ID from the URL
     $: id = $page.params.id;
 
@@ -25,8 +25,8 @@
                     }
                 }); // Adjust the URL accordingly
                 if (response.ok) {
-                    orderData = await response.json();
-                    console.log(`Order Data: ${JSON.stringify(orderData, null, 2)}`);
+                    $orderData = await response.json();
+                    console.log(`Order Data: ${JSON.stringify($orderData, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
                 }
@@ -41,9 +41,9 @@
 
 <h1>Order Tracking for ID: {id}</h1>
 
-{#if orderData}
+{#if $orderData}
     <p>Tracking details for order ID: {id}</p>
-    <pre>{JSON.stringify(orderData, null, 2)}</pre> <!-- Display order details -->
+    <pre style="font-size: 12px">{JSON.stringify($orderData, null, 2)}</pre> <!-- Display order details -->
 {:else if errorMessage}
     <p style="color: red;">{errorMessage}</p>
 {:else}
