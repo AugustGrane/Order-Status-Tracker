@@ -6,14 +6,20 @@ import java.util.Map;
 import java.util.HashMap;
 
 @Entity
-@Table(name = "order_product_types")
-public class OrderProductType {
+@Table(name = "order_details")
+public class OrderDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "order_id")
     private Long orderId;
+
+    @Column(name = "item_id")
+    private Long itemId;
+
+    @Column(name = "item_amount")
+    private Integer itemAmount;
 
     @Column(name = "name")
     private String name;
@@ -40,6 +46,22 @@ public class OrderProductType {
     private Map<Long, LocalDateTime> updated = new HashMap<>();
 
     // Getters and Setters
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
+
+    public Integer getItemAmount() {
+        return itemAmount;
+    }
+
+    public void setItemAmount(Integer itemAmount) {
+        this.itemAmount = itemAmount;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
