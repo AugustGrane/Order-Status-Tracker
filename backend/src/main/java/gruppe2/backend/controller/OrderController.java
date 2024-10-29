@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
 public class OrderController {
 
@@ -126,15 +127,24 @@ public class OrderController {
         return ResponseEntity.ok(statusDefinitionRepository.save(statusDefinition));
     }
 
-    @GetMapping("/orders/{orderId}/product-types")
-    public ResponseEntity<List<OrderProductType>> getOrderProductTypes(@PathVariable Long orderId) {
-        // Verify order exists
-        orderRepository.findById(orderId)
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<OrderDetailsDTO> getOrderDetails(@PathVariable Long orderId) {
+        // Fetch the order and verify it exists
+        Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        // Get product types
         List<OrderProductType> productTypes = orderProductTypeRepository.findByOrderId(orderId);
-        return ResponseEntity.ok(productTypes);
+
+        // Get item mapping directly from the order
+        Map<Long, Integer> itemQuantities = order.getItemMapping();
+
+        // Combine both pieces of information in the DTO
+        OrderDetailsDTO orderDetails = new OrderDetailsDTO(productTypes, itemQuantities);
+
+        return ResponseEntity.ok(orderDetails);
     }
+
 
     @PutMapping("/order-product-types/{id}/next-step")
     public ResponseEntity<?> moveToNextStep(@PathVariable Long id) {

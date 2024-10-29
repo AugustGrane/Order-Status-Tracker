@@ -4,9 +4,11 @@
     import ItemComponent from './components/ItemComponent.svelte'; // Import the Item component
 
     // Declare a variable to hold the ID
-    let id;
+    let id:any;
     // ANY TYPES NEED DEFINING WHEN WE KNOW WHAT TYPE RESPONSE IS
     let orderData:any; // To store fetched order data
+    let orderData2:any;
+    let orderData3:any;
     let errorMessage:any; // To hold any error messages
 
     // Reactive statement to access the ID from the URL
@@ -26,8 +28,35 @@
                 }); // Adjust the URL accordingly
                 if (response.ok) {
                     orderData = await response.json();
+                    console.log(`Order Data: ${JSON.stringify(orderData, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
+                }
+
+                const response2 = await fetch(`http://localhost:8080/api/orders/1/product-types`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response2.ok) {
+                    orderData2 = await response2.json();
+                    console.log(`Order Data 2: ${JSON.stringify(orderData2, null, 2)}`)
+                } else {
+                    errorMessage = 'Failed to retrieve order data 2.';
+                }
+
+                const response3 = await fetch(`http://localhost:8080/api/orders/1/product-types`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if (response3.ok) {
+                    orderData3 = await response3.json();
+                    console.log(`Order Data 2: ${JSON.stringify(orderData3, null, 2)}`)
+                } else {
+                    errorMessage = 'Failed to retrieve order data 3.';
                 }
             } catch (error) {
                 errorMessage = 'Network error: Could not connect to the backend.';
