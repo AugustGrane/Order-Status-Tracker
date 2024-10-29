@@ -65,6 +65,6 @@ public class Order {
     public int getTotalEstimatedTime() { return totalEstimatedTime; }
     public void setTotalEstimatedTime(int totalEstimatedTime) { this.totalEstimatedTime = totalEstimatedTime; }
 
-//    public Map<Long, Integer> getItemMapping() { return itemMapping; }
-//    public void setItemMapping(Map<Long, Integer> itemMapping) { this.itemMapping = itemMapping; }
+    public Map<Long, Integer> getItemMapping() { return itemMapping; }
+    public void setItemMapping(Map<Long, Integer> itemMapping) { this.itemMapping = itemMapping; }
 }

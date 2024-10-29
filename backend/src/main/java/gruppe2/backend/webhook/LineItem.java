@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class LineItem {
     private String name;
     private int quantity;
-    private int id;
+    private long product_id;
 
     @JsonProperty("image")
     private Img img;
@@ -20,13 +20,21 @@ public class LineItem {
         this.img = img;
     }
 
-    public int getId() {
-        return id;
+    public LineItem(String name, int quantity, long product_id, Img img) {
+        this.name = name;
+        this.quantity = quantity;
+        this.product_id = product_id;
+        this.img = img;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public long getProduct_id() {
+        return product_id;
     }
+
+    public void setProduct_id(long product_id) {
+        this.product_id = product_id;
+    }
+
 // Getters and setters...
 
     @Override
@@ -34,7 +42,7 @@ public class LineItem {
         return "LineItem{" +
                 "name='" + name + '\'' +
                 ", quantity=" + quantity +
-                ", id=" + id +
+                ", product_id=" + product_id +
                 ", img=" + img.toString() +
                 '}';
     }
