@@ -11,4 +11,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByCustomerNameContainingIgnoreCase(String customerName);
     List<Order> findByPriorityTrue();
     List<Order> findByOrderCreatedBetween(LocalDateTime start, LocalDateTime end);
+//    List<Order> findByItemMapping(Long itemMapping);
 }
