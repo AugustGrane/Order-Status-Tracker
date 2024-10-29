@@ -94,6 +94,7 @@ public class WebhookController {
 
             System.out.println("OrderDTO" + orderDTO);
             // Send package to creatOrderFromWebhook function
+            createOrderFromWebhook(orderDTO);
 
 
             // Return the payload filtered payload object to sender (for check in postman)
