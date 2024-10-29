@@ -81,6 +81,7 @@ public class OrderController {
             // Create OrderProductType
             OrderProductType orderProductType = new OrderProductType();
             orderProductType.setOrderId(orderId);
+            orderProductType.setItemId(itemId);
             orderProductType.setName(productType.getName());
 
             // Create a new array instead of using the reference directly

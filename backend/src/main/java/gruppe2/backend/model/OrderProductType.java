@@ -15,6 +15,9 @@ public class OrderProductType {
     @Column(name = "order_id")
     private Long orderId;
 
+    @Column(name = "item_id")
+    private Long itemId;
+
     @Column(name = "name")
     private String name;
 
@@ -40,6 +43,14 @@ public class OrderProductType {
     private Map<Long, LocalDateTime> updated = new HashMap<>();
 
     // Getters and Setters
+    public Long getItemId() {
+        return itemId;
+    }
+
+    public void setItemId(Long itemId) {
+        this.itemId = itemId;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

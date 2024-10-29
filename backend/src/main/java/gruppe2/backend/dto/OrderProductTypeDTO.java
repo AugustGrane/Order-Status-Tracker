@@ -5,6 +5,7 @@ import java.util.Map;
 
 public record OrderProductTypeDTO(
         Long orderId,
+        Long itemId,
         String name,
         Long[] differentSteps,
         Long currentStepId,  // Added this field
