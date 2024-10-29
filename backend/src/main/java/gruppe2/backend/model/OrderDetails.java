@@ -15,14 +15,16 @@ public class OrderDetails {
     @Column(name = "order_id")
     private Long orderId;
 
-    @Column(name = "item_id")
-    private Long itemId;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "item_id")
+    private Item item;
+
 
     @Column(name = "item_amount")
     private Integer itemAmount;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "product_type")
+    private String product_type;
 
     @Column(name = "current_step_index")
     private Integer currentStepIndex;
@@ -46,12 +48,14 @@ public class OrderDetails {
     private Map<Long, LocalDateTime> updated = new HashMap<>();
 
     // Getters and Setters
-    public Long getItemId() {
-        return itemId;
+
+
+    public Item getItem() {
+        return item;
     }
 
-    public void setItemId(Long itemId) {
-        this.itemId = itemId;
+    public void setItem(Item item) {
+        this.item = item;
     }
 
     public Integer getItemAmount() {
@@ -68,8 +72,13 @@ public class OrderDetails {
     public Long getOrderId() { return orderId; }
     public void setOrderId(Long orderId) { this.orderId = orderId; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getProduct_type() {
+        return product_type;
+    }
+
+    public void setProduct_type(String product_type) {
+        this.product_type = product_type;
+    }
 
     public Integer getCurrentStepIndex() { return currentStepIndex; }
     public void setCurrentStepIndex(Integer currentStepIndex) { this.currentStepIndex = currentStepIndex; }
