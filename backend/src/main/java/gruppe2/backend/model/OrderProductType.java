@@ -2,8 +2,8 @@ package gruppe2.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @Entity
 @Table(name = "order_product_types")
@@ -18,29 +18,26 @@ public class OrderProductType {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "current_step_index")
+    private Integer currentStepIndex;
+
     @ElementCollection
-    @CollectionTable(name = "order_product_type_steps", 
-                    joinColumns = @JoinColumn(name = "order_product_type_id"))
+    @CollectionTable(
+            name = "order_product_type_steps",
+            joinColumns = @JoinColumn(name = "order_product_type_id")
+    )
     @Column(name = "step_id")
+    @OrderColumn(name = "step_order")
     private Long[] differentSteps;
 
     @ElementCollection
-    @CollectionTable(name = "order_product_type_updated", 
-                    joinColumns = @JoinColumn(name = "order_product_type_id"))
+    @CollectionTable(
+            name = "order_product_type_updated",
+            joinColumns = @JoinColumn(name = "order_product_type_id")
+    )
     @MapKeyColumn(name = "status_definition_id")
     @Column(name = "updated")
-    private Map<Long, LocalDateTime> updated;
-
-    public OrderProductType() {}
-
-    public OrderProductType(Long id, Long orderId, String name, Long[] differentSteps, 
-                          Map<Long, LocalDateTime> updated) {
-        this.id = id;
-        this.orderId = orderId;
-        this.name = name;
-        this.differentSteps = differentSteps;
-        this.updated = updated;
-    }
+    private Map<Long, LocalDateTime> updated = new HashMap<>();
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -51,6 +48,9 @@ public class OrderProductType {
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
+
+    public Integer getCurrentStepIndex() { return currentStepIndex; }
+    public void setCurrentStepIndex(Integer currentStepIndex) { this.currentStepIndex = currentStepIndex; }
 
     public Long[] getDifferentSteps() { return differentSteps; }
     public void setDifferentSteps(Long[] differentSteps) { this.differentSteps = differentSteps; }
