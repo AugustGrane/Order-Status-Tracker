@@ -86,6 +86,7 @@ public class WebhookController {
 
             // Repackage to orderDTO
             OrderDTO orderDTO = new OrderDTO(
+                    payload.getId(),
                     displayName,
                     false,
                     "",
@@ -105,10 +106,11 @@ public class WebhookController {
             return ResponseEntity.status(500).body(null);
         }
     }
-    
+
     public ResponseEntity<Order> createOrderFromWebhook (@RequestBody OrderDTO orderDTO) {
         // 1. Create the order
         Order order = new Order();
+        order.setId(orderDTO.id());
         order.setCustomerName(orderDTO.customerName());
         order.setPriority(orderDTO.priority());
         order.setNotes(orderDTO.notes());
