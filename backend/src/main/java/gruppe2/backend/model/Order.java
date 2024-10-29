@@ -26,12 +26,12 @@ public class Order {
     @Column(name = "total_estimated_time")
     private int totalEstimatedTime;
 
-    @ElementCollection
-    @CollectionTable(name = "item_mapping", 
-                    joinColumns = @JoinColumn(name = "order_id"))
-    @MapKeyColumn(name = "item_id")
-    @Column(name = "amount")
-    private Map<Long, Integer> itemMapping;
+//    @ElementCollection
+//    @CollectionTable(name = "item_mapping",
+//                    joinColumns = @JoinColumn(name = "order_id"))
+//    @MapKeyColumn(name = "item_id")
+//    @Column(name = "amount")
+//    private Map<Long, Integer> itemMapping;
 
     public Order() {}
 
@@ -43,7 +43,7 @@ public class Order {
         this.notes = notes;
         this.orderCreated = orderCreated;
         this.totalEstimatedTime = totalEstimatedTime;
-        this.itemMapping = itemMapping;
+//        this.itemMapping = itemMapping;
     }
 
     // Getters and Setters
@@ -65,6 +65,6 @@ public class Order {
     public int getTotalEstimatedTime() { return totalEstimatedTime; }
     public void setTotalEstimatedTime(int totalEstimatedTime) { this.totalEstimatedTime = totalEstimatedTime; }
 
-    public Map<Long, Integer> getItemMapping() { return itemMapping; }
-    public void setItemMapping(Map<Long, Integer> itemMapping) { this.itemMapping = itemMapping; }
+//    public Map<Long, Integer> getItemMapping() { return itemMapping; }
+//    public void setItemMapping(Map<Long, Integer> itemMapping) { this.itemMapping = itemMapping; }
 }

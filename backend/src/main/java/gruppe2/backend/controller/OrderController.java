@@ -59,7 +59,7 @@ public class OrderController {
         order.setPriority(orderDTO.priority());
         order.setNotes(orderDTO.notes());
         order.setOrderCreated(LocalDateTime.now());
-        order.setItemMapping(orderDTO.items());
+        //order.setItemMapping(orderDTO.items());
 
         // 2. Calculate total estimated time
         int totalTime = calculateEstimatedTime(orderDTO.items());
@@ -69,7 +69,7 @@ public class OrderController {
         order = orderRepository.save(order);
         final Long orderId = order.getId();
 
-        // 3. For each item in the order, create an OrderProductType
+        // 3. For each item in the order, create an OrderDetails
         orderDTO.items().forEach((itemId, quantity) -> {
             Item item = itemRepository.findById(itemId)
                     .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
@@ -78,26 +78,27 @@ public class OrderController {
             ProductType productType = productTypeRepository.findById(item.getProductTypeId())
                     .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
 
-            // Create OrderProductType
-            OrderProductType orderProductType = new OrderProductType();
-            orderProductType.setOrderId(orderId);
-            orderProductType.setItemId(itemId);
-            orderProductType.setName(productType.getName());
+            // Create OrderDetails
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.setOrderId(orderId);
+            orderDetails.setItemId(itemId);
+            orderDetails.setName(productType.getName());
+            orderDetails.setItemAmount(quantity);
 
             // Create a new array instead of using the reference directly
             Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
                     productType.getDifferentSteps().length);
-            orderProductType.setDifferentSteps(steps);
+            orderDetails.setDifferentSteps(steps);
 
             // Set the initial step index
-            orderProductType.setCurrentStepIndex(0);
+            orderDetails.setCurrentStepIndex(0);
 
             // Initialize the status updates map with first step
             Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
             statusUpdates.put(steps[0], LocalDateTime.now());
-            orderProductType.setUpdated(statusUpdates);
+            orderDetails.setUpdated(statusUpdates);
 
-            orderProductTypeRepository.save(orderProductType);
+            orderProductTypeRepository.save(orderDetails);
         });
 
         return ResponseEntity.ok(order);
@@ -129,53 +130,50 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderDetailsDTO> getOrderDetails(@PathVariable Long orderId) {
+    public ResponseEntity<OrderDetailsDTO> getOrderProductType(@PathVariable Long orderId) {
         // Fetch the order and verify it exists
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         // Get product types
-        List<OrderProductType> productTypes = orderProductTypeRepository.findByOrderId(orderId);
+        List<OrderDetails> productTypes = orderProductTypeRepository.findByOrderId(orderId);
 
-        // Get item mapping directly from the order
-        Map<Long, Integer> itemQuantities = order.getItemMapping();
 
         // Combine both pieces of information in the DTO
-        OrderDetailsDTO orderDetails = new OrderDetailsDTO(productTypes, itemQuantities);
+        OrderDetailsDTO orderDetails = new OrderDetailsDTO(productTypes);
 
         return ResponseEntity.ok(orderDetails);
     }
 
-
     @PutMapping("/order-product-types/{id}/next-step")
     public ResponseEntity<?> moveToNextStep(@PathVariable Long id) {
         try {
-            OrderProductType orderProductType = orderProductTypeRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("OrderProductType not found with id: " + id));
+            OrderDetails orderDetails = orderProductTypeRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
 
             // Check if we're already at the last step
-            if (orderProductType.getCurrentStepIndex() >= orderProductType.getDifferentSteps().length - 1) {
+            if (orderDetails.getCurrentStepIndex() >= orderDetails.getDifferentSteps().length - 1) {
                 return ResponseEntity
                         .badRequest()
                         .body("Already at final step");
             }
 
             // Move to next step
-            int newIndex = orderProductType.getCurrentStepIndex() + 1;
-            orderProductType.setCurrentStepIndex(newIndex);
+            int newIndex = orderDetails.getCurrentStepIndex() + 1;
+            orderDetails.setCurrentStepIndex(newIndex);
 
             // Record timestamp for this step
-            Long stepId = orderProductType.getDifferentSteps()[newIndex];
-            orderProductType.getUpdated().put(stepId, LocalDateTime.now());
+            Long stepId = orderDetails.getDifferentSteps()[newIndex];
+            orderDetails.getUpdated().put(stepId, LocalDateTime.now());
 
-            OrderProductType updated = orderProductTypeRepository.save(orderProductType);
+            OrderDetails updated = orderProductTypeRepository.save(orderDetails);
 
             return ResponseEntity.ok(
                     Map.of(
                             "currentStep", newIndex + 1, // 1-based for display
-                            "totalSteps", orderProductType.getDifferentSteps().length,
+                            "totalSteps", orderDetails.getDifferentSteps().length,
                             "stepId", stepId,
-                            "updatedAt", orderProductType.getUpdated().get(stepId)
+                            "updatedAt", orderDetails.getUpdated().get(stepId)
                     )
             );
 
@@ -189,19 +187,19 @@ public class OrderController {
     @GetMapping("/order-product-types/{id}/progress")
     public ResponseEntity<?> getProgress(@PathVariable Long id) {
         try {
-            OrderProductType orderProductType = orderProductTypeRepository.findById(id)
-                    .orElseThrow(() -> new RuntimeException("OrderProductType not found with id: " + id));
+            OrderDetails orderDetails = orderProductTypeRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
 
             return ResponseEntity.ok(
                     Map.of(
-                            "currentStep", orderProductType.getCurrentStepIndex() + 1,
-                            "totalSteps", orderProductType.getDifferentSteps().length,
+                            "currentStep", orderDetails.getCurrentStepIndex() + 1,
+                            "totalSteps", orderDetails.getDifferentSteps().length,
                             "percentComplete",
-                            ((double)(orderProductType.getCurrentStepIndex() + 1) /
-                                    orderProductType.getDifferentSteps().length) * 100,
+                            ((double)(orderDetails.getCurrentStepIndex() + 1) /
+                                    orderDetails.getDifferentSteps().length) * 100,
                             "currentStepId",
-                            orderProductType.getDifferentSteps()[orderProductType.getCurrentStepIndex()],
-                            "stepHistory", orderProductType.getUpdated()
+                            orderDetails.getDifferentSteps()[orderDetails.getCurrentStepIndex()],
+                            "stepHistory", orderDetails.getUpdated()
                     )
             );
         } catch (Exception e) {
