@@ -45,6 +45,7 @@ public class OrderController {
                 .orElseThrow(() -> new RuntimeException("Product type not found"));
 
         Item item = new Item();
+        item.setId(itemDTO.id());
         item.setName(itemDTO.name());
         item.setProductTypeId(itemDTO.productTypeId());
         item.setImage(itemDTO.item_image());

@@ -106,14 +106,13 @@ public class WebhookController {
     }
 
 
-    public void createOrderFromWebhook(OrderDTO orderDTO) {
+    public ResponseEntity<Order> createOrderFromWebhook (@RequestBody OrderDTO orderDTO) {
         // 1. Create the order
-        gruppe2.backend.model.Order order = new Order();
+        Order order = new Order();
         order.setCustomerName(orderDTO.customerName());
         order.setPriority(orderDTO.priority());
         order.setNotes(orderDTO.notes());
         order.setOrderCreated(LocalDateTime.now());
-        order.setItemMapping(orderDTO.items());
 
         // 2. Calculate total estimated time
         int totalTime = calculateEstimatedTime(orderDTO.items());
@@ -125,6 +124,7 @@ public class WebhookController {
 
         // 3. For each item in the order, create an OrderDetails
         orderDTO.items().forEach((itemId, quantity) -> {
+            // Find the item
             Item item = itemRepository.findById(itemId)
                     .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
 
@@ -135,8 +135,8 @@ public class WebhookController {
             // Create OrderDetails
             OrderDetails orderDetails = new OrderDetails();
             orderDetails.setOrderId(orderId);
-            orderDetails.setItemId(itemId);
-            orderDetails.setName(productType.getName());
+            orderDetails.setItem(item);  // Set the Item entity instead of just the ID
+            orderDetails.setProduct_type(productType.getName());
             orderDetails.setItemAmount(quantity);
 
             // Create a new array instead of using the reference directly
@@ -155,6 +155,7 @@ public class WebhookController {
             orderProductTypeRepository.save(orderDetails);
         });
 
+        return ResponseEntity.ok(order);
     }
     private int calculateEstimatedTime(Map<Long, Integer> items) {
         return items.entrySet().stream()
