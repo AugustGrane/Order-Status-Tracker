@@ -1,6 +1,7 @@
 package gruppe2.backend.model;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "product_types")
@@ -13,7 +14,7 @@ public class ProductType {
     private String name;
 
     @ElementCollection
-    @CollectionTable(name = "product_type_steps", 
+    @CollectionTable(name = "product_type_steps",
                     joinColumns = @JoinColumn(name = "product_type_id"))
     @Column(name = "step_id")
     private Long[] differentSteps;
