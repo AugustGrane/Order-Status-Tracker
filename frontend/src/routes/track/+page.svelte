@@ -5,29 +5,7 @@
 
     async function handleSubmit(event:any) {
         event.preventDefault();
-        // Post to database here and check if order exists
-        try {
-            const response = await fetch(`http://localhost:8080/endpoints/${orderInput.trim()}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ orderInput: orderInput.trim() })
-            });
-            // Checks if the respons is ok, if yes it sends the JSON response
-            if (response.ok) {
-                const data = await response.json();
-                // Redirect to /track/{orderInput} on success
-                console.log("Sent data:", data);
-                goto(`/track/${orderInput.trim()}`);
-            } else {
-                const errorData = await response.json();
-                errorMessage = errorData.message || 'Failed to submit order.';
-            }
-        } catch (error) {
-            errorMessage = 'Network error: Could not connect to the backend.';
-            console.log("Error:", error);
-        }
+        goto(`/track/${orderInput.trim()}`);
     }
 </script>
 
