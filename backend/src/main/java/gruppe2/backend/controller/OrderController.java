@@ -8,10 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -132,19 +130,37 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderDetailsDTO> getOrderProductType(@PathVariable Long orderId) {
+    public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderProductType(@PathVariable Long orderId) {
         // Fetch the order and verify it exists
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Get product types
-        List<OrderDetails> productTypes = orderProductTypeRepository.findByOrderId(orderId);
+        // Get order details
+        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
 
+        // Convert each OrderDetails to OrderDetailsWithStatusDTO
+        List<OrderDetailsWithStatusDTO> result = orderDetailsList.stream()
+                .map(details -> {
+                    // Convert step IDs to StatusDefinition objects
+                    StatusDefinition[] statusDefinitions = Arrays.stream(details.getDifferentSteps())
+                            .map(stepId -> statusDefinitionRepository.findById(stepId)
+                                    .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
+                            .toArray(StatusDefinition[]::new);
 
-        // Combine both pieces of information in the DTO
-        OrderDetailsDTO orderDetails = new OrderDetailsDTO(productTypes);
+                    return new OrderDetailsWithStatusDTO(
+                            details.getId(),
+                            details.getOrderId(),
+                            details.getItem(),
+                            details.getItemAmount(),
+                            details.getProduct_type(),
+                            details.getCurrentStepIndex(),
+                            statusDefinitions,
+                            details.getUpdated()
+                    );
+                })
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(orderDetails);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("/order-product-types/{id}/next-step")

@@ -6,7 +6,7 @@
     export let productType:string;
     export let quantity:number;
 
-    let date = new Date(orderItem.updated[1]).toLocaleDateString();
+    let date = new Date(orderItem.updated[5]).toLocaleDateString();
     console.log("Date:", date);
 </script>
 
@@ -20,18 +20,22 @@
             {:else}
                 {#each orderItem.differentSteps as step, index}
                     {#if index === 0}
-                        <StepComponent status={step} estimate={date} done={true} firstItem={true} />
+                        {#if orderItem.currentStepIndex === index}
+                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} firstItem={true} />
+                        {:else}
+                            <StepComponent status={step.name} estimate={date} icon={step.image} done={true} firstItem={true} />
+                        {/if}
                     {:else if index <= orderItem.currentStepIndex}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step} estimate={date} current={true} done={true} />
+                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} done={true} />
                         {:else}
-                            <StepComponent status={step} estimate={date} done={true}/>
+                            <StepComponent status={step.name} estimate={date} icon={step.image} done={true}/>
                         {/if}
                     {:else}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step} estimate={date} current={true} />
+                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} />
                         {:else}
-                            <StepComponent status={step} estimate={date} />
+                            <StepComponent status={step.name} estimate={date} icon={step.image} />
                         {/if}
                     {/if}
                 {/each}

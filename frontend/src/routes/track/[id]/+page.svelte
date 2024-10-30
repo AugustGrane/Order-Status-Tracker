@@ -26,12 +26,13 @@
                 if (response.ok) {
                     orderData.set(await response.json());
                     console.log(`Order Data: ${JSON.stringify($orderData, null, 2)}`);
-                    console.log(`Order Data list: ${JSON.stringify($orderData.orderDetails.length, null, 2)}`);
+                    console.log(`Amount of Items: ${JSON.stringify($orderData.orderDetails.length, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
                 }
             } catch (error) {
                 errorMessage = 'Network error: Could not connect to the backend.';
+                console.log("Error:", error);
             }
         } else {
             errorMessage = 'No ID provided.';
@@ -42,8 +43,7 @@
 <h1>Order Tracking for ID: {id}</h1>
 
 {#if $orderData}
-<!--    <p>Tracking details for order ID: {id}</p>-->
-<!--    <pre style="font-size: 12px">{JSON.stringify($orderData, null, 2)}</pre> &lt;!&ndash; Display order details &ndash;&gt;-->
+
 {:else if errorMessage}
     <p style="color: red;">{errorMessage}</p>
 {:else}
@@ -74,10 +74,10 @@
             <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
                 {#if $orderData}
-                    {#if $orderData.orderDetails.length === 0}
+                    {#if $orderData.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each $orderData.orderDetails as item}
+                        {#each $orderData as item}
                             <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
                         {/each}
                     {/if}
