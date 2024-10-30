@@ -130,35 +130,37 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<EnhancedOrderDetailsDTO> getOrderProductType(@PathVariable Long orderId) {
+    public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderProductType(@PathVariable Long orderId) {
         // Fetch the order and verify it exists
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        // Get product types
-        List<OrderDetails> productTypes = orderProductTypeRepository.findByOrderId(orderId);
+        // Get order details
+        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
 
-        // Collect all unique status IDs from all order details
-        Set<Long> statusIds = productTypes.stream()
-                .flatMap(pt -> Arrays.stream(pt.getDifferentSteps()))
-                .collect(Collectors.toSet());
+        // Convert each OrderDetails to OrderDetailsWithStatusDTO
+        List<OrderDetailsWithStatusDTO> result = orderDetailsList.stream()
+                .map(details -> {
+                    // Convert step IDs to StatusDefinition objects
+                    StatusDefinition[] statusDefinitions = Arrays.stream(details.getDifferentSteps())
+                            .map(stepId -> statusDefinitionRepository.findById(stepId)
+                                    .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
+                            .toArray(StatusDefinition[]::new);
 
-        // Fetch all relevant status definitions
-        Map<Long, StatusDefinition> statusDefinitions = statusIds.stream()
-                .map(id -> statusDefinitionRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Status definition not found: " + id)))
-                .collect(Collectors.toMap(
-                        StatusDefinition::getId,
-                        statusDef -> statusDef
-                ));
+                    return new OrderDetailsWithStatusDTO(
+                            details.getId(),
+                            details.getOrderId(),
+                            details.getItem(),
+                            details.getItemAmount(),
+                            details.getProduct_type(),
+                            details.getCurrentStepIndex(),
+                            statusDefinitions,
+                            details.getUpdated()
+                    );
+                })
+                .collect(Collectors.toList());
 
-        // Combine both pieces of information in the enhanced DTO
-        EnhancedOrderDetailsDTO enhancedOrderDetails = new EnhancedOrderDetailsDTO(
-                productTypes,
-                statusDefinitions
-        );
-
-        return ResponseEntity.ok(enhancedOrderDetails);
+        return ResponseEntity.ok(result);
     }
 
     @PutMapping("/order-product-types/{id}/next-step")
