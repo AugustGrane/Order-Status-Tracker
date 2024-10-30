@@ -8,10 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -132,7 +130,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<OrderDetailsDTO> getOrderProductType(@PathVariable Long orderId) {
+    public ResponseEntity<EnhancedOrderDetailsDTO> getOrderProductType(@PathVariable Long orderId) {
         // Fetch the order and verify it exists
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -140,11 +138,27 @@ public class OrderController {
         // Get product types
         List<OrderDetails> productTypes = orderProductTypeRepository.findByOrderId(orderId);
 
+        // Collect all unique status IDs from all order details
+        Set<Long> statusIds = productTypes.stream()
+                .flatMap(pt -> Arrays.stream(pt.getDifferentSteps()))
+                .collect(Collectors.toSet());
 
-        // Combine both pieces of information in the DTO
-        OrderDetailsDTO orderDetails = new OrderDetailsDTO(productTypes);
+        // Fetch all relevant status definitions
+        Map<Long, StatusDefinition> statusDefinitions = statusIds.stream()
+                .map(id -> statusDefinitionRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Status definition not found: " + id)))
+                .collect(Collectors.toMap(
+                        StatusDefinition::getId,
+                        statusDef -> statusDef
+                ));
 
-        return ResponseEntity.ok(orderDetails);
+        // Combine both pieces of information in the enhanced DTO
+        EnhancedOrderDetailsDTO enhancedOrderDetails = new EnhancedOrderDetailsDTO(
+                productTypes,
+                statusDefinitions
+        );
+
+        return ResponseEntity.ok(enhancedOrderDetails);
     }
 
     @PutMapping("/order-product-types/{id}/next-step")
