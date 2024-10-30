@@ -1,0 +1,42 @@
+classDiagram
+    class Order {
+        +id: UUID
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        +customer: String
+        +orderItems: List~OrderItem~
+        +status: Status
+    }
+
+    class OrderItem {
+        +id: UUID
+        +order: Order
+        +product: ProductType
+        +quantity: int
+    }
+
+    class ProductType {
+        +id: UUID
+        +name: String
+        +description: String
+    }
+
+    class Status {
+        +id: UUID
+        +name: String
+        +description: String
+    }
+
+    class StatusHistory {
+        +id: UUID
+        +order: Order
+        +status: Status
+        +timestamp: DateTime
+    }
+
+    Order "1" --* "0..*" OrderItem
+    Order "1" --o "1" Status
+    Order "1" --* "0..*" StatusHistory
+    OrderItem "1" --o "1" ProductType
+    StatusHistory "1" --o "1" Status
+    StatusHistory "1" --o "1" Order
