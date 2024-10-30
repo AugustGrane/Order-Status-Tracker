@@ -1,20 +1,19 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import type { OrderDetailsWithStatus } from '$lib/types';
 
 // Create a store to hold our orders
-const { subscribe, set, update } = writable<{
+const orderCache = writable<{
     [orderId: string]: OrderDetailsWithStatus[] | null
 }>({});
 
 // Export our store with custom methods
 export const orderStore = {
-    subscribe,
+    subscribe: orderCache.subscribe,
 
     // Method to fetch and store order data
     async getOrder(orderId: string) {
-        // Try to get from store first
-        let orders: { [key: string]: OrderDetailsWithStatus[] | null };
-        subscribe(value => { orders = value; })();
+        // Get current store value
+        const orders = get(orderCache);
 
         // If we have it in cache and it's not null, return it
         if (orders[orderId]) {
@@ -31,7 +30,7 @@ export const orderStore = {
             const orderData: OrderDetailsWithStatus[] = await response.json();
             
             // Store in cache
-            update(orders => ({
+            orderCache.update(orders => ({
                 ...orders,
                 [orderId]: orderData
             }));
@@ -39,7 +38,7 @@ export const orderStore = {
             return orderData;
         } catch (error) {
             // Store null in cache to indicate failed fetch
-            update(orders => ({
+            orderCache.update(orders => ({
                 ...orders,
                 [orderId]: null
             }));
@@ -49,6 +48,6 @@ export const orderStore = {
 
     // Clear the store
     clear() {
-        set({});
+        orderCache.set({});
     }
 };
