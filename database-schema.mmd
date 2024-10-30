@@ -1,42 +1,41 @@
-classDiagram
-    class Order {
-        +id: UUID
-        +createdAt: DateTime
-        +updatedAt: DateTime
-        +customer: String
-        +orderItems: List~OrderItem~
-        +status: Status
+erDiagram
+    Order ||--o{ OrderDetails : contains
+    OrderDetails }o--|| Item : "contains item"
+    Item }o--|| ProductType : "has product type"
+    ProductType }o--|| StatusDefinition : "has status definitions"
+
+    Order {
+        int id
+        int orderNumber
+        date orderDate
+        decimal totalAmount
     }
 
-    class OrderItem {
-        +id: UUID
-        +order: Order
-        +product: ProductType
-        +quantity: int
+    OrderDetails {
+        int id
+        int order_id
+        int item_id
+        int quantity
+        decimal price
     }
 
-    class ProductType {
-        +id: UUID
-        +name: String
-        +description: String
+    Item {
+        int id
+        string name
+        string description
+        decimal price
+        int productType_id
     }
 
-    class Status {
-        +id: UUID
-        +name: String
-        +description: String
+    ProductType {
+        int id
+        string name
+        Long[] differentSteps
     }
 
-    class StatusHistory {
-        +id: UUID
-        +order: Order
-        +status: Status
-        +timestamp: DateTime
+    StatusDefinition {
+        int id
+        string name
+        string description
+        string image
     }
-
-    Order "1" --* "0..*" OrderItem
-    Order "1" --o "1" Status
-    Order "1" --* "0..*" StatusHistory
-    OrderItem "1" --o "1" ProductType
-    StatusHistory "1" --o "1" Status
-    StatusHistory "1" --o "1" Order
