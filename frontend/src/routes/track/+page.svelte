@@ -5,7 +5,20 @@
 
     async function handleSubmit(event:any) {
         event.preventDefault();
-        goto(`/track/${orderInput.trim()}`);
+        const trimmedOrderId = orderInput.trim();
+        
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${trimmedOrderId}`);
+            if (response.ok) {
+                errorMessage = '';
+                goto(`/track/${trimmedOrderId}`);
+            } else {
+                errorMessage = 'Ordrenummer findes ikke';
+                orderInput = ''; // Clear the input field
+            }
+        } catch (error) {
+            errorMessage = 'Der opstod en fejl. Prøv igen senere.';
+        }
     }
 </script>
 
@@ -27,7 +40,7 @@
                     <button type="submit" class="button">Spor din ordres proces</button>
 
                     {#if errorMessage}
-                        <p style="color: red;">{errorMessage}</p>
+                        <p class="error-message">{errorMessage}</p>
                     {/if}
                 </form>
             </div>
@@ -94,7 +107,7 @@
     .logo {
         width: 12rem;
         height: 7rem;
-        background: url(gtryk_logo.png) no-repeat center;
+        background: url('/gtryk_logo.png') no-repeat center;
         background-size: contain;
     }
 
@@ -145,6 +158,14 @@
         font-weight: 400;
         border: none; /* Remove default button border */
         cursor: pointer; /* Change cursor to pointer */
+    }
+
+    .error-message {
+        color: #dc3545;
+        text-align: center;
+        margin-top: 1rem;
+        font-family: var(--font-primary);
+        font-size: 1rem;
     }
 
     /* Icon Boxes Grid Layout */
