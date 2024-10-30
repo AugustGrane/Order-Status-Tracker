@@ -1,13 +1,12 @@
 <script lang="ts">
     import { page } from '$app/stores'; // For accessing the page store
     import { onMount } from 'svelte'; // Importing onMount
-    import { writable } from 'svelte/store'; // Import writable store
+    import { orderData } from '$lib/stores/orderStore'; // Import writable store
     import ItemComponent from './components/ItemComponent.svelte'; // Import the Item component
 
     // Declare a variable to hold the ID
     let id:any;
     // ANY TYPES NEED DEFINING WHEN WE KNOW WHAT TYPE RESPONSE IS
-    export const orderData = writable(null); // To store fetched order data
     let errorMessage:any; // To hold any error messages
     // Reactive statement to access the ID from the URL
     $: id = $page.params.id;
@@ -25,8 +24,9 @@
                     }
                 }); // Adjust the URL accordingly
                 if (response.ok) {
-                    $orderData = await response.json();
+                    orderData.set(await response.json());
                     console.log(`Order Data: ${JSON.stringify($orderData, null, 2)}`);
+                    console.log(`Order Data list: ${JSON.stringify($orderData.orderDetails.length, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
                 }
@@ -42,8 +42,8 @@
 <h1>Order Tracking for ID: {id}</h1>
 
 {#if $orderData}
-    <p>Tracking details for order ID: {id}</p>
-    <pre style="font-size: 12px">{JSON.stringify($orderData, null, 2)}</pre> <!-- Display order details -->
+<!--    <p>Tracking details for order ID: {id}</p>-->
+<!--    <pre style="font-size: 12px">{JSON.stringify($orderData, null, 2)}</pre> &lt;!&ndash; Display order details &ndash;&gt;-->
 {:else if errorMessage}
     <p style="color: red;">{errorMessage}</p>
 {:else}
@@ -73,9 +73,15 @@
             </div>
             <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
-                <ItemComponent productType="T-shirt" id="22324" quantity="25" />
-                <ItemComponent productType="Banner" id="22325" quantity="10" />
-                <ItemComponent productType="Folie" id="22326" quantity="2" />
+                {#if $orderData}
+                    {#if $orderData.orderDetails.length === 0}
+                        <p style="color: red">No items found for this order.</p>
+                    {:else}
+                        {#each $orderData.orderDetails as item}
+                            <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
+                        {/each}
+                    {/if}
+                {/if}
             </div>
         </div>
     </div>

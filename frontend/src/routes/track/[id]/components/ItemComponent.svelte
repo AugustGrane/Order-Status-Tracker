@@ -1,23 +1,48 @@
 <script lang="ts">
-    // import { orderData } from '/+page.svelte';
     import StepComponent from "./StepComponent.svelte";
 
-    // console.log($orderData);
+    export let orderItem:object;
+    export let name:string;
     export let productType:string;
-    export let id:number;
     export let quantity:number;
+
+    let date = new Date(orderItem.updated[1]).toLocaleDateString();
+    console.log("Date:", date);
 </script>
 
 
 <div class="item"> <!-- Start of Item -->
-    <div class="item-title">{productType} | #{id} | <i>Antal: {quantity}</i></div>
+    <div class="item-title">{name} | {productType} | <i>Antal: {quantity}</i></div>
     <div class="timeline-wrapper">
-        <StepComponent status="Modtaget" estimate="" done={true} firstItem={true} />
-        <StepComponent status="Justeret" estimate="4 timer" current={true} />
-        <StepComponent status="Printet" estimate="8 timer" />
-        <StepComponent status="Tørret" estimate="1 dag" />
-        <StepComponent status="Pakket" estimate="2 timer" />
-        <StepComponent status="Afsendt" estimate="1 dag" />
+        {#if orderItem}
+            {#if orderItem.differentSteps.length === 0}
+                <p style="color: red">Error: No steps in item</p>
+            {:else}
+                {#each orderItem.differentSteps as step, index}
+                    {#if index === 0}
+                        <StepComponent status={step} estimate={date} done={true} firstItem={true} />
+                    {:else if index <= orderItem.currentStepIndex}
+                        {#if orderItem.currentStepIndex === index}
+                            <StepComponent status={step} estimate={date} current={true} done={true} />
+                        {:else}
+                            <StepComponent status={step} estimate={date} done={true}/>
+                        {/if}
+                    {:else}
+                        {#if orderItem.currentStepIndex === index}
+                            <StepComponent status={step} estimate={date} current={true} />
+                        {:else}
+                            <StepComponent status={step} estimate={date} />
+                        {/if}
+                    {/if}
+                {/each}
+            {/if}
+        {/if}
+<!--        <StepComponent status="Modtaget" estimate="" done={true} firstItem={true} />-->
+<!--        <StepComponent status="Justeret" estimate="4 timer" current={true} />-->
+<!--        <StepComponent status="Printet" estimate="8 timer" />-->
+<!--        <StepComponent status="Tørret" estimate="1 dag" />-->
+<!--        <StepComponent status="Pakket" estimate="2 timer" />-->
+<!--        <StepComponent status="Afsendt" estimate="1 dag" />-->
     </div>
 </div> <!-- End of Item -->
 

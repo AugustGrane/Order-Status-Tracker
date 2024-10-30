@@ -9,7 +9,7 @@
 </script>
 
 {#if !firstItem}
-    <Line done="{done}" />
+    <Line done={done} />
 {/if}
 
 <div class="step">
