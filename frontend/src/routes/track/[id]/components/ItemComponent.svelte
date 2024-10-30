@@ -68,7 +68,7 @@
     .item {
         display: flex;
         flex-direction: column;
-        height: 130px;
+        height: 150px;
         align-items: flex-start;
         justify-content: center;
         gap: 20px;

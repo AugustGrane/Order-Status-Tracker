@@ -8,59 +8,34 @@
     export let done:boolean = false;
     export let firstItem:boolean = false;
 
+    // Remove 'frontend/static/' from the icon path if it exists
+    $: cleanIconPath = icon.replace('frontend/static/', '');
     console.log("Icon:", icon);
 </script>
 
 {#if !firstItem}
-    <Line done={true} />
+    <Line done={!current && done} current={current} />
 {/if}
-
-<!--<div class="step">-->
-<!--    <div class="circle-wrapper">-->
-<!--        <div class="icon" style="background: url({icon}) no-repeat center;">-->
-<!--        </div>-->
-<!--    </div>-->
-<!--    <div class="status-text">-->
-<!--        <div class="status">{status}</div>-->
-<!--        <div class="estimate">-->
-<!--            {#if estimate}-->
-<!--                ({estimate})-->
-<!--            {:else}-->
-
-<!--            {/if}-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
 
 <div class="step">
     <div class="circle-wrapper">
-        {#if current}
-            <div class="current-circle"></div>
-        {:else}
-            {#if done}
-                <div class="circle"></div>
-            {:else}
-                <div class="circle-2"></div>
-            {/if}
-        {/if}
+        <div class="icon-wrapper" class:current={current} class:done={!current && done}>
+            <div class="icon" style="background: url('/{cleanIconPath}') no-repeat center;"></div>
+        </div>
         <div class="status-text">
             {#if current}
                 <div class="current-status">{status}</div>
                 <div class="current-estimate">
-                    <!--{#if estimate}-->
-                    <!--    ({estimate})-->
-                    <!--{:else}-->
-
-                    <!--{/if}-->
+                    {#if estimate}
+                        ({estimate})
+                    {/if}
                 </div>
             {:else}
                 <div class="status">{status}</div>
                 <div class="estimate">
-                    <!--{#if estimate}-->
-                    <!--    ({estimate})-->
-                    <!--{:else}-->
-
-                    <!--{/if}-->
+                    {#if estimate}
+                        ({estimate})
+                    {/if}
                 </div>
             {/if}
         </div>
@@ -79,15 +54,15 @@
     *,
     *::before,
     *::after {
-        box-sizing: border-box; /* Include padding and border in element's total width and height */
+        box-sizing: border-box;
     }
 
     .step {
         display: flex;
         align-items: flex-start;
         justify-content: center;
-        gap: 5px;
-        padding: 0px 1px;
+        gap: 12px;
+        padding: 0px 8px;
         position: relative;
         flex: 1;
         flex-grow: 1;
@@ -97,42 +72,47 @@
         display: inline-flex;
         flex-direction: column;
         align-items: center;
-        gap: 5px;
+        gap: 8px;
         position: relative;
         flex: 0 0 auto;
     }
 
+    .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        background-color: #f8f8f8;
+        padding: 10px;
+        border: 3px solid #dddddd;
+        transition: all 0.3s ease;
+    }
+
+    .icon-wrapper.current {
+        border-color: #1166ee;
+        background-color: #f0f7ff;
+        box-shadow: 0 0 0 4px rgba(17, 102, 238, 0.1);
+    }
+
+    .icon-wrapper.done {
+        border-color: #24a147;
+        background-color: #f0fff4;
+        box-shadow: 0 0 0 4px rgba(36, 161, 71, 0.1);
+    }
+
     .icon {
-        width: 2rem;
-        height: 2rem;
-        background-size: contain;
+        width: 100%;
+        height: 100%;
+        background-size: contain !important;
+        transition: all 0.3s ease;
+        filter: grayscale(100%) opacity(0.5);
     }
 
-    .circle {
-        position: relative;
-        width: 25px;
-        height: 25px;
-        background-color: #24a147;
-        border-radius: 15px;
-        transform: rotate(180deg);
-    }
-
-    .current-circle {
-        position: relative;
-        width: 25px;
-        height: 25px;
-        background-color: #1166ee;
-        border-radius: 15px;
-        transform: rotate(180deg);
-    }
-
-    .circle-2 {
-        position: relative;
-        width: 25px;
-        height: 25px;
-        background-color: #aaaaaa;
-        border-radius: 15px;
-        transform: rotate(180deg);
+    .current .icon,
+    .done .icon {
+        filter: none;
     }
 
     .status-text {
@@ -142,15 +122,15 @@
         justify-content: center;
         position: relative;
         flex: 0 0 auto;
+        margin-top: 4px;
     }
 
     .current-status {
         color: #000000;
         position: relative;
         width: fit-content;
-        margin-top: -1.00px;
         font-family: var(--font-primary);
-        font-weight: 400;
+        font-weight: 500;
         font-size: 0.9rem;
         text-align: center;
         letter-spacing: 0;
@@ -175,7 +155,6 @@
         color: #808080;
         position: relative;
         width: fit-content;
-        margin-top: -1.00px;
         font-family: var(--font-primary);
         font-weight: 400;
         font-size: 0.9rem;
