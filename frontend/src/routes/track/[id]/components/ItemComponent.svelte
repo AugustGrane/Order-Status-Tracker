@@ -1,17 +1,18 @@
 <script lang="ts">
+    import type { OrderDetailsWithStatus } from '$lib/types';
     import StepComponent from "./StepComponent.svelte";
 
-    export let orderItem:object;
-    export let name:string;
-    export let productType:string;
-    export let quantity:number;
+    export let orderItem: OrderDetailsWithStatus;
+    export let name: string;
+    export let productType: string;
+    export let quantity: number;
 
+    // Get the last update time (index 5 corresponds to the last status)
     let date = new Date(orderItem.updated[5]).toLocaleDateString();
     console.log("Date:", date);
 </script>
 
-
-<div class="item"> <!-- Start of Item -->
+<div class="item">
     <div class="item-title">{name} | {productType} | <i>Antal: {quantity}</i></div>
     <div class="timeline-wrapper">
         {#if orderItem}
@@ -41,17 +42,10 @@
                 {/each}
             {/if}
         {/if}
-<!--        <StepComponent status="Modtaget" estimate="" done={true} firstItem={true} />-->
-<!--        <StepComponent status="Justeret" estimate="4 timer" current={true} />-->
-<!--        <StepComponent status="Printet" estimate="8 timer" />-->
-<!--        <StepComponent status="Tørret" estimate="1 dag" />-->
-<!--        <StepComponent status="Pakket" estimate="2 timer" />-->
-<!--        <StepComponent status="Afsendt" estimate="1 dag" />-->
     </div>
-</div> <!-- End of Item -->
+</div>
 
 <style>
-    /* Add a Google Font import for Roboto */
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     :root {
@@ -62,13 +56,13 @@
     *,
     *::before,
     *::after {
-        box-sizing: border-box; /* Include padding and border in element's total width and height */
+        box-sizing: border-box;
     }
 
     .item {
         display: flex;
         flex-direction: column;
-        height: 130px;
+        height: 150px;
         align-items: flex-start;
         justify-content: center;
         gap: 20px;

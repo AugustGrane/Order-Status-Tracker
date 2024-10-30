@@ -1,54 +1,12 @@
 <script lang="ts">
-    import { page } from '$app/stores'; // For accessing the page store
-    import { onMount } from 'svelte'; // Importing onMount
-    import { orderData } from '$lib/stores/orderStore'; // Import writable store
-    import ItemComponent from './components/ItemComponent.svelte'; // Import the Item component
+    import { page } from '$app/stores';
+    import type { OrderDetailsWithStatus } from '$lib/types';
+    import ItemComponent from './components/ItemComponent.svelte';
+    import { orderStore } from '$lib/stores/orderStore';
 
-    // Declare a variable to hold the ID
-    let id:any;
-    // ANY TYPES NEED DEFINING WHEN WE KNOW WHAT TYPE RESPONSE IS
-    let errorMessage:any; // To hold any error messages
-    // Reactive statement to access the ID from the URL
-    $: id = $page.params.id;
-
-    // Use onMount to fetch order details based on the ID
-    onMount(async () => {
-        console.log("Fetching order details for ID:", id);// Log the ID
-
-        if (id) { // Only fetch if id is present
-            try {
-                const response = await fetch(`http://localhost:8080/api/orders/${id}`, {
-                    method: 'GET', // Set the method to POST to match the backend's expectation
-                    headers: {
-                        'Content-Type': 'application/json' // Optional, depending on backend requirements
-                    }
-                }); // Adjust the URL accordingly
-                if (response.ok) {
-                    orderData.set(await response.json());
-                    console.log(`Order Data: ${JSON.stringify($orderData, null, 2)}`);
-                    console.log(`Amount of Items: ${JSON.stringify($orderData.orderDetails.length, null, 2)}`);
-                } else {
-                    errorMessage = 'Failed to retrieve order data.';
-                }
-            } catch (error) {
-                errorMessage = 'Network error: Could not connect to the backend.';
-                console.log("Error:", error);
-            }
-        } else {
-            errorMessage = 'No ID provided.';
-        }
-    });
+    export let data: { order: OrderDetailsWithStatus[] };
+    let id = $page.params.id;
 </script>
-
-<h1>Order Tracking for ID: {id}</h1>
-
-{#if $orderData}
-
-{:else if errorMessage}
-    <p style="color: red;">{errorMessage}</p>
-{:else}
-    <p>Waiting for order details...</p>
-{/if}
 
 <div class="main2">
     <div class="background2">
@@ -73,14 +31,16 @@
             </div>
             <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
-                {#if $orderData}
-                    {#if $orderData.length === 0}
+                {#if data.order}
+                    {#if data.order.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each $orderData as item}
+                        {#each data.order as item}
                             <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
                         {/each}
                     {/if}
+                {:else}
+                    <p>Loading order details...</p>
                 {/if}
             </div>
         </div>
@@ -98,7 +58,7 @@
     *,
     *::before,
     *::after {
-        box-sizing: border-box; /* Include padding and border in element's total width and height */
+        box-sizing: border-box;
     }
 
     .main2 {
@@ -107,7 +67,6 @@
         min-height: 100vh;
         align-items: center;
         gap: 10px;
-        /*padding: 0px 2%;*/
         position: relative;
         background-color: #ffffff;
     }

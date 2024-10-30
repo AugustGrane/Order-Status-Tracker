@@ -1,23 +1,21 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';  // Import goto function
+    import { goto } from '$app/navigation';
+    import { orderStore } from '$lib/stores/orderStore';
     let orderInput = '';
     let errorMessage = '';
 
-    async function handleSubmit(event:any) {
+    async function handleSubmit(event: Event) {
         event.preventDefault();
         const trimmedOrderId = orderInput.trim();
         
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${trimmedOrderId}`);
-            if (response.ok) {
-                errorMessage = '';
-                goto(`/track/${trimmedOrderId}`);
-            } else {
-                errorMessage = 'Ordrenummer findes ikke';
-                orderInput = ''; // Clear the input field
-            }
+            // Try to get the order through our store
+            await orderStore.getOrder(trimmedOrderId);
+            errorMessage = '';
+            goto(`/track/${trimmedOrderId}`);
         } catch (error) {
-            errorMessage = 'Der opstod en fejl. Prøv igen senere.';
+            errorMessage = 'Ordrenummer findes ikke';
+            orderInput = ''; // Clear the input field
         }
     }
 </script>
@@ -45,10 +43,10 @@
                 </form>
             </div>
             <div class="icon-boxes">
-                <div class="icon"></div>
-                <div class="icon"></div>
-                <div class="icon"></div>
-                <div class="icon"></div>
+                <div class="icon acceptance"></div>
+                <div class="icon print"></div>
+                <div class="icon drying"></div>
+                <div class="icon shipping"></div>
             </div>
         </div>
     </div>
@@ -84,7 +82,6 @@
         width: 100%;
         height: 100%;
         align-self: stretch;
-        /*background-color: #D9D9D94C;*/  /* Background color if no image */
         background-image: url("https://acctcdn.msauth.net/images/AppBackgrounds/49-small_v2_5YqvyYBhSpzXeWvqe16o8A2.jpg");
         background-repeat: no-repeat;
         background-size: cover;
@@ -92,10 +89,10 @@
 
     .focus-box {
         display: flex;
-        width: 93.5%; /* Increased width by 10% */
-        max-width: 660px; /* Increased max-width by 10% */
-        min-width: 385px; /* Increased min-width by 10% */
-        padding: 3.3vw; /* Slight increase in padding */
+        width: 93.5%;
+        max-width: 660px;
+        min-width: 385px;
+        padding: 3.3vw;
         flex-direction: column;
         justify-content: center;
         align-items: center;
@@ -122,42 +119,40 @@
     *,
     *::before,
     *::after {
-        box-sizing: border-box; /* Include padding and border in element's total width and height */
+        box-sizing: border-box;
     }
 
     .form-wrapper {
         display: flex;
         flex-direction: column;
-        width: 100%; /* Ensure it takes the full width of the focus-box */
-        padding: 0; /* Ensure no padding affects width */
+        width: 100%;
+        padding: 0;
     }
 
-    /* Styles for input field */
     .input-field {
         display: block;
-        width: 100%; /* Full width of the form-wrapper */
-        padding: 1.5vw; /* Same padding as before */
+        width: 100%;
+        padding: 1.5vw;
         border-radius: 0.5vw;
-        border: 1px solid #ccc; /* Border for the input */
+        border: 1px solid #ccc;
         font-family: var(--font-primary);
         font-size: 1.5rem;
         color: #363636;
-        margin-bottom: 1rem; /* Small gap between input and button */
+        margin-bottom: 1rem;
     }
 
-    /* Styles for the button */
     .button {
         display: block;
-        width: 100%; /* Full width of the form-wrapper */
-        padding: 1.5vw; /* Same padding as before */
+        width: 100%;
+        padding: 1.5vw;
         border-radius: 0.5vw;
-        background: #454545; /* Same background as old .div-wrapper */
-        color: #FFF; /* White text color */
+        background: #454545;
+        color: #FFF;
         font-family: var(--font-primary);
         font-size: 1.5rem;
         font-weight: 400;
-        border: none; /* Remove default button border */
-        cursor: pointer; /* Change cursor to pointer */
+        border: none;
+        cursor: pointer;
     }
 
     .error-message {
@@ -180,9 +175,27 @@
 
     .icon {
         width: 100%;
-        aspect-ratio: 2 / 1;
-        background: #D9D9D9;
+        aspect-ratio: 1;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
         border-radius: 0.25rem;
+    }
+
+    .acceptance {
+        background-image: url('/Acceptance agreement.png');
+    }
+
+    .print {
+        background-image: url('/Print icon.png');
+    }
+
+    .drying {
+        background-image: url('/Drying icon.png');
+    }
+
+    .shipping {
+        background-image: url('/Shipping icon.png');
     }
 
     /* Responsive adjustments */
@@ -193,7 +206,7 @@
 
         .focus-box {
             width: 90%;
-            padding: 2.2vw; /* Adjusted for smaller screens */
+            padding: 2.2vw;
         }
 
         .input-field, .button {
