@@ -9,7 +9,7 @@
 </script>
 
 {#if !firstItem}
-    <Line done="{done}" />
+    <Line done={done} />
 {/if}
 
 <div class="step">
@@ -54,6 +54,12 @@
     :root {
         font-size: 16px;
         --font-primary: 'Roboto', Arial, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
     }
 
     .step {
