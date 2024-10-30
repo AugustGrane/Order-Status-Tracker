@@ -1,5 +1,6 @@
 package gruppe2.backend.controller;
 
+import gruppe2.backend.dto.ItemDTO;
 import gruppe2.backend.dto.OrderDTO;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.Order;
@@ -17,10 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 @RestController
 @RequestMapping("/webhooks")
@@ -46,8 +44,6 @@ public class WebhookController {
     }
 
     private static final Logger log = LoggerFactory.getLogger(WebhookController.class);
-
-
 
     @PostMapping("/wooOrder")
     public ResponseEntity<WebhookPayload> handleWebhook(@RequestBody WebhookPayload payload) {
@@ -82,6 +78,7 @@ public class WebhookController {
             Map<Long, Integer> itemsMap = new HashMap<>();
             for (LineItem item : payload.getItems()) {
                 itemsMap.put(item.getProduct_id(), item.getQuantity());
+                checkItemExistence(item); // Checks if the items exists. Creates it otherwise
             }
 
             // Repackage to orderDTO
@@ -94,6 +91,9 @@ public class WebhookController {
             );
 
             System.out.println("OrderDTO" + orderDTO);
+
+            // checkItemExistence
+
             // Send package to creatOrderFromWebhook function
             createOrderFromWebhook(orderDTO);
 
@@ -159,6 +159,19 @@ public class WebhookController {
 
         return ResponseEntity.ok(order);
     }
+    private void checkItemExistence(LineItem item){
+        Optional<Item> itemDB = itemRepository.findById(item.getProduct_id());
+
+        if(itemDB.isEmpty()) {
+            ItemDTO itemDTO = new ItemDTO(
+                    item.getName(),
+                    item.getProduct_id(),
+                    1L,   // HARDCODED PRODUCT TYPE !!!!!! #####################################
+                    item.getImg().getSrc()
+            );
+            createItem(itemDTO); // If item did not exist, create it.
+        }
+    }
     private int calculateEstimatedTime(Map<Long, Integer> items) {
         return items.entrySet().stream()
                 .mapToInt(entry -> {
@@ -169,6 +182,19 @@ public class WebhookController {
                     return entry.getValue() * 10; // 10 minutes per item
                 })
                 .sum();
+    }
+    public ResponseEntity<Item> createItem(@RequestBody ItemDTO itemDTO) {
+        // Verify product type exists
+        productTypeRepository.findById(itemDTO.productTypeId())
+                .orElseThrow(() -> new RuntimeException("Product type not found"));
+
+        Item item = new Item();
+        item.setId(itemDTO.id());
+        item.setName(itemDTO.name());
+        item.setProductTypeId(itemDTO.productTypeId());
+        item.setImage(itemDTO.item_image());
+
+        return ResponseEntity.ok(itemRepository.save(item));
     }
 }
 
