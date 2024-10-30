@@ -26,7 +26,7 @@
                 if (response.ok) {
                     orderData.set(await response.json());
                     console.log(`Order Data: ${JSON.stringify($orderData, null, 2)}`);
-                    console.log(`Amount of Items: ${JSON.stringify($orderData.orderDetails.length, null, 2)}`);
+                    console.log(`Amount of Items: ${JSON.stringify($orderData.length, null, 2)}`);
                 } else {
                     errorMessage = 'Failed to retrieve order data.';
                 }
@@ -39,8 +39,6 @@
         }
     });
 </script>
-
-<h1>Order Tracking for ID: {id}</h1>
 
 {#if $orderData}
 
@@ -71,14 +69,13 @@
                     </div>
                 </div>
             </div>
-            <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
                 {#if $orderData}
                     {#if $orderData.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
                         {#each $orderData as item}
-                            <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
+                            <ItemComponent orderItem={item} name={item.item.name} quantity={item.itemAmount} />
                         {/each}
                     {/if}
                 {/if}
@@ -152,6 +149,7 @@
 
     .title-wrapper {
         gap: 10px;
+        margin-bottom: 0.5rem;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
