@@ -1,19 +1,25 @@
 <script lang="ts">
     import type { OrderDetailsWithStatus } from '$lib/types';
     import StepComponent from "./StepComponent.svelte";
+    import {onMount} from "svelte";
 
-    export let orderItem: OrderDetailsWithStatus;
-    export let name: string;
-    export let productType: string;
-    export let quantity: number;
+    export let orderItem:object;
+    export let name:string;
+    export let quantity:number;
+    let date;
 
-    // Get the last update time (index 5 corresponds to the last status)
-    let date = new Date(orderItem.updated[5]).toLocaleDateString();
-    console.log("Date:", date);
+    onMount(() => {
+        orderItem.differentSteps.forEach((step, index) => {
+            if (Object.keys(orderItem.updated).includes(step.id.toString())) {
+                date = new Date(orderItem.updated[step.id]).toLocaleDateString();
+            }
+        });
+    });
 </script>
 
-<div class="item">
-    <div class="item-title">{name} | {productType} | <i>Antal: {quantity}</i></div>
+
+<div class="item"> <!-- Start of Item -->
+    <div class="item-title">Artikel #{orderItem.item.id} | {name} | Antal: {quantity}</div>
     <div class="timeline-wrapper">
         {#if orderItem}
             {#if orderItem.differentSteps.length === 0}
@@ -62,7 +68,7 @@
     .item {
         display: flex;
         flex-direction: column;
-        height: 150px;
+        height: 170px;
         align-items: flex-start;
         justify-content: center;
         gap: 20px;

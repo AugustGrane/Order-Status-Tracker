@@ -10,7 +10,6 @@
 
     // Remove 'frontend/static/' from the icon path if it exists
     $: cleanIconPath = icon.replace('frontend/static/', '');
-    console.log("Icon:", icon);
 </script>
 
 {#if !firstItem}
@@ -54,7 +53,7 @@
     *,
     *::before,
     *::after {
-        box-sizing: border-box;
+        box-sizing: border-box; /* Include padding and border in element's total width and height */
     }
 
     .step {
@@ -97,9 +96,9 @@
     }
 
     .icon-wrapper.done {
-        border-color: #24a147;
+        border-color: #24A1477F;
         background-color: #f0fff4;
-        box-shadow: 0 0 0 4px rgba(36, 161, 71, 0.1);
+        /*box-shadow: 0 0 0 4px rgba(36, 161, 71, 0.1);*/
     }
 
     .icon {

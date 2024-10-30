@@ -29,14 +29,13 @@
                     </div>
                 </div>
             </div>
-            <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
                 {#if data.order}
                     {#if data.order.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each data.order as item}
-                            <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
+                        {#each $orderData as item}
+                            <ItemComponent orderItem={item} name={item.item.name} quantity={item.itemAmount} />
                         {/each}
                     {/if}
                 {:else}
@@ -111,6 +110,7 @@
 
     .title-wrapper {
         gap: 10px;
+        margin-bottom: 0.5rem;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
