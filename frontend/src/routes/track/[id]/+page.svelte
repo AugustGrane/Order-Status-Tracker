@@ -1,25 +1,12 @@
 <script lang="ts">
     import { page } from '$app/stores';
-    import { orderData } from '$lib/stores/orderStore';
+    import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from './components/ItemComponent.svelte';
+    import { orderStore } from '$lib/stores/orderStore';
 
-    export let data;
-
-    // Update the store with the loaded data
-    $: if (data.orderData) {
-        orderData.set(data.orderData);
-    }
-
+    export let data: { order: OrderDetailsWithStatus[] };
     let id = $page.params.id;
 </script>
-
-<h1>Order Tracking for ID: {id}</h1>
-
-{#if data.error}
-    <p style="color: red;">{data.error}</p>
-{:else if !data.orderData}
-    <p>Waiting for order details...</p>
-{/if}
 
 <div class="main2">
     <div class="background2">
@@ -44,14 +31,16 @@
             </div>
             <div class="total-estimate">Estimeret færdiggørrelse: "totalEstimatedTime" dage</div>
             <div class="order-box-items">
-                {#if data.orderData}
-                    {#if data.orderData.length === 0}
+                {#if data.order}
+                    {#if data.order.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each data.orderData as item}
+                        {#each data.order as item}
                             <ItemComponent orderItem={item} name={item.item.name} productType={item.product_type} quantity={item.itemAmount} />
                         {/each}
                     {/if}
+                {:else}
+                    <p>Loading order details...</p>
                 {/if}
             </div>
         </div>

@@ -1,23 +1,21 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';  // Import goto function
+    import { goto } from '$app/navigation';
+    import { orderStore } from '$lib/stores/orderStore';
     let orderInput = '';
     let errorMessage = '';
 
-    async function handleSubmit(event:any) {
+    async function handleSubmit(event: Event) {
         event.preventDefault();
         const trimmedOrderId = orderInput.trim();
         
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${trimmedOrderId}`);
-            if (response.ok) {
-                errorMessage = '';
-                goto(`/track/${trimmedOrderId}`);
-            } else {
-                errorMessage = 'Ordrenummer findes ikke';
-                orderInput = ''; // Clear the input field
-            }
+            // Try to get the order through our store
+            await orderStore.getOrder(trimmedOrderId);
+            errorMessage = '';
+            goto(`/track/${trimmedOrderId}`);
         } catch (error) {
-            errorMessage = 'Der opstod en fejl. Prøv igen senere.';
+            errorMessage = 'Ordrenummer findes ikke';
+            orderInput = ''; // Clear the input field
         }
     }
 </script>

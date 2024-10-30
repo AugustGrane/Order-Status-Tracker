@@ -1,27 +1,15 @@
 import type { PageLoad } from './$types';
-import type { OrderDetailsWithStatus } from '$lib/types';
+import { orderStore } from '$lib/stores/orderStore';
+import { error } from '@sveltejs/kit';
 
-export const load: PageLoad = async ({ params, fetch }) => {
+export const load = (async ({ params }) => {
     try {
-        const response = await fetch(`http://localhost:8080/api/orders/${params.id}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to retrieve order data');
+        const order = await orderStore.getOrder(params.id);
+        if (!order) {
+            throw error(404, 'Order not found');
         }
-        
-        const data: OrderDetailsWithStatus[] = await response.json();
-        return {
-            orderData: data
-        };
-    } catch (error) {
-        return {
-            orderData: null,
-            error: 'Failed to load order data'
-        };
+        return { order };
+    } catch (e) {
+        throw error(404, 'Order not found');
     }
-};
+}) satisfies PageLoad;
