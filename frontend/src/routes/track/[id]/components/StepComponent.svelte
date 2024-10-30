@@ -3,14 +3,34 @@
 
     export let status:string;
     export let estimate:string;
+    export let icon:string;
     export let current:boolean = false;
     export let done:boolean = false;
     export let firstItem:boolean = false;
+
+    console.log("Icon:", icon);
 </script>
 
 {#if !firstItem}
-    <Line done={done} />
+    <Line done={true} />
 {/if}
+
+<!--<div class="step">-->
+<!--    <div class="circle-wrapper">-->
+<!--        <div class="icon" style="background: url({icon}) no-repeat center;">-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    <div class="status-text">-->
+<!--        <div class="status">{status}</div>-->
+<!--        <div class="estimate">-->
+<!--            {#if estimate}-->
+<!--                ({estimate})-->
+<!--            {:else}-->
+
+<!--            {/if}-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
 
 <div class="step">
     <div class="circle-wrapper">
@@ -27,20 +47,20 @@
             {#if current}
                 <div class="current-status">{status}</div>
                 <div class="current-estimate">
-                    {#if estimate}
-                        ({estimate})
-                    {:else}
+                    <!--{#if estimate}-->
+                    <!--    ({estimate})-->
+                    <!--{:else}-->
 
-                    {/if}
+                    <!--{/if}-->
                 </div>
             {:else}
                 <div class="status">{status}</div>
                 <div class="estimate">
-                    {#if estimate}
-                        ({estimate})
-                    {:else}
+                    <!--{#if estimate}-->
+                    <!--    ({estimate})-->
+                    <!--{:else}-->
 
-                    {/if}
+                    <!--{/if}-->
                 </div>
             {/if}
         </div>
@@ -80,6 +100,12 @@
         gap: 5px;
         position: relative;
         flex: 0 0 auto;
+    }
+
+    .icon {
+        width: 2rem;
+        height: 2rem;
+        background-size: contain;
     }
 
     .circle {
