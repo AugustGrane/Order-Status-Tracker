@@ -1,4 +1,4 @@
-package gruppe2.backend.webhook;
+package gruppe2.backend.service.webhook;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
