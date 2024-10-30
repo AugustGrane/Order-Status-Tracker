@@ -34,7 +34,7 @@
                     {#if data.order.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each $orderData as item}
+                        {#each data.order as item}
                             <ItemComponent orderItem={item} name={item.item.name} quantity={item.itemAmount} />
                         {/each}
                     {/if}
