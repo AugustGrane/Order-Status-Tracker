@@ -1,6 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { orderStore } from '$lib/stores/orderStore';
+    import HelpLink from "$lib/components/dialog/HelpLink.svelte";
     let orderInput = '';
     let errorMessage = '';
 
@@ -41,6 +42,9 @@
                         <p class="error-message">{errorMessage}</p>
                     {/if}
                 </form>
+                <HelpLink></HelpLink>
+
+
             </div>
             <div class="icon-boxes">
                 <div class="icon acceptance"></div>
