@@ -1,5 +1,6 @@
 <script lang="ts">
     export let dialog: any;
+    export let title: string;
 
     function handleClose() {
         if (dialog && dialog.open) {
@@ -17,21 +18,29 @@
         on:close={handleDialogClose}
 >
     <div class="dialog-content">
-        <div class="dialog-header">
-            <button
-                    type="button"
-                    class="close-button"
-                    on:click={handleClose}
-                    aria-label="Close dialog"
-            >×</button>
-        </div>
         <div class="dialog-body">
+            <div class="dialog-header">
+                <h2 class="dialog-title">{title}</h2>
+                <button
+                        type="button"
+                        class="close-button"
+                        on:click={handleClose}
+                        aria-label="Close dialog"
+                >×</button>
+            </div>
             <slot/>
         </div>
     </div>
 </dialog>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    :root {
+        font-size: 16px;
+        --font-primary: 'Roboto', Arial, sans-serif;
+    }
+
     dialog {
         border: none;
         border-radius: 8px;
@@ -40,17 +49,21 @@
         max-width: 500px;
         width: 90%;
     }
+
     dialog::backdrop {
         background: rgba(0, 0, 0, 0.5);
     }
+
     .dialog-content {
         padding: 20px;
     }
+
     .dialog-header {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         margin-bottom: 16px;
     }
+
     .close-button {
         background: none;
         border: none;
@@ -61,13 +74,15 @@
         border-radius: 4px;
         transition: background-color 0.2s;
     }
+
     .close-button:hover {
         background-color: #f0f0f0;
         color: #333;
     }
+
     .dialog-body {
-        font-size: 16px;
         line-height: 1.5;
         color: #333;
+        font-family: var(--font-primary);
     }
 </style>

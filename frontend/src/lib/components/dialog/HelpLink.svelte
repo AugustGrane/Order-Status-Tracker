@@ -3,19 +3,18 @@
     let dialog: any;
 </script>
 
-<a
-        href="#"
-        class="help-link"
-        on:click|preventDefault={() => dialog.showModal()}
->
-    <span class="question-circle">?</span>
-    How to find order number
-</a>
+<div style="justify-content: center; align-items: center; padding-top: 0.5rem">
+    <a
+            href="#"
+            class="help-link"
+            on:click|preventDefault={() => dialog.showModal()}
+    >
+        How to find order number
+        <span class="question-circle">?</span>
+    </a>
+</div>
 
-<Dialog bind:dialog on:close={() => console.log('closed')}>
-    <div class="dialog-header">
-        <h2 class="dialog-title">Order Number Required</h2>
-    </div>
+<Dialog title="Order Number Required" bind:dialog on:close={() => console.log('closed')}>
     <div class="dialog-body">
         <p>You need to enter your order number. You should be able to find this order number in the email we sent you.</p>
         <p class="note">You can press ESC or click the × button to close</p>
@@ -23,6 +22,13 @@
 </Dialog>
 
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+    :root {
+        font-size: 16px;
+        --font-primary: 'Roboto', Arial, sans-serif;
+    }
+
     .help-link {
         display: inline-flex;
         align-items: center;
@@ -30,6 +36,7 @@
         color: #0066cc;
         text-decoration: none;
         cursor: pointer;
+        font-family: var(--font-primary);
     }
 
     .help-link:hover {
@@ -45,7 +52,7 @@
         border-radius: 50%;
         background-color: #0066cc;
         color: white;
-        font-size: 12px;
+        font-family: var(--font-primary);
         font-weight: bold;
     }
 </style>
