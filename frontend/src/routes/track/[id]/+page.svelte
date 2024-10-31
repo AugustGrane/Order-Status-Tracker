@@ -1,19 +1,45 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { browser } from '$app/environment';
     import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
     import { orderStore } from '$lib/stores/orderStore';
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
+    import confetti from 'canvas-confetti';
 
     export let data: { order: OrderDetailsWithStatus[] };
     data.order.sort((a, b) => a.id - b.id);
     let id = $page.params.id;
+    let previousAllItemsComplete = false;
 
     // Check if all items in the order are at their last step
     $: allItemsComplete = data.order?.every(item => 
         item.currentStepIndex === item.differentSteps.length - 1
     ) ?? false;
+
+    // Trigger confetti when allItemsComplete becomes true
+    $: if (browser && allItemsComplete && !previousAllItemsComplete) {
+        previousAllItemsComplete = true;
+        confetti({
+            particleCount: 200,
+            spread: 200,
+            origin: { y: 0.6 },
+            colors: ['#24A147', '#1166ee', '#FFC107']
+        });
+    }
+
+    onMount(() => {
+        if (browser && allItemsComplete) {
+            previousAllItemsComplete = true;
+            confetti({
+                particleCount: 200,
+                spread: 200,
+                origin: { y: 0.6 },
+                colors: ['#24A147', '#1166ee', '#FFC107']
+            });
+        }
+    });
 
     function backButton() {
         goto("/track");
@@ -54,8 +80,7 @@
                             <ItemComponent 
                                 orderItem={item} 
                                 name={item.item.name} 
-                                quantity={item.itemAmount} 
-                                allItemsComplete={allItemsComplete}
+                                quantity={item.itemAmount}
                             />
                         {/each}
                     {/if}

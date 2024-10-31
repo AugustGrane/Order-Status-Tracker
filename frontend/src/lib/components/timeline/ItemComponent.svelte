@@ -6,7 +6,6 @@
     export let orderItem: OrderDetailsWithStatus;
     export let name: string;
     export let quantity: number;
-    export let allItemsComplete: boolean;
 
     let isLastStep = false;
 
