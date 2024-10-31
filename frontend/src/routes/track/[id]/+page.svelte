@@ -4,16 +4,24 @@
     import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
     import { orderStore } from '$lib/stores/orderStore';
     import {onMount} from "svelte";
+    import {goto} from "$app/navigation";
 
     export let data: { order: OrderDetailsWithStatus[] };
     data.order.sort((a, b) => a.id - b.id);
     let id = $page.params.id;
+
     console.log("Data:", data);
+
+
+    function backButton() {
+        goto("/track");
+    }
 </script>
 
 <div class="main2">
     <div class="background2">
         <div class="logo2"></div>
+        <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
         <div class="order-box-main">
             <div class="title-wrapper">
                 <div class="order-number-text">Ordrenummer: #{id}</div>
@@ -93,6 +101,23 @@
         object-fit: cover;
         background: url('/gtryk_logo.png') no-repeat center;
         background-size: contain;
+    }
+
+    .backbutton {
+        position: absolute;   /* Position it absolutely */
+        top: 20px;            /* Adjust top position as needed */
+        left: 20px;          /* Adjust right position as needed */
+        padding: 0.5rem 1rem; /* Adjust padding for snug background */
+        border-radius: 0.5vw;
+        background: #454545;
+        color: #FFF;
+        opacity: 0.3;
+        font-family: var(--font-primary);
+        font-size: 1.0rem;
+        font-weight: 250;
+        border: none;
+        cursor: pointer;
+        text-align: center;   /* Center text within the button */
     }
 
     .order-box-main {
