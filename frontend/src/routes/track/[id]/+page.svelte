@@ -1,7 +1,7 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import type { OrderDetailsWithStatus } from '$lib/types';
-    import ItemComponent from './components/ItemComponent.svelte';
+    import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
     import { orderStore } from '$lib/stores/orderStore';
     import {onMount} from "svelte";
 
