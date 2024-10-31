@@ -3,14 +3,17 @@
     import { browser } from '$app/environment';
     import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
-    import { orderStore } from '$lib/stores/orderStore';
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
     import confetti from 'canvas-confetti';
+    import TrackForm from "$lib/components/TrackForm.svelte";
 
-    export let data: { order: OrderDetailsWithStatus[] };
-    data.order.sort((a, b) => a.id - b.id);
-    let id = $page.params.id;
+    export let data: { 
+        order: OrderDetailsWithStatus[] | null;
+        orderNotFound: boolean;
+        orderId: string;
+    };
+
     let previousAllItemsComplete = false;
 
     // Check if all items in the order are at their last step
@@ -40,57 +43,57 @@
             });
         }
     });
-
-    function backButton() {
-        goto("/track");
-    }
 </script>
 
-<div class="main2">
-    <div class="background2">
-        <div class="logo2"></div>
-        <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
-        <div class="order-box-main">
-            <div class="title-wrapper">
-                <div class="order-number-text">Ordrenummer: #{id}</div>
-                {#if allItemsComplete}
-                    <div class="order-sent">Ordren er sendt</div>
-                {/if}
-                <div class="circle-explanations">
-                    <div class="circle-explanation">
-                        <div class="circle"></div>
-                        <div class="circle-text">Færdig</div>
-                    </div>
-                    <div class="circle-explanation">
-                        <div class="current-circle"></div>
-                        <div class="circle-text">Igangsat</div>
-                    </div>
-                    <div class="circle-explanation">
-                        <div class="circle-2"></div>
-                        <div class="circle-text">Afventer</div>
+{#if data.orderNotFound}
+    <TrackForm initialValue={data.orderId} initialError="Ordrenummer findes ikke" />
+{:else}
+    <div class="main2">
+        <div class="background2">
+            <div class="logo2"></div>
+            <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
+            <div class="order-box-main">
+                <div class="title-wrapper">
+                    <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
+                    {#if allItemsComplete}
+                        <div class="order-sent">Ordren er sendt</div>
+                    {/if}
+                    <div class="circle-explanations">
+                        <div class="circle-explanation">
+                            <div class="circle"></div>
+                            <div class="circle-text">Færdig</div>
+                        </div>
+                        <div class="circle-explanation">
+                            <div class="current-circle"></div>
+                            <div class="circle-text">Igangsat</div>
+                        </div>
+                        <div class="circle-explanation">
+                            <div class="circle-2"></div>
+                            <div class="circle-text">Afventer</div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="order-box-items">
-                {#if data.order}
-                    {#if data.order.length === 0}
-                        <p style="color: red">No items found for this order.</p>
+                <div class="order-box-items">
+                    {#if data.order}
+                        {#if data.order.length === 0}
+                            <p style="color: red">No items found for this order.</p>
+                        {:else}
+                            {#each data.order as item (item.id)}
+                                <ItemComponent 
+                                    orderItem={item} 
+                                    name={item.item.name} 
+                                    quantity={item.itemAmount}
+                                />
+                            {/each}
+                        {/if}
                     {:else}
-                        {#each data.order as item (item.id)}
-                            <ItemComponent 
-                                orderItem={item} 
-                                name={item.item.name} 
-                                quantity={item.itemAmount}
-                            />
-                        {/each}
+                        <p>Loading order details...</p>
                     {/if}
-                {:else}
-                    <p>Loading order details...</p>
-                {/if}
+                </div>
             </div>
         </div>
     </div>
-</div>
+{/if}
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');

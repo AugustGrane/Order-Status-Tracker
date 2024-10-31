@@ -1,16 +1,33 @@
 import type { PageLoad } from './$types';
-import { orderStore } from '$lib/stores/orderStore';
-import { error } from '@sveltejs/kit';
 
 export const load = (async ({ params }) => {
     try {
-        orderStore.clear()
-        const order = await orderStore.getOrder(params.id);
-        if (!order) {
-            throw error(404, 'Order not found');
+        const response = await fetch(`http://localhost:8080/api/orders/${params.id}`);
+        if (!response.ok) {
+            return { 
+                order: null,
+                orderNotFound: true,
+                orderId: params.id
+            };
         }
-        return { order };
+        const order = await response.json();
+        if (!order) {
+            return { 
+                order: null,
+                orderNotFound: true,
+                orderId: params.id
+            };
+        }
+        return { 
+            order,
+            orderNotFound: false,
+            orderId: params.id
+        };
     } catch (e) {
-        throw error(404, 'Order not found');
+        return { 
+            order: null,
+            orderNotFound: true,
+            orderId: params.id
+        };
     }
 }) satisfies PageLoad;
