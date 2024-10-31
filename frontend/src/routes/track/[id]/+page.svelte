@@ -3,9 +3,12 @@
     import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from './components/ItemComponent.svelte';
     import { orderStore } from '$lib/stores/orderStore';
+    import {onMount} from "svelte";
 
     export let data: { order: OrderDetailsWithStatus[] };
+    data.order.sort((a, b) => a.id - b.id);
     let id = $page.params.id;
+    console.log("Data:", data);
 </script>
 
 <div class="main2">
@@ -34,7 +37,7 @@
                     {#if data.order.length === 0}
                         <p style="color: red">No items found for this order.</p>
                     {:else}
-                        {#each data.order as item}
+                        {#each data.order as item (item.id)}
                             <ItemComponent orderItem={item} name={item.item.name} quantity={item.itemAmount} />
                         {/each}
                     {/if}
@@ -98,8 +101,8 @@
         background-color: #ffffff;
         border-radius: 15px;
         overflow: hidden;
-        border: 1px solid;
-        border-color: #00000026;
+        border: none;
+        /*border-color: #00000026;*/
         display: flex;
         flex-direction: column;
         position: relative;

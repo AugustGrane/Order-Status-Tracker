@@ -202,6 +202,45 @@ public class OrderController {
         }
     }
 
+    @PutMapping("/order-product-types/{id}/prev-step")
+    public ResponseEntity<?> moveToPrevStep(@PathVariable Long id) {
+        try {
+            OrderDetails orderDetails = orderProductTypeRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
+
+            // Check if we're already at the last step
+            if (orderDetails.getCurrentStepIndex() <= 0) {
+                return ResponseEntity
+                        .badRequest()
+                        .body("Already at first step");
+            }
+
+            // Move to next step
+            int newIndex = orderDetails.getCurrentStepIndex() - 1;
+            orderDetails.setCurrentStepIndex(newIndex);
+
+            // Record timestamp for this step
+            Long stepId = orderDetails.getDifferentSteps()[newIndex];
+            orderDetails.getUpdated().put(stepId, LocalDateTime.now());
+
+            OrderDetails updated = orderProductTypeRepository.save(orderDetails);
+
+            return ResponseEntity.ok(
+                    Map.of(
+                            "currentStep", newIndex + 1, // 1-based for display
+                            "totalSteps", orderDetails.getDifferentSteps().length,
+                            "stepId", stepId,
+                            "updatedAt", orderDetails.getUpdated().get(stepId)
+                    )
+            );
+
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating step: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/order-product-types/{id}/progress")
     public ResponseEntity<?> getProgress(@PathVariable Long id) {
         try {
