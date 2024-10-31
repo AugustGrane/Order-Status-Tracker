@@ -7,8 +7,9 @@
     
     let orderInput = initialValue;
     let errorMessage = initialError;
+    let isLoading = false;
 
-    function handleSubmit(event: Event) {
+    async function handleSubmit(event: Event) {
         event.preventDefault();
         const trimmedOrderId = orderInput.trim();
         
@@ -24,9 +25,15 @@
             return;
         }
 
-        // Clear any error and redirect to the order page
+        // Clear any error and show loading state
         errorMessage = '';
-        goto(`/track/${trimmedOrderId}`);
+        isLoading = true;
+
+        // Navigate to order page
+        await goto(`/track/${trimmedOrderId}`);
+        
+        // Reset loading state (though this might not be seen due to navigation)
+        isLoading = false;
     }
 </script>
 
@@ -44,8 +51,16 @@
                             bind:value={orderInput}
                             placeholder="Indtast ordrenummer"
                             required
+                            disabled={isLoading}
                     />
-                    <button type="submit" class="button">Spor din ordres proces</button>
+                    <button type="submit" class="button" disabled={isLoading}>
+                        {#if isLoading}
+                            <div class="loading-spinner"></div>
+                            <span>Søger...</span>
+                        {:else}
+                            Spor din ordres proces
+                        {/if}
+                    </button>
 
                     {#if errorMessage}
                         <p class="error-message">{errorMessage}</p>
@@ -152,8 +167,13 @@
         margin-bottom: 1rem;
     }
 
+    .input-field:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+
     .button {
-        display: block;
+        display: flex;
         width: 100%;
         padding: 1.5vw;
         border-radius: 0.5vw;
@@ -164,6 +184,30 @@
         font-weight: 400;
         border: none;
         cursor: pointer;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        transition: opacity 0.2s;
+    }
+
+    .button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 3px solid #ffffff;
+        border-top: 3px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     .error-message {
