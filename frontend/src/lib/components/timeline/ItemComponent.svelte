@@ -3,46 +3,44 @@
     import StepComponent from "./StepComponent.svelte";
     import {onMount} from "svelte";
 
-    export let orderItem:object;
-    export let name:string;
-    export let quantity:number;
-    let date;
+    export let orderItem: OrderDetailsWithStatus;
+    export let name: string;
+    export let quantity: number;
+    export let allItemsComplete: boolean;
+
+    let isLastStep = false;
 
     onMount(() => {
-        orderItem.differentSteps.forEach((step, index) => {
-            if (Object.keys(orderItem.updated).includes(step.id.toString())) {
-                date = new Date(orderItem.updated[step.id]).toLocaleDateString();
-            }
-        });
+        // Check if this item is at the last step
+        isLastStep = orderItem.currentStepIndex === orderItem.differentSteps.length - 1;
     });
 </script>
 
-
-<div class="item"> <!-- Start of Item -->
+<div class="item">
     <div class="item-title">Artikel #{orderItem.item.id} | {name} | Antal: {quantity}</div>
     <div class="timeline-wrapper">
         {#if orderItem}
             {#if orderItem.differentSteps.length === 0}
                 <p style="color: red">Error: No steps in item</p>
             {:else}
-                {#each orderItem.differentSteps as step, index}
+                {#each orderItem.differentSteps.slice(0, -1) as step, index}
                     {#if index === 0}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} firstItem={true} />
+                            <StepComponent status={step.name} icon={step.image} current={true} firstItem={true} />
                         {:else}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} done={true} firstItem={true} />
+                            <StepComponent status={step.name} icon={step.image} done={true} firstItem={true} />
                         {/if}
                     {:else if index <= orderItem.currentStepIndex}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} done={true} />
+                            <StepComponent status={step.name} icon={step.image} current={true} done={true} />
                         {:else}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} done={true}/>
+                            <StepComponent status={step.name} icon={step.image} done={true}/>
                         {/if}
                     {:else}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} current={true} />
+                            <StepComponent status={step.name} icon={step.image} current={true} />
                         {:else}
-                            <StepComponent status={step.name} estimate={date} icon={step.image} />
+                            <StepComponent status={step.name} icon={step.image} />
                         {/if}
                     {/if}
                 {/each}

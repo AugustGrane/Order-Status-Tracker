@@ -4,6 +4,7 @@ import { error } from '@sveltejs/kit';
 
 export const load = (async ({ params }) => {
     try {
+        orderStore.clear()
         const order = await orderStore.getOrder(params.id);
         if (!order) {
             throw error(404, 'Order not found');
