@@ -17,6 +17,9 @@
 
     let previousAllItemsComplete = false;
 
+    // Sort order items by article number (item.id)
+    $: sortedOrder = data.order ? [...data.order].sort((a, b) => a.item.id - b.item.id) : null;
+
     // Check if all items in the order are at their last step
     $: allItemsComplete = data.order?.every(item => 
         item.currentStepIndex === item.differentSteps.length - 1
@@ -76,11 +79,11 @@
                         </div>
                     </div>
                     <div class="order-box-items">
-                        {#if data.order}
-                            {#if data.order.length === 0}
+                        {#if sortedOrder}
+                            {#if sortedOrder.length === 0}
                                 <p style="color: red">No items found for this order.</p>
                             {:else}
-                                {#each data.order as item (item.id)}
+                                {#each sortedOrder as item (item.id)}
                                     <ItemComponent 
                                         orderItem={item} 
                                         name={item.item.name} 
