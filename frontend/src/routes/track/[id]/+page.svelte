@@ -1,61 +1,105 @@
 <script lang="ts">
     import { page } from '$app/stores';
+    import { browser } from '$app/environment';
     import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
-    import { orderStore } from '$lib/stores/orderStore';
     import {onMount} from "svelte";
     import {goto} from "$app/navigation";
+    import confetti from 'canvas-confetti';
+    import TrackForm from "$lib/components/TrackForm.svelte";
+    import PageTransition from "$lib/components/PageTransition.svelte";
 
-    export let data: { order: OrderDetailsWithStatus[] };
-    data.order.sort((a, b) => a.id - b.id);
-    let id = $page.params.id;
+    export let data: { 
+        order: OrderDetailsWithStatus[] | null;
+        orderNotFound: boolean;
+        orderId: string;
+    };
 
-    console.log("Data:", data);
+    let previousAllItemsComplete = false;
 
+    // Sort order items by article number (item.id)
+    $: sortedOrder = data.order ? [...data.order].sort((a, b) => a.item.id - b.item.id) : null;
 
-    function backButton() {
-        goto("/track");
+    // Check if all items in the order are at their last step
+    $: allItemsComplete = data.order?.every(item => 
+        item.currentStepIndex === item.differentSteps.length - 1
+    ) ?? false;
+
+    // Trigger confetti when allItemsComplete becomes true
+    $: if (browser && allItemsComplete && !previousAllItemsComplete) {
+        previousAllItemsComplete = true;
+        confetti({
+            particleCount: 200,
+            spread: 200,
+            origin: { y: 0.6 },
+            colors: ['#24A147', '#1166ee', '#FFC107']
+        });
     }
+
+    onMount(() => {
+        if (browser && allItemsComplete) {
+            previousAllItemsComplete = true;
+            confetti({
+                particleCount: 200,
+                spread: 200,
+                origin: { y: 0.6 },
+                colors: ['#24A147', '#1166ee', '#FFC107']
+            });
+        }
+    });
 </script>
 
-<div class="main2">
-    <div class="background2">
-        <div class="logo2"></div>
-        <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
-        <div class="order-box-main">
-            <div class="title-wrapper">
-                <div class="order-number-text">Ordrenummer: #{id}</div>
-                <div class="circle-explanations">
-                    <div class="circle-explanation">
-                        <div class="circle"></div>
-                        <div class="circle-text">Færdig</div>
+<PageTransition>
+    {#if data.orderNotFound}
+        <TrackForm initialValue={data.orderId} initialError="Ordrenummer findes ikke" />
+    {:else}
+        <div class="main2">
+            <div class="background2">
+                <div class="logo2"></div>
+                <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
+                <div class="order-box-main">
+                    <div class="title-wrapper">
+                        <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
+                        {#if allItemsComplete}
+                            <div class="order-sent">Ordren er sendt</div>
+                        {/if}
+                        <div class="circle-explanations">
+                            <div class="circle-explanation">
+                                <div class="circle"></div>
+                                <div class="circle-text">Færdig</div>
+                            </div>
+                            <div class="circle-explanation">
+                                <div class="current-circle"></div>
+                                <div class="circle-text">Igangsat</div>
+                            </div>
+                            <div class="circle-explanation">
+                                <div class="circle-2"></div>
+                                <div class="circle-text">Afventer</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="circle-explanation">
-                        <div class="current-circle"></div>
-                        <div class="circle-text">Igangsat</div>
-                    </div>
-                    <div class="circle-explanation">
-                        <div class="circle-2"></div>
-                        <div class="circle-text">Afventer</div>
+                    <div class="order-box-items">
+                        {#if sortedOrder}
+                            {#if sortedOrder.length === 0}
+                                <p style="color: red">No items found for this order.</p>
+                            {:else}
+                                {#each sortedOrder as item (item.id)}
+                                    <ItemComponent 
+                                        orderItem={item} 
+                                        name={item.item.name} 
+                                        quantity={item.itemAmount}
+                                    />
+                                {/each}
+                            {/if}
+                        {:else}
+                            <p>Loading order details...</p>
+                        {/if}
                     </div>
                 </div>
             </div>
-            <div class="order-box-items">
-                {#if data.order}
-                    {#if data.order.length === 0}
-                        <p style="color: red">No items found for this order.</p>
-                    {:else}
-                        {#each data.order as item (item.id)}
-                            <ItemComponent orderItem={item} name={item.item.name} quantity={item.itemAmount} />
-                        {/each}
-                    {/if}
-                {:else}
-                    <p>Loading order details...</p>
-                {/if}
-            </div>
         </div>
-    </div>
-</div>
+    {/if}
+</PageTransition>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
@@ -104,10 +148,10 @@
     }
 
     .backbutton {
-        position: absolute;   /* Position it absolutely */
-        top: 20px;            /* Adjust top position as needed */
-        left: 20px;          /* Adjust right position as needed */
-        padding: 0.5rem 1rem; /* Adjust padding for snug background */
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        padding: 0.5rem 1rem;
         border-radius: 0.5vw;
         background: #454545;
         color: #FFF;
@@ -117,7 +161,7 @@
         font-weight: 250;
         border: none;
         cursor: pointer;
-        text-align: center;   /* Center text within the button */
+        text-align: center;
     }
 
     .order-box-main {
@@ -127,7 +171,6 @@
         border-radius: 15px;
         overflow: hidden;
         border: none;
-        /*border-color: #00000026;*/
         display: flex;
         flex-direction: column;
         position: relative;
@@ -162,16 +205,14 @@
         white-space: nowrap;
     }
 
-    .total-estimate {
-        position: relative;
-        width: fit-content;
+    .order-sent {
+        position: absolute;
+        top: 10px;
+        right: 220px;
         font-family: var(--font-primary);
-        font-size: 1.0rem;
-        font-weight: 400;
-        color: rgba(0, 0, 0, 0.8);
-        letter-spacing: 0;
-        line-height: normal;
-        white-space: nowrap;
+        font-size: 1.2rem;
+        color: #24A147;
+        font-weight: 500;
     }
 
     .order-box-items {
