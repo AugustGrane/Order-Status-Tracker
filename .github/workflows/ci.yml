@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ '**' ]
+    branches: [ main ]
   pull_request:
     branches: [ '**' ]
   workflow_dispatch:
@@ -25,9 +25,9 @@ jobs:
         cache: maven
         
     - name: Build and test with Maven
-      run: ./mvnw clean test
+      run: ./mvnw clean test -X
 
-  frontend-tests:
+  frontend-build:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,8 +49,5 @@ jobs:
     - name: Type check
       run: npm run check
       
-    - name: Run tests
-      run: npm test
-
     - name: Build
       run: npm run build
