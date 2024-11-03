@@ -44,9 +44,7 @@ jobs:
         cache-dependency-path: './frontend/package-lock.json'
         
     - name: Install dependencies
-      run: |
-        npm install
-        npm install -D @types/testing-library__svelte
+      run: npm install
       
     - name: Type check
       run: npm run check

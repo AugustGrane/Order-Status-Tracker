@@ -1,15 +1,28 @@
-import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/svelte';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { render, screen } from '@testing-library/svelte';
 import Dialog from './Dialog.svelte';
 
-describe('Dialog', () => {
-    it('should render', () => {
-        const { container } = render(Dialog, { 
+describe('Dialog Component', () => {
+    const mockDialog = {
+        open: false,
+        close: () => {
+            mockDialog.open = false;
+        }
+    };
+
+    beforeEach(() => {
+        mockDialog.open = false;
+    });
+
+    it('should render with title', () => {
+        const title = 'Test Dialog';
+        render(Dialog, { 
             props: { 
-                dialog: true,
-                title: 'Test Dialog'
+                dialog: mockDialog,
+                title: title
             }
         });
-        expect(container).toBeTruthy();
+        
+        expect(screen.getByText(title)).toBeTruthy();
     });
 });
