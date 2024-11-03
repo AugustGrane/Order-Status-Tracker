@@ -84,12 +84,6 @@
                 </form>
                 <HelpLink></HelpLink>
             </div>
-            <div class="icon-boxes">
-                <div class="icon acceptance"></div>
-                <div class="icon print"></div>
-                <div class="icon drying"></div>
-                <div class="icon shipping"></div>
-            </div>
         </div>
     </div>
 </div>
@@ -234,25 +228,6 @@
         font-size: 1rem;
     }
 
-    /* Icon Boxes Grid Layout */
-    .icon-boxes {
-        display: grid;
-        gap: 1.5vw;
-        width: 90%;
-        max-width: 800px;
-        grid-template-columns: repeat(4, 1fr);
-        margin-top: 5%;
-    }
-
-    .icon {
-        width: 100%;
-        aspect-ratio: 1;
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        border-radius: 0.25rem;
-    }
-
     .acceptance {
         background-image: url('/Acceptance agreement.png');
     }
@@ -282,15 +257,6 @@
 
         .input-field, .button {
             width: 100%;
-        }
-
-        .icon-boxes {
-            grid-template-columns: repeat(2, 1fr);
-        }
-
-        .icon {
-            width: 100%;
-            height: auto;
         }
     }
 </style>
