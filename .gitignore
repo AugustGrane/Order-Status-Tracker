@@ -4,6 +4,7 @@
 *.iml
 *.iws
 *.ipr
+scripts/node_modules/
 
 # Frontend
 frontend/node_modules/
