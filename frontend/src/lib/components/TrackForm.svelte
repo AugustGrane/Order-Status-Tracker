@@ -1,13 +1,27 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
+    import { onMount } from 'svelte';
     import HelpLink from "$lib/components/dialog/HelpLink.svelte";
     
     export let initialValue = '';
     export let initialError = '';
     
-    let orderInput = initialValue;
-    let errorMessage = initialError;
+    let orderInput = '';
+    let errorMessage = '';
     let isLoading = false;
+
+    onMount(() => {
+        orderInput = initialValue;
+        errorMessage = initialError;
+    });
+
+    // Update error message when initialError changes
+    $: {
+        if (initialError) {
+            errorMessage = initialError;
+            isLoading = false;
+        }
+    }
 
     async function handleSubmit(event: Event) {
         event.preventDefault();
@@ -25,15 +39,17 @@
             return;
         }
 
-        // Clear any error and show loading state
-        errorMessage = '';
+        // Show loading state
         isLoading = true;
 
-        // Navigate to order page
-        await goto(`/track/${trimmedOrderId}`);
-        
-        // Reset loading state (though this might not be seen due to navigation)
-        isLoading = false;
+        try {
+            // Navigate to order page
+            await goto(`/track/${trimmedOrderId}`);
+        } catch (error) {
+            errorMessage = 'Der opstod en fejl. Prøv igen.';
+        } finally {
+            isLoading = false;
+        }
     }
 </script>
 
