@@ -4,7 +4,12 @@ import Dialog from './Dialog.svelte';
 
 describe('Dialog', () => {
     it('should render', () => {
-        const { container } = render(Dialog, { props: { open: false } });
+        const { container } = render(Dialog, { 
+            props: { 
+                dialog: true,
+                title: 'Test Dialog'
+            }
+        });
         expect(container).toBeTruthy();
     });
 });

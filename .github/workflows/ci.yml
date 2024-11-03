@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ '**' ]
+  workflow_dispatch:
 
 jobs:
   backend-tests:
@@ -45,7 +46,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm install
-        npm install -D jsdom@latest
+        npm install -D @types/testing-library__svelte
       
     - name: Type check
       run: npm run check

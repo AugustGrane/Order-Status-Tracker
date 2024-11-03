@@ -1,89 +1,66 @@
 <script lang="ts">
-    import {onMount} from "svelte";
-    import type { OrderDetailsWithStatus } from "$lib/types";
+    interface OrderItem {
+        id: number;
+        // Add other properties as needed
+    }
 
-    let order_id = "8080";
     // export let data: { order: OrderDetailsWithStatus[] };
-    let data;
-    let updatedData;
+    let data: OrderItem[] = [];
+    let updatedData: OrderItem[] = [];
 
-    onMount(async () => {
+    async function fetchData() {
         try {
-            const response = await fetch(`http://localhost:8080/api/orders/${order_id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            if (!response.ok) {
-                throw new Error('Order not found');
-            }
-
+            const response = await fetch('http://localhost:8080/api/orders');
             data = await response.json();
-            data.sort((a, b) => a.id - b.id);
+            data.sort((a: OrderItem, b: OrderItem) => a.id - b.id);
             console.log("Response: ", data);
         } catch (error) {
-            console.error(error);
-        }
-    });
-
-    async function nextStep(item) {
-        try {
-            const response = await fetch(`http://localhost:8080/api/order-product-types/${item}/next-step`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    step_id: order_id
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error('Could not move to next step');
-            }
-
-            updatedData = await response.json();
-            console.log("Updated data: ", updatedData);
-        } catch (error) {
-            console.error(error);
+            console.error("Error fetching data:", error);
         }
     }
 
-    async function prevStep(item) {
+    async function nextStep(item: number) {
         try {
-            const response = await fetch(`http://localhost:8080/api/order-product-types/${item}/prev-step`, {
+            const response = await fetch(`http://localhost:8080/api/orders/${item}/next`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    step_id: order_id
-                })
             });
-
-            if (!response.ok) {
-                throw new Error('Could not move to next step');
+            if (response.ok) {
+                await fetchData();
             }
-
-            updatedData = await response.json();
-            console.log("Updated data: ", updatedData);
         } catch (error) {
-            console.error(error);
+            console.error("Error updating status:", error);
         }
     }
+
+    async function prevStep(item: number) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/orders/${item}/previous`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            if (response.ok) {
+                await fetchData();
+            }
+        } catch (error) {
+            console.error("Error updating status:", error);
+        }
+    }
+
+    // Fetch data when component mounts
+    fetchData();
 </script>
 
 {#each data as item (item.id)}
     <div>
-        <div>Item: {item.item.id}</div>
-        <div>Item name: {item.item.name}</div>
-        <div>Item amount: {item.itemAmount}</div>
-        <div>Current step: {item.currentStepIndex}</div>
-        <div>Steps: [{#each item.differentSteps as step}{step.name},&nbsp{/each}]</div>
+        <h2>Order {item.id}</h2>
+        <!-- Add other order details here -->
     </div>
-    <button onclick="{prevStep(item.id)}">Move to previous step</button>
-    <button onclick="{nextStep(item.id)}">Move to next step</button>
-    <br>
+    <button on:click={() => prevStep(item.id)}>Move to previous step</button>
+    <button on:click={() => nextStep(item.id)}>Move to next step</button>
     <br>
 {/each}
