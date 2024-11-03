@@ -4,14 +4,13 @@
 </script>
 
 <div style="justify-content: center; align-items: center; padding-top: 0.5rem">
-    <a
-            href="#"
+    <button
             class="help-link"
-            on:click|preventDefault={() => dialog.showModal()}
+            on:click={() => dialog.showModal()}
     >
         How to find order number
         <span class="question-circle">?</span>
-    </a>
+    </button>
 </div>
 
 <Dialog title="Order Number Required" bind:dialog on:close={() => console.log('closed')}>
@@ -37,6 +36,10 @@
         text-decoration: none;
         cursor: pointer;
         font-family: var(--font-primary);
+        background: none;
+        border: none;
+        padding: 0;
+        font: inherit;
     }
 
     .help-link:hover {

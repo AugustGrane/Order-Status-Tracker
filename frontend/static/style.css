@@ -1,0 +1,33 @@
+/* Global styles */
+:root {
+  --font-primary: 'Roboto', Arial, sans-serif;
+  --primary-color: #0066cc;
+  --background-color: #ffffff;
+  --text-color: #333333;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-primary);
+  color: var(--text-color);
+  background-color: var(--background-color);
+  line-height: 1.6;
+}
+
+/* Global link styles */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Global container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
