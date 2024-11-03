@@ -228,21 +228,6 @@
         font-size: 1rem;
     }
 
-    .acceptance {
-        background-image: url('/Acceptance agreement.png');
-    }
-
-    .print {
-        background-image: url('/Print icon.png');
-    }
-
-    .drying {
-        background-image: url('/Drying icon.png');
-    }
-
-    .shipping {
-        background-image: url('/Shipping icon.png');
-    }
 
     /* Responsive adjustments */
     @media (max-width: 768px) {
