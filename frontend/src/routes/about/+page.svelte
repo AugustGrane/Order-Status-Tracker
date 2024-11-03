@@ -1,8 +1,7 @@
-<script>
-// count up to 10 and display while coutning
-let count = $state(0);
-
+<script lang="ts">
+    let count = 0;
 </script>
-<p>This is the about page.</p>
+
+<h1>About</h1>
 <p>The count is {count}</p>
-<button onclick={count += 1}>Click me</button>
+<button on:click={() => count += 1}>Click me</button>

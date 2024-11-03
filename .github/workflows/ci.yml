@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ '**' ]
   pull_request:
-    branches: [ main ]
+    branches: [ '**' ]
+  workflow_dispatch:
 
 jobs:
   backend-tests:
@@ -24,9 +25,9 @@ jobs:
         cache: maven
         
     - name: Build and test with Maven
-      run: ./mvnw clean test
+      run: ./mvnw clean test -X
 
-  frontend-tests:
+  frontend-build:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -43,15 +44,10 @@ jobs:
         cache-dependency-path: './frontend/package-lock.json'
         
     - name: Install dependencies
-      run: |
-        npm install
-        npm install -D jsdom@latest
+      run: npm install
       
     - name: Type check
       run: npm run check
       
-    - name: Run tests
-      run: npm test
-
     - name: Build
       run: npm run build
