@@ -1,15 +1,9 @@
 <script>
     import { onMount } from 'svelte';
+    import {goto} from "$app/navigation";
     let message = 'Loading...';
-    onMount(async () => {
-        try {
-            const response = await fetch('http://localhost:8080/api/hello');
-            const data = await response.text();
-            message = data;
-        } catch (error) {
-            message = 'Error loading message';
-            console.error('Error:', error);
-        }
+    onMount( () => {
+        goto("/track");
     });
 </script>
 <h1>Hello {message}</h1>
