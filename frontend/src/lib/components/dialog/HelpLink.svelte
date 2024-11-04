@@ -8,15 +8,15 @@
             class="help-link"
             on:click={() => dialog.showModal()}
     >
-        How to find order number
+        Hvor finder jeg mit ordrenummer?
         <span class="question-circle">?</span>
     </button>
 </div>
 
-<Dialog title="Order Number Required" bind:dialog on:close={() => console.log('closed')}>
+<Dialog title="Hvor finder jeg mit ordrenummer?" bind:dialog on:close={() => console.log('closed')}>
     <div class="dialog-body">
-        <p>You need to enter your order number. You should be able to find this order number in the email we sent you.</p>
-        <p class="note">You can press ESC or click the × button to close</p>
+        <p>Ordrenummeret kan findes i den ordrebekræftelse du har modtaget fra os på mail.</p>
+        <p class="note">Tryk ESC eller × for at lukke dette vindue.</p>
     </div>
 </Dialog>
 

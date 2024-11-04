@@ -35,7 +35,7 @@
 
         // Validate that order number only contains numbers
         if (!/^\d+$/.test(trimmedOrderId)) {
-            errorMessage = 'Ordrenummer må kun indeholde tal';
+            errorMessage = 'Ordrenummeret må kun indeholde tal';
             return;
         }
 
@@ -57,7 +57,7 @@
     <div class="background">
         <div class="focus-box">
             <div class="logo"></div>
-            <div class="title">Se din proces</div>
+            <div class="title">Se status på din ordre</div>
             <div class="form-wrapper">
                 <form on:submit={handleSubmit}>
                     <input
@@ -74,7 +74,7 @@
                             <div class="loading-spinner"></div>
                             <span>Søger...</span>
                         {:else}
-                            Spor din ordres proces
+                            Find ordre
                         {/if}
                     </button>
 
