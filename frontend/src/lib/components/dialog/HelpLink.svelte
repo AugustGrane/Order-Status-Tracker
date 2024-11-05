@@ -8,8 +8,8 @@
             class="help-link"
             on:click={() => dialog.showModal()}
     >
-        Hvor finder jeg mit ordrenummer?
-        <span class="question-circle">?</span>
+        <u>Hvor finder jeg mit ordrenummer?</u>
+        <div class="question-circle">?</div>
     </button>
 </div>
 
@@ -32,7 +32,8 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        color: #0066cc;
+        color: #4d56cd;
+        /*color: #6a6a6a;*/
         text-decoration: none;
         cursor: pointer;
         font-family: var(--font-primary);
@@ -47,15 +48,18 @@
     }
 
     .question-circle {
+        background-image: url("/Question mark icon.png"), linear-gradient(transparent, transparent);
+
         display: inline-flex;
         align-items: center;
         justify-content: center;
         width: 16px;
         height: 16px;
         border-radius: 50%;
-        background-color: #0066cc;
-        color: white;
-        font-family: var(--font-primary);
-        font-weight: bold;
+        background-color: #4d56cd;
+        /*background-color: #6a6a6a;*/
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100%;
     }
 </style>
