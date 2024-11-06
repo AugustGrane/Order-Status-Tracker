@@ -50,7 +50,7 @@
         align-items: flex-start;
         justify-content: center;
         gap: 12px;
-        padding: 0px 8px;
+        padding: 0px 4px;
         position: relative;
         flex: 1;
         flex-grow: 1;
@@ -136,5 +136,23 @@
         letter-spacing: 0;
         line-height: normal;
         white-space: nowrap;
+    }
+
+    @media (max-width: 1000px){
+        .icon-wrapper{
+            width: 30px;
+            height: 30px;
+            padding: 2px;
+        }
+        .status {
+            white-space: normal; /* Allows text to wrap */
+            max-width: 50px; /* Sets max width to contain text */
+            font-size: 0.6rem;
+        }
+        .current-status{
+            white-space: normal; /* Allows text to wrap */
+            max-width: 50px; /* Sets max width to contain text */
+            font-size: 0.6rem;
+        }
     }
 </style>

@@ -22,4 +22,9 @@
     .line.current {
         background-color: #1166ee;
     }
+    @media (max-width: 1000px){
+        .line{
+            opacity: 0%;
+        }
+    }
 </style>
