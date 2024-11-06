@@ -106,7 +106,7 @@
 
         }
         .item {
-            height: 90px;
+            height: 120px;
             align-items: center;
         }
 

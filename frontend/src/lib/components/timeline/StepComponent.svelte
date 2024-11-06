@@ -146,11 +146,13 @@
         }
         .status {
             white-space: normal; /* Allows text to wrap */
-            max-width: 100%; /* Sets max width to contain text */
+            max-width: 50px; /* Sets max width to contain text */
             font-size: 0.6rem;
         }
         .current-status{
-            display: none;
+            white-space: normal; /* Allows text to wrap */
+            max-width: 50px; /* Sets max width to contain text */
+            font-size: 0.6rem;
         }
     }
 </style>
