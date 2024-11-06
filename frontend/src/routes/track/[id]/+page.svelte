@@ -65,15 +65,15 @@
                         {/if}
                         <div class="circle-explanations">
                             <div class="circle-explanation">
-                                <div class="circle"></div>
+                                <div class="circle-done"></div>
                                 <div class="circle-text">Færdig</div>
                             </div>
                             <div class="circle-explanation">
-                                <div class="current-circle"></div>
+                                <div class="circle-active"></div>
                                 <div class="circle-text">Igangsat</div>
                             </div>
                             <div class="circle-explanation">
-                                <div class="circle-2"></div>
+                                <div class="circle-waiting"></div>
                                 <div class="circle-text">Afventer</div>
                             </div>
                         </div>
@@ -243,7 +243,7 @@
         flex: 1 0 0;
     }
 
-    .circle {
+    .circle-done {
         position: relative;
         width: 25px;
         height: 25px;
@@ -252,7 +252,7 @@
         transform: rotate(180deg);
     }
 
-    .current-circle {
+    .circle-active {
         position: relative;
         width: 25px;
         height: 25px;
@@ -261,7 +261,7 @@
         transform: rotate(180deg);
     }
 
-    .circle-2 {
+    .circle-waiting {
         position: relative;
         width: 25px;
         height: 25px;
@@ -277,5 +277,35 @@
         font-style: normal;
         font-weight: 400;
         line-height: normal;
+    }
+    /*
+    Scaling for phones ( <1000 px width)
+ */
+
+    @media (max-width: 1000px){
+        .order-number-text{
+            font-size: 1.5rem;
+        }
+        .title-wrapper{
+            flex-direction: column;
+            align-items: center;
+        }
+        .circle-done{
+            width: 20px;
+            height: 20px;
+        }
+        .circle-active {
+            width: 20px;
+            height: 20px;
+        }
+        .circle-waiting {
+            width: 20px;
+            height: 20px;
+        }
+        .logo2 {
+            width: 8rem;
+            margin: 6px;
+            object-fit: cover;
+        }
     }
 </style>
