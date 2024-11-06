@@ -129,7 +129,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 0px 10%;
+        padding: 0px 5%;
         position: relative;
         flex: 1;
         align-self: stretch;

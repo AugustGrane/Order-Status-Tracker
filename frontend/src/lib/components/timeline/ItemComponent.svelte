@@ -100,4 +100,15 @@
         width: 100%;
         flex: 0 0 auto;
     }
+    @media (max-width: 1000px) {
+        .item-title{
+            font-size: 0.9rem;
+
+        }
+        .item {
+            height: 90px;
+            align-items: center;
+        }
+
+    }
 </style>
