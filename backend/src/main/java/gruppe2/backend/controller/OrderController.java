@@ -97,6 +97,16 @@ public class OrderController {
         }
     }
 
+    @GetMapping("/get-all-orders")
+    public ResponseEntity<List<OrderDashboardDTO>> getAllOrders() {
+        try {
+            List<OrderDashboardDTO> orders = orderService.getAllOrders();
+            return ResponseEntity.ok(orders);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
     @GetMapping("/order-product-types/{id}/progress")
     public ResponseEntity<?> getProgress(@PathVariable Long id) {
         try {
