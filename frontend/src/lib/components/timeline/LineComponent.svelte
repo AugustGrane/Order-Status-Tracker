@@ -24,7 +24,8 @@
     }
     @media (max-width: 1000px){
         .line{
-            opacity: 0%;
+            height: 2px;
+            bottom: 10px;
         }
     }
 </style>

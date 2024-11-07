@@ -22,7 +22,7 @@
             {#if orderItem.differentSteps.length === 0}
                 <p style="color: red">Error: No steps in item</p>
             {:else}
-                {#each orderItem.differentSteps.slice(0, -1) as step, index}
+                {#each orderItem.differentSteps as step, index}
                     {#if index === 0}
                         {#if orderItem.currentStepIndex === index}
                             <StepComponent status={step.name} icon={step.image} current={true} firstItem={true} />

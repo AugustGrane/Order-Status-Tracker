@@ -58,4 +58,13 @@
         background-position: center;
         background-size: 100%;
     }
+
+    @media(max-width: 768px) {
+        .question-circle {
+            width: 12px;
+            height: 12px;
+        }
+        .help-link {
+            font-size: 12px;}
+    }
 </style>

@@ -57,7 +57,7 @@
     <div class="background">
         <div class="focus-box">
             <div class="logo"></div>
-            <div class="title">Se status på din ordre</div>
+            <div class="title">SE DIN ORDRESTATUS</div>
             <div class="form-wrapper">
                 <form on:submit={handleSubmit}>
                     <input
@@ -127,7 +127,6 @@
         display: flex;
         width: 93.5%;
         max-width: 660px;
-        min-width: 385px;
         padding: 3.3vw;
         flex-direction: column;
         justify-content: center;
@@ -148,8 +147,8 @@
         color: #000;
         text-align: center;
         font-family: var(--font-primary);
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 1.5rem;
+        font-weight: 600;
     }
 
     *,
@@ -232,16 +231,32 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .title {
-            font-size: 2rem;
+            font-size: 1.2rem;
         }
-
+        .logo {
+            width: 8rem;
+            height: 5rem;
+        }
         .focus-box {
             width: 90%;
             padding: 2.2vw;
         }
-
-        .input-field, .button {
-            width: 100%;
+        .button {
+            display: flex;
+            padding: 1.5vw;
+            border-radius: 0.5vw;
+            font-size: 1rem;
+            font-weight: 250;
+        }
+        .input-field {
+            display: block;
+            padding: 2vw;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+        .focus-box {
+            width: 80%;
+            min-width: 220px;
         }
     }
 </style>
