@@ -154,5 +154,8 @@
             max-width: 50px; /* Sets max width to contain text */
             font-size: 0.6rem;
         }
+        .step {
+            min-width: 50px;
+        }
     }
 </style>
