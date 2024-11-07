@@ -239,63 +239,45 @@ public class OrderService {
      *
      * @return a list of OrderDashboardDTO objects representing all orders and their details.
      */
+
     public List<OrderDashboardDTO> getAllOrders() {
-        // Fetch all orders sorted by the order creation date in ascending order
         List<Order> orders = orderRepository.findAllByOrderByOrderCreatedAsc();
 
-        // Convert each order and its details into OrderDashboardDTO objects
         return orders.stream()
-                .flatMap(order -> orderProductTypeRepository.findByOrderId(order.getId()).stream()
-                        .map(orderDetails -> {
-                            // Convert step IDs to StatusDefinition objects
-                            StatusDefinition[] statusDefinitions = Arrays.stream(orderDetails.getDifferentSteps())
-                                    .map(stepId -> statusDefinitionRepository.findById(stepId)
-                                            .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
-                                    .toArray(StatusDefinition[]::new);
-                            // Create and return a new OrderDashboardDTO object
-                            return new OrderDashboardDTO(
-                                    orderDetails.getId(),
-                                    orderDetails.getOrderId(),
-                                    order.getOrderCreated(),
-                                    order.isPriority(),
-                                    orderDetails.getItem(),
-                                    orderDetails.getItemAmount(),
-                                    orderDetails.getProduct_type(),
-                                    order.getCustomerName(),
-                                    order.getNotes(),
-                                    orderDetails.getCurrentStepIndex(),
-                                    statusDefinitions,
-                                    orderDetails.getUpdated()
-                            );
-                        }))
-                .collect(Collectors.toList());
+                .map(order -> {
+                    List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(order.getId());
 
-//        List<Order> orders = orderRepository.findAllByOrderByOrderCreatedAsc();
-//
-//        List<OrderDashboardDTO> orderDashboardDTOs = new ArrayList<>();
-//        for (Order order : orders) {
-//            List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(order.getId());
-//            for (OrderDetails orderDetails : orderDetailsList) {
-//                StatusDefinition[] statusDefinitions = Arrays.stream(orderDetails.getDifferentSteps())
-//                        .map(stepId -> statusDefinitionRepository.findById(stepId)
-//                                .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
-//                        .toArray(StatusDefinition[]::new);
-//                orderDashboardDTOs.add(new OrderDashboardDTO(
-//                        orderDetails.getId(),
-//                        orderDetails.getOrderId(),
-//                        order.getOrderCreated(),
-//                        order.isPriority(),
-//                        orderDetails.getItem(),
-//                        orderDetails.getItemAmount(),
-//                        orderDetails.getProduct_type(),
-//                        order.getCustomerName(),
-//                        order.getNotes(),
-//                        orderDetails.getCurrentStepIndex(),
-//                        statusDefinitions,
-//                        orderDetails.getUpdated()
-//                ));
-//            }
-//        }
-//        return orderDashboardDTOs;
+                    // Convert OrderDetails to OrderDetailsWithStatusDTO
+                    List<OrderDetailsWithStatusDTO> items = orderDetails.stream()
+                            .map(detail -> {
+                                StatusDefinition[] statusDefinitions = Arrays.stream(detail.getDifferentSteps())
+                                        .map(stepId -> statusDefinitionRepository.findById(stepId)
+                                                .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
+                                        .toArray(StatusDefinition[]::new);
+
+                                return new OrderDetailsWithStatusDTO(
+                                        detail.getId(),
+                                        detail.getOrderId(),
+                                        detail.getItem(),
+                                        detail.getItemAmount(),
+                                        detail.getProduct_type(),
+                                        detail.getCurrentStepIndex(),
+                                        statusDefinitions,
+                                        detail.getUpdated()
+                                );
+                            })
+                            .collect(Collectors.toList());
+
+                    return new OrderDashboardDTO(
+                            order.getId(),
+                            order.getOrderCreated(),
+                            order.isPriority(),
+                            order.getCustomerName(),
+                            order.getNotes(),
+                            items
+                    );
+                })
+                .collect(Collectors.toList());
     }
+
 }
