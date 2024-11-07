@@ -56,7 +56,7 @@
         <div class="main2">
             <div class="background2">
                 <div class="logo2"></div>
-                <button class="backbutton" on:click={() => goto("/track")}>{"←"} Track en anden ordre</button>
+                <button class="backbutton" on:click={() => goto("/track")}></button>
                 <div class="order-box-main">
                     <div class="title-wrapper">
                         <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
@@ -147,7 +147,8 @@
         background-size: contain;
     }
 
-    .backbutton {
+    .backbutton::before {
+        content: "← Track en anden ordre";
         position: absolute;
         top: 20px;
         left: 20px;
@@ -306,6 +307,23 @@
             width: 8rem;
             margin: 6px;
             object-fit: cover;
+        }
+
+        .backbutton::before {
+            content: "← Track";
+            position: absolute;
+            top: 42px;
+            left: 10px;
+            padding: 0.3rem 0.55rem;
+            background: #454545;
+            color: #FFF;
+            opacity: 0.3;
+            font-family: var(--font-primary);
+            font-size: 0.75rem;
+            font-weight: 250;
+            border: none;
+            cursor: pointer;
+            text-align: center;
         }
     }
 </style>
