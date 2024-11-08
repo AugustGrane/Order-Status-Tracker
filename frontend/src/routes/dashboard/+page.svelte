@@ -1,37 +1,41 @@
-<script>
-    import {onMount} from "svelte";
-
-    let data;
-
-    onMount(async () => {
-        try {
-            const response = await fetch("http://localhost:8080/api/get-all-orders", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            data = await response.json();
-            console.log(data);
-        } catch (error) {
-            console.error(error);
-        }
-    });
+<script lang="ts">
+    import type { PageData } from './$types';
+    export let data: PageData;
+    const orders = data.orders; // If you want to create a shorter reference
+    console.log(orders);
 </script>
 
-<h1>Dashboard</h1>
+<main>
+    <h1>Dashboard</h1>
+    <p>Here you can see all orders</p>
+    {#if orders} <!-- Now we can check just orders -->
+        {#each orders as order}
+            <p>Order ID: {order.orderId}</p>
+            <p>Date created: {new Date(order.orderCreated).toLocaleDateString()}</p>
+            <p>Customer name: {order.customerName}</p>
+            <h3>Products:
+                {#each order.items as item}
+                    Name: {item.item.name},
+                    Amount: {item.itemAmount},
+                    Status: {item.differentSteps[item.currentStepIndex].name}&nbsp;
+                {/each}
+            </h3>
+            <p>Notes: {order.Notes}</p>
+            <br>
+        {/each}
+    {:else}
+        <p>Loading...</p>
+    {/if}
+</main>
 
-<p>Here you can see all orders</p>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-{#if data}
-    {#each data as order}
-        <p>Item: {order.orderId}</p>
-        <p>Amount: {order.itemAmount}</p>
-        <p>Date created: {new Date(order.orderCreated).toLocaleDateString()}</p>
-        <p>Customer name: {order.customerName}</p>
-        <p>Notes: {order.Notes}</p>
-        <p>Status: {order.statusDefination}</p>
-    {/each}
-{:else}
-    <p>Loading...</p>
-{/if}
+    html {
+        font-family: Roboto, Arial, sans-serif;
+    }
+
+    main {
+        margin: 0 20px;
+    }
+</style>
