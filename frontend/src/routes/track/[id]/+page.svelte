@@ -56,7 +56,7 @@
         <div class="main2">
             <div class="background2">
                 <div class="logo2"></div>
-                <button class="backbutton" on:click={() => goto("/track")}></button>
+                <button class="backbutton" style="border:none; background-color:#dbdbdb00" on:click={() => goto("/track")}></button>
                 <div class="order-box-main">
                     <div class="title-wrapper">
                         <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
