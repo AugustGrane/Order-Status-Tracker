@@ -1,8 +1,8 @@
 import type { PageLoad } from './$types';
 
-export const load = (async ({ params }) => {
+export const load = (async ({ fetch, params }) => {
     try {
-        const response = await fetch(`http://localhost:8080/api/orders/${params.id}`);
+        const response = await fetch(`/api/orders/${params.id}`);
         if (!response.ok) {
             return { 
                 order: null,
