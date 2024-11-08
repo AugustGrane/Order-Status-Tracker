@@ -268,6 +268,9 @@ public class OrderService {
                             })
                             .collect(Collectors.toList());
 
+                    // Sort the items by the item id
+                    items.sort(Comparator.comparing(OrderDetailsWithStatusDTO::id));
+
                     return new OrderDashboardDTO(
                             order.getId(),
                             order.getOrderCreated(),
@@ -279,5 +282,4 @@ public class OrderService {
                 })
                 .collect(Collectors.toList());
     }
-
 }
