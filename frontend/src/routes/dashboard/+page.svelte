@@ -117,10 +117,12 @@
 
     .background .logo {
         position: relative;
-        width: 52px;
-        height: 59px;
-        background-image: url(./img/philip-gumoes-gtryk-logo-blue-1.png);
+        width: 6rem;
+        height: 3.5rem;
+        background-size: contain;
+        background-image: url('/gtryk_logo.png');
         background-size: 100% 100%;
+
     }
 
     .background .title {
