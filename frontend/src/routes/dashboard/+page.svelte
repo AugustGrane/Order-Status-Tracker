@@ -6,9 +6,65 @@
 </script>
 
 <main>
-    <h1>Dashboard</h1>
-    <p>Here you can see all orders</p>
-    {#if orders} <!-- Now we can check just orders -->
+    <div class="background">
+        <div class="navbar">
+            <div class="logo"></div>
+            <div class="title">Dashboard</div>
+        </div>
+        <div class="search-filter">
+            <div class="left">
+                <div class="active-orders-text">Aktive ordre</div>
+                <div class="active-orders">Se og opdater kundeordre</div>
+                <div class="search"><input class="text-wrapper" placeholder="Søg"></div>
+            </div>
+            <div class="right">
+                <div class="filter">
+                    <select class="dropdown-filter">
+                        <option>Nyeste</option>
+                        <option>Ældste</option>
+                        <option>Længst i process</option>
+                    </select>
+                </div> <!-- Closed div here -->
+            </div>
+        </div>
+        <div class="order-overview">
+            <div class="name-bar">
+                <div class="order-number">Ordrenummer</div>
+                <div class="date">Dato</div>
+                <div class="customer">Kundens navn</div>
+                <div class="items-and-amount">Artikler og mængde</div>
+                <div class="status">Artikelstatus</div> <!-- Changed class name here -->
+            </div>
+            <div class="order">
+                {#each orders as order}
+                    <div class="order-container">
+                        <div class="actual-order-number">{order.orderId}</div>
+                        <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
+                        <div class="actual-customer">{order.customerName}</div>
+                        <div class="item-container">
+                            {#each order.items as item}
+                                <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
+                            {/each}
+                        </div>
+                        <div class="status-container">
+                            {#each order.items as item}
+                                <div class="actual-status">
+                                    <select class="dropdown-status">{item.differentSteps[item.currentStepIndex].name}&nbsp;
+                                        <option>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
+                                    </select>
+                                </div>
+                            {/each}
+                        </div>
+                    </div>
+                {/each}
+            </div>
+        </div>
+    </div>
+</main>
+
+<style>
+
+    /*{#if orders} <!-- Now we can check just orders -->
         {#each orders as order}
             <p>Order ID: {order.orderId}</p>
             <p>Date created: {new Date(order.orderCreated).toLocaleDateString()}</p>
@@ -25,17 +81,368 @@
         {/each}
     {:else}
         <p>Loading...</p>
-    {/if}
-</main>
+    {/if}*/
 
-<style>
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-    html {
+
+      html {
         font-family: Roboto, Arial, sans-serif;
     }
 
     main {
         margin: 0 20px;
     }
+    .background {
+        display: flex;
+        flex-direction: column;
+        height: 1024px;
+        align-items: center;
+        gap: 25px;
+        position: relative;
+        background-color: #ffffff;
+    }
+
+    .background .navbar {
+        display: flex;
+        height: 81px;
+        align-items: center;
+        gap: 10px;
+        padding: 0px 30px;
+        position: relative;
+        align-self: stretch;
+        width: 100%;
+        background-color: #b0b0b0;
+    }
+
+    .background .logo {
+        position: relative;
+        width: 52px;
+        height: 59px;
+        background-image: url(./img/philip-gumoes-gtryk-logo-blue-1.png);
+        background-size: 100% 100%;
+    }
+
+    .background .title {
+        position: relative;
+        width: 234px;
+        height: 53px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 44px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .search-filter {
+        display: flex;
+        height: 100px;
+        width: 1090px;
+        align-items: flex-end;
+        justify-content: space-between;
+        position: relative;
+        background-color: #ffffff;
+    }
+
+    .background .left {
+        display: flex;
+        flex-direction: column;
+        width: 535px;
+        height: 100px;
+        align-items: flex-start;
+        justify-content: space-between;
+        position: relative;
+        margin-top: -5.00px;
+        border: 0px none;
+    }
+
+    .background .active-orders-text {
+        width: 262px;
+        height: 24px;
+        font-size: 24px;
+        position: relative;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .background .active-orders {
+        font-size: 16px;
+        position: relative;
+        width: 397px;
+        height: 16px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .background .search {
+        display: flex;
+        width: 200px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 5px 0px;
+        position: relative;
+        flex: 0 0 auto;
+    }
+
+    .background .text-wrapper {
+        position: relative;
+        width: 200px;
+        margin-top: -2.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #8b8b8b;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .right {
+        display: flex;
+        flex-direction: column;
+        width: 524px;
+        align-items: flex-end;
+        justify-content: flex-end;
+        gap: 10px;
+        position: relative;
+    }
+
+    .background .filter {
+        display: flex;
+        width: 200px;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 5px 0px;
+        position: relative;
+        flex: 0 0 auto;
+    }
+
+    .background .dropdown-filter {
+        align-self: stretch;
+        position: relative;
+        margin-top: -2.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .order-overview {
+        display: flex;
+        flex-wrap: wrap;
+        width: 1090px;
+        height: 569px;
+        align-items: flex-start;
+        justify-content: center;
+        position: relative;
+        background-color: #ffffff;
+    }
+
+    .background .name-bar {
+        display: flex;
+        width: 1090px;
+        height: 35px;
+        align-items: center;
+        gap: 10px;
+        padding: 0px 25px;
+        position: relative;
+        background-color: #9d9d9d;
+    }
+
+    .background .order-number {
+        position: relative;
+        width: 160px;
+        height: 19px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .background .date {
+        position: relative;
+        width: 125px;
+        height: 19px;
+        font-family: "Inter-Regular", Helvetica;
+        font-width: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+        white-space: nowrap;
+    }
+
+    .background .customer {
+        position: relative;
+        width: 200px;
+        height: 19px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .status {
+        position: relative;
+        height: 19px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .items-and-amount {
+        position: relative;
+        width: 275px;
+        height: 19px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .order {
+        display: flex;
+        flex-direction: column;
+        width: 1090px;
+        height: 488px;
+        margin-bottom: -25.00px;
+        align-items: flex-start;
+        gap: 10px;
+        position: relative;
+        background-color: #9f9f9f;
+    }
+
+    .background .order-container {
+        width: 1040px;
+        height: 147px;
+        gap: 10px;
+        padding: 20px 25px;
+        background-color: #c3c3c3;
+        display: flex;
+        align-items: flex-start;
+        position: relative;
+    }
+
+    .background .actual-order-number {
+        position: relative;
+        width: 160px;
+        height: 19px;
+        margin-top: -1.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .actual-date {
+        position: relative;
+        width: 125px;
+        height: 19px;
+        margin-top: -1.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .actual-customer {
+        position: relative;
+        width: 200px;
+        height: 19px;
+        margin-top: -1.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .item-container {
+        display: flex;
+        flex-wrap: wrap;
+        width: 275px;
+        height: 30px;
+        align-items: flex-start;
+        padding: 2px 0px;
+        position: relative;
+    }
+
+    .background .actual-item {
+        position: relative;
+        width: 250px;
+        height: 35px;
+        margin-top: -1.00px;
+        margin-bottom: -9.00px;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        font-size: 16px;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
+    .background .status-container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        width: 200px;
+        align-items: flex-start;
+        position: relative;
+        margin-bottom: -3.00px;
+    }
+
+    .background .actual-status {
+        display: flex;
+        width: 200px;
+        min-width: 30px;
+        max-width: 30px;
+        align-items: center;
+        gap: 10px;
+        padding: 2px 0px;
+        position: relative;
+    }
+
+    .background .dropdown-status {
+        width: fit-content;
+        min-width: 150px;
+        margin-top: -1.50px;
+        font-size: 16px;
+        white-space: nowrap;
+        position: relative;
+        font-family: "Inter-Regular", Helvetica;
+        font-weight: 400;
+        color: #000000;
+        letter-spacing: 0;
+        line-height: normal;
+    }
+
 </style>
