@@ -1,41 +1,70 @@
 erDiagram
-    Order ||--o{ OrderDetails : contains
-    OrderDetails }o--|| Item : "contains item"
-    Item }o--|| ProductType : "has product type"
-    ProductType }o--|| StatusDefinition : "has status definitions"
+    Orders {
+        Long id PK
+        String customerName
+        Boolean priority
+        String notes
+        LocalDateTime orderCreated
+        Integer totalEstimatedTime
+    }
 
-    Order {
-        int id
-        int orderNumber
-        date orderDate
-        decimal totalAmount
+    Items {
+        Long id PK
+        String itemImage
+        String name
+        Long productTypeId FK
+    }
+
+    ProductTypes {
+        Long id PK
+        String name
     }
 
     OrderDetails {
-        int id
-        int order_id
-        int item_id
-        int quantity
-        decimal price
+        Long id PK
+        Long orderId FK
+        Long itemId FK
+        Integer currentStepIndex
+        Integer itemAmount
+        String productType
     }
 
-    Item {
-        int id
-        string name
-        string description
-        decimal price
-        int productType_id
+    StatusDefinitions {
+        Long id PK
+        String description
+        String image
+        String name
     }
 
-    ProductType {
-        int id
-        string name
-        Long[] differentSteps
+    OrderProductTypeSteps {
+        Long orderProductTypeId FK
+        Long stepId FK
+        Integer stepOrder
     }
 
-    StatusDefinition {
-        int id
-        string name
-        string description
-        string image
+    OrderProductTypeUpdated {
+        Long orderProductTypeId FK
+        LocalDateTime updated
+        Long statusDefinitionId FK
     }
+
+    OrderSteps {
+        Long orderId FK
+        Long stepId FK
+        Integer stepOrder
+    }
+
+    ProductTypeSteps {
+        Long productTypeId FK
+        Long stepId FK
+        Integer stepOrder
+    }
+
+    Orders ||--o{ OrderDetails : "contains"
+    Items ||--o{ OrderDetails : "used in"
+    ProductTypes ||--o{ Items : "categorizes"
+    ProductTypes ||--o{ ProductTypeSteps : "has steps"
+    StatusDefinitions ||--o{ OrderProductTypeUpdated : "tracks status"
+    Orders ||--o{ OrderSteps : "has steps"
+    ProductTypes ||--o{ OrderProductTypeSteps : "defines steps"
+    StatusDefinitions ||--o{ ProductTypeSteps : "defines steps"
