@@ -7,6 +7,8 @@ import gruppe2.backend.domain.webhook.WebhookOrder;
 import gruppe2.backend.domain.exception.WebhookProcessingException;
 import gruppe2.backend.domain.command.*;
 import gruppe2.backend.dto.ItemDTO;
+import gruppe2.backend.mapper.OrderMapper;
+import gruppe2.backend.mapper.WebhookMapper;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.ProductType;
 import gruppe2.backend.model.OrderDetails;
@@ -24,6 +26,8 @@ public class WebhookService {
     private final ItemRepository itemRepository;
     private final ProductTypeRepository productTypeRepository;
     private final OrderProductTypeRepository orderProductTypeRepository;
+    private final WebhookMapper webhookMapper;
+    private final OrderMapper orderMapper;
 
     public WebhookService(
             OrderService orderService,
@@ -31,20 +35,24 @@ public class WebhookService {
             ProductTypeService productTypeService,
             ItemRepository itemRepository,
             ProductTypeRepository productTypeRepository,
-            OrderProductTypeRepository orderProductTypeRepository) {
+            OrderProductTypeRepository orderProductTypeRepository,
+            WebhookMapper webhookMapper,
+            OrderMapper orderMapper) {
         this.orderService = orderService;
         this.itemService = itemService;
         this.productTypeService = productTypeService;
         this.itemRepository = itemRepository;
         this.productTypeRepository = productTypeRepository;
         this.orderProductTypeRepository = orderProductTypeRepository;
+        this.webhookMapper = webhookMapper;
+        this.orderMapper = orderMapper;
     }
 
     @Transactional
     public void createOrderInDatabase(WebhookPayload payload) {
         try {
-            // Convert webhook payload to domain objects
-            CustomerInfo customerInfo = createCustomerInfo(payload);
+            // Convert webhook payload to domain objects using mapper
+            CustomerInfo customerInfo = webhookMapper.toCustomerInfo(payload);
             Map<Long, Integer> items = createItemsMap(payload);
             Map<Long, Integer> processingTimes = getProcessingTimes(items.keySet());
 
@@ -57,8 +65,8 @@ public class WebhookService {
                 false // Default priority
             );
 
-            // Persist order and get the persisted entity
-            gruppe2.backend.model.Order persistedOrder = orderService.createOrder(convertToOrderDTO(order));
+            // Persist order and get the persisted entity using mapper
+            gruppe2.backend.model.Order persistedOrder = orderService.createOrder(orderMapper.toOrderDTO(order));
 
             // Create OrderDetails for each item
             setupOrderDetails(persistedOrder.getId(), items);
@@ -100,23 +108,6 @@ public class WebhookService {
 
             orderProductTypeRepository.save(orderDetails);
         });
-    }
-
-    private CustomerInfo createCustomerInfo(WebhookPayload payload) {
-        String displayName;
-        if (!Objects.equals(payload.getBilling().getCompany(), "")) {
-            String companyName = payload.getBilling().getCompany();
-            String name = payload.getBilling().getFirstName() + " " + payload.getBilling().getLastName();
-            displayName = companyName + " | " + name;
-        } else {
-            displayName = payload.getBilling().getFirstName() + " " + payload.getBilling().getLastName();
-        }
-
-        return new CustomerInfo(
-            displayName,
-            "", // Notes
-            false // Priority
-        );
     }
 
     private Map<Long, Integer> createItemsMap(WebhookPayload payload) {
@@ -167,19 +158,5 @@ public class WebhookService {
             }
         });
         return processingTimes;
-    }
-
-    private gruppe2.backend.dto.OrderDTO convertToOrderDTO(Order order) {
-        return new gruppe2.backend.dto.OrderDTO(
-            order.getId().getValue(),
-            order.getCustomerInfo().getName(),
-            order.getCustomerInfo().isPriority(),
-            order.getCustomerInfo().getNotes(),
-            order.getItems().stream()
-                .collect(HashMap::new, 
-                    (m, item) -> m.put(item.getItem().getId(), item.getQuantity()),
-                    HashMap::putAll),
-            ""
-        );
     }
 }

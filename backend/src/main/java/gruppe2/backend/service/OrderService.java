@@ -4,6 +4,8 @@ import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.*;
 import gruppe2.backend.domain.command.*;
 import gruppe2.backend.domain.specification.OrderInvariantsSpecification;
+import gruppe2.backend.mapper.OrderMapper;
+import gruppe2.backend.mapper.OrderDetailsMapper;
 import gruppe2.backend.model.*;
 import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ public class OrderService {
     private final StatusDefinitionRepository statusDefinitionRepository;
     private final ProductTypeRepository productTypeRepository;
     private final ItemRepository itemRepository;
+    private final OrderMapper orderMapper;
+    private final OrderDetailsMapper orderDetailsMapper;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -27,13 +31,17 @@ public class OrderService {
             ItemService itemService,
             StatusDefinitionRepository statusDefinitionRepository,
             ProductTypeRepository productTypeRepository,
-            ItemRepository itemRepository) {
+            ItemRepository itemRepository,
+            OrderMapper orderMapper,
+            OrderDetailsMapper orderDetailsMapper) {
         this.orderRepository = orderRepository;
         this.orderProductTypeRepository = orderProductTypeRepository;
         this.itemService = itemService;
         this.statusDefinitionRepository = statusDefinitionRepository;
         this.productTypeRepository = productTypeRepository;
         this.itemRepository = itemRepository;
+        this.orderMapper = orderMapper;
+        this.orderDetailsMapper = orderDetailsMapper;
     }
 
     @Transactional
@@ -68,10 +76,10 @@ public class OrderService {
             throw new IllegalStateException("Order validation failed");
         }
 
-        // Persist order
-        gruppe2.backend.model.Order persistedOrder = persistOrder(domainOrder);
+        // Persist order using mapper
+        gruppe2.backend.model.Order persistedOrder = orderRepository.save(orderMapper.toModelOrder(domainOrder));
 
-        // Create order items with their statuses using the same logic as WebhookService
+        // Create order items with their statuses
         setupOrderDetails(persistedOrder.getId(), orderDTO.items());
         
         return persistedOrder;
@@ -108,7 +116,6 @@ public class OrderService {
     }
 
     private Long generateOrderId() {
-        // Simple implementation - in practice, use a more robust ID generation strategy
         return System.currentTimeMillis();
     }
 
@@ -123,83 +130,24 @@ public class OrderService {
         return processingTimes;
     }
 
-    private gruppe2.backend.model.Order persistOrder(gruppe2.backend.domain.Order domainOrder) {
-        // Create and save order entity
-        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        orderEntity.setId(domainOrder.getId().getValue());
-        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
-        orderEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
-        orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
-        orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
-        orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
-        return orderRepository.save(orderEntity);
-    }
-
     public List<OrderDetailsWithStatusDTO> getOrderDetails(Long orderId) {
         gruppe2.backend.model.Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
         return orderDetailsList.stream()
-                .map(this::createOrderDetailsDTO)
+                .map(orderDetailsMapper::toOrderDetailsDTO)
                 .collect(Collectors.toList());
-    }
-
-    private OrderDetailsWithStatusDTO createOrderDetailsDTO(OrderDetails details) {
-        OrderStatus status = new OrderStatus(
-            details.getDifferentSteps(),
-            details.getCurrentStepIndex(),
-            details.getUpdated()
-        );
-
-        OrderItem orderItem = new OrderItem(
-            details.getItem(),
-            details.getItemAmount(),
-            details.getProduct_type(),
-            status
-        );
-
-        StatusDefinition[] statusDefinitions = Arrays.stream(details.getDifferentSteps())
-                .map(stepId -> statusDefinitionRepository.findById(stepId)
-                        .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId)))
-                .toArray(StatusDefinition[]::new);
-
-        return new OrderDetailsWithStatusDTO(
-            details.getId(),
-            details.getOrderId(),
-            orderItem.getItem(),
-            orderItem.getQuantity(),
-            orderItem.getProductTypeName(),
-            orderItem.getCurrentStepIndex(),
-            statusDefinitions,
-            orderItem.getStatus().getStatusUpdates()
-        );
     }
 
     public List<OrderDashboardDTO> getAllOrders() {
         List<gruppe2.backend.model.Order> orderEntities = orderRepository.findAllByOrderByOrderCreatedAsc();
         return orderEntities.stream()
-                .map(this::createOrderDashboardDTO)
+                .map(order -> {
+                    List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(order.getId());
+                    return orderDetailsMapper.toOrderDashboardDTO(order, orderDetails);
+                })
                 .collect(Collectors.toList());
-    }
-
-    private OrderDashboardDTO createOrderDashboardDTO(gruppe2.backend.model.Order orderEntity) {
-        OrderTimeline timeline = new OrderTimeline(orderEntity.getOrderCreated(), orderEntity.isPriority());
-        List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(orderEntity.getId());
-        
-        List<OrderDetailsWithStatusDTO> items = orderDetails.stream()
-                .map(this::createOrderDetailsDTO)
-                .sorted(Comparator.comparing(OrderDetailsWithStatusDTO::id))
-                .collect(Collectors.toList());
-
-        return new OrderDashboardDTO(
-            orderEntity.getId(),
-            orderEntity.getOrderCreated(),
-            orderEntity.isPriority(),
-            orderEntity.getCustomerName(),
-            orderEntity.getNotes(),
-            items
-        );
     }
 
     public StatusDefinition createStatusDefinition(StatusDefinitionDTO dto) {
