@@ -7,6 +7,7 @@ public record OrderDTO(
         String customerName,
         boolean priority,
         String notes,
-        Map<Long, Integer> items  // item_id -> quantity
+        Map<Long, Integer> items,  // item_id -> quantity
+        String shippingUrl
 ) {
 }
