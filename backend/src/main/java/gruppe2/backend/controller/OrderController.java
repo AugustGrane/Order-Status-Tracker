@@ -60,8 +60,8 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-
-    @PostMapping("/test")
+    
+    @PostMapping("/update-generic-product-type")
     public ResponseEntity<?> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
         try {
                 orderService.updateOrderProductTypeStepsFromGeneric(dto.itemId(), dto.productTypeId());
