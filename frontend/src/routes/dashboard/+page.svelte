@@ -12,56 +12,58 @@
             <div class="logo"></div>
             <div class="title">Dashboard</div>
         </div>
-        <div class="search-filter">
-            <div class="left">
-                <div class="active-orders-text">Aktive ordre</div>
-                <div class="active-orders">Se og opdater kundeordre</div>
-                <div class="search"><input class="search-field" placeholder="Søg efter navn, ordrenummer eller artikler"></div>
+        <div class="container">
+            <div class="search-filter">
+                <div class="left">
+                    <div class="active-orders-text">Aktive ordre</div>
+                    <div class="active-orders">Se og opdater kundeordre</div>
+                    <div class="search"><input class="search-field" placeholder="Søg efter navn, ordrenummer eller artikler"></div>
+                </div>
+                <div class="right">
+                    <select class="dropdown-filter">
+                        <option>Nyeste</option>
+                        <option>Ældste</option>
+                        <option>Længst i process</option>
+                    </select>
+                </div>
             </div>
-            <div class="right">
-                <select class="dropdown-filter">
-                    <option>Nyeste</option>
-                    <option>Ældste</option>
-                    <option>Længst i process</option>
-                </select>
-            </div>
-        </div>
-        <div class="order-overview">
-            <div class="name-bar">
-                <div class="order-number">Ordrenummer</div>
-                <div class="date">Dato</div>
-                <div class="customer">Kundens navn</div>
-                <div class="items-and-amount">Artikler og mængde</div>
-                <div class="status">Artikelstatus</div> <!-- Changed class name here -->
-            </div>
-            <div class="order">
-                {#each orders as order}
-                    <div class="order-container">
-                        <div class="actual-order-number">{order.orderId}</div>
-                        <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
-                        <div class="actual-customer">{order.customerName}</div>
-                        <div class="item-container">
-                            {#each order.items as item}
-                                <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
-                            {/each}
+            <div class="order-overview">
+                <div class="name-bar">
+                    <div class="order-number">Ordrenummer</div>
+                    <div class="date">Dato</div>
+                    <div class="customer">Kundens navn</div>
+                    <div class="items-and-amount">Artikler og mængde</div>
+                    <div class="status">Artikelstatus</div> <!-- Changed class name here -->
+                </div>
+                <div class="order">
+                    {#each orders as order}
+                        <div class="order-container">
+                            <div class="actual-order-number">{order.orderId}</div>
+                            <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
+                            <div class="actual-customer">{order.customerName}</div>
+                            <div class="item-container">
+                                {#each order.items as item}
+                                    <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
+                                {/each}
+                            </div>
+                            <div class="status-container">
+                                {#each order.items as item}
+                                    <div class="actual-status">
+                                        <select class="dropdown-status">
+                                            {#each item.differentSteps as step}
+                                                {#if step.name == item.differentSteps[item.currentStepIndex].name}
+                                                    <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
+                                                {:else}
+                                                    <option>{step.name}&nbsp;</option>
+                                                {/if}
+                                            {/each}
+                                        </select>
+                                    </div>
+                                {/each}
+                            </div>
                         </div>
-                        <div class="status-container">
-                            {#each order.items as item}
-                                <div class="actual-status">
-                                    <select class="dropdown-status">
-                                        {#each item.differentSteps as step}
-                                            {#if step.name == item.differentSteps[item.currentStepIndex].name}
-                                                <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
-                                            {:else}
-                                                <option>{step.name}&nbsp;</option>
-                                            {/if}
-                                        {/each}
-                                    </select>
-                                </div>
-                            {/each}
-                        </div>
-                    </div>
-                {/each}
+                    {/each}
+                </div>
             </div>
         </div>
     </div>
@@ -97,11 +99,12 @@
     .background {
         display: flex;
         flex-direction: column;
-        height: 1024px;
         align-items: center;
-        gap: 5px;
+        gap: 25px;
         position: relative;
         background-color: #ffffff;
+        padding-bottom: 25px;
+
     }
 
     .background .navbar {
@@ -121,7 +124,6 @@
         background-size: contain;
         background-image: url('/gtryk_logo.png');
         background-size: 100% 100%;
-
     }
 
     .background .title {
@@ -136,6 +138,17 @@
         line-height: normal;
     }
 
+    .background .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centering content inside */
+        padding: 5px;
+        width: 80%; /* Adjust as needed */
+        background-color: #f9f9f9; /* Background color for visibility */
+        border-radius: 15px;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    }
+
     .background .search-filter {
         display: flex;
         height: 100px;
@@ -143,7 +156,6 @@
         align-items: flex-end;
         justify-content: space-between;
         position: relative;
-        background-color: #ffffff;
         padding-top: 25px;
     }
 
@@ -239,12 +251,10 @@
         display: flex;
         flex-wrap: wrap;
         width: 1090px;
-        height: 550px;
         gap: 10px;
         align-items: flex-start;
         justify-content: center;
         position: relative;
-        background-color: #ffffff;
     }
 
     .background .name-bar {
@@ -327,7 +337,6 @@
         align-items: flex-start;
         gap: 10px;
         position: relative;
-        background-color: #ffffff;
         padding-bottom: 25px; /* Remove fixed height */
     }
 
