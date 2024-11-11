@@ -134,7 +134,10 @@
         flex: 1;
         align-self: stretch;
         width: 100%;
-        background-color: #dbdbdb4c;
+        /*background-color: #dbdbdb4c;*/
+        background-image: url("https://acctcdn.msauth.net/images/AppBackgrounds/49-small_v2_5YqvyYBhSpzXeWvqe16o8A2.jpg");
+        background-repeat: no-repeat;
+        background-size: cover;
     }
 
     .logo2 {
@@ -167,8 +170,8 @@
 
     .order-box-main {
         align-items: flex-start;
-        padding: 15px 20px;
-        background-color: #ffffff;
+        padding: 30px 40px;
+        background-color: #fdfdfd;
         border-radius: 15px;
         overflow: hidden;
         border: none;
@@ -218,8 +221,8 @@
 
     .order-box-items {
         align-items: center;
-        gap: 10px;
-        padding: 10px 0px 52px;
+        gap: 0px;
+        padding: 10px 0px;
         display: flex;
         flex-direction: column;
         position: relative;
