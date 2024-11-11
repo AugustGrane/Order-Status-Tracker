@@ -6,14 +6,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class Order {
-    private final Long id;
+    private final OrderId id;
     private final CustomerInfo customerInfo;
     private final Set<OrderItem> items;
     private final OrderTimeline timeline;
     private final OrderEstimation estimation;
     private final List<OrderEvent> events;
 
-    public Order(Long id, CustomerInfo customerInfo, Set<OrderItem> items, 
+    public Order(OrderId id, CustomerInfo customerInfo, Set<OrderItem> items, 
                 OrderTimeline timeline, OrderEstimation estimation) {
         this.id = id;
         this.customerInfo = customerInfo;
@@ -21,11 +21,31 @@ public class Order {
         this.timeline = timeline;
         this.estimation = estimation;
         this.events = new ArrayList<>();
+        validateInvariants();
+        raiseEvent(new OrderCreatedEvent(id.getValue()));
+    }
+
+    private void validateInvariants() {
+        if (id == null) {
+            throw new OrderException("Order must have an ID") {};
+        }
+        if (customerInfo == null) {
+            throw new OrderException("Order must have customer information") {};
+        }
+        if (timeline == null) {
+            throw new OrderException("Order must have a timeline") {};
+        }
+        if (estimation == null) {
+            throw new OrderException("Order must have an estimation") {};
+        }
     }
 
     public void addItem(OrderItem item) {
+        if (item == null) {
+            throw new IllegalArgumentException("Item cannot be null");
+        }
         items.add(item);
-        raiseEvent(new ItemAddedEvent(id, item));
+        raiseEvent(new ItemAddedEvent(id.getValue(), item));
     }
 
     public void updateItemStatus(Long itemId, OrderStatus newStatus) {
@@ -36,7 +56,7 @@ public class Order {
                 OrderItem updatedItem = item.withStatus(newStatus);
                 items.add(updatedItem);
                 timeline.recordItemStatus(itemId, newStatus.getCurrentStepId(), LocalDateTime.now());
-                raiseEvent(new ItemStatusChangedEvent(id, itemId, oldStatus, newStatus));
+                raiseEvent(new ItemStatusChangedEvent(id.getValue(), itemId, oldStatus, newStatus));
             } else {
                 throw new InvalidStatusTransitionException(itemId, oldStatus, newStatus);
             }
@@ -59,7 +79,7 @@ public class Order {
                 );
                 items.add(updatedItem);
                 
-                raiseEvent(new ProductTypeChangedEvent(id, itemId, 
+                raiseEvent(new ProductTypeChangedEvent(id.getValue(), itemId, 
                     transition.getSourceProductTypeId(), 
                     transition.getTargetProductTypeId()));
             } else {
@@ -80,7 +100,8 @@ public class Order {
         return estimation.getItemDelayStatus(timeline);
     }
 
-    private Optional<OrderItem> findItem(Long itemId) {
+    // Changed from private to public for specification pattern
+    public Optional<OrderItem> findItem(Long itemId) {
         return items.stream()
                 .filter(item -> item.getItem().getId().equals(itemId))
                 .findFirst();
@@ -90,7 +111,7 @@ public class Order {
         events.add(event);
     }
 
-    public Long getId() {
+    public OrderId getId() {
         return id;
     }
 
@@ -115,13 +136,13 @@ public class Order {
     }
 
     public static class Builder {
-        private Long id;
+        private OrderId id;
         private CustomerInfo customerInfo;
         private Set<OrderItem> items = new HashSet<>();
         private OrderTimeline timeline;
         private OrderEstimation estimation;
 
-        public Builder withId(Long id) {
+        public Builder withId(OrderId id) {
             this.id = id;
             return this;
         }

@@ -1,200 +1,207 @@
-# Comprehensive Guide to Code Structure Improvements
+# Domain Model Changes and Architecture Overview
 
 ## Table of Contents
-1. [Previous System Structure](#previous-system-structure)
-2. [New System Architecture](#new-system-architecture)
-3. [Detailed Component Overview](#detailed-component-overview)
-4. [Error Handling System](#error-handling-system)
-5. [Event Management System](#event-management-system)
-6. [Webhook Integration](#webhook-integration)
-7. [Implementation Examples](#implementation-examples)
-8. [System Benefits](#system-benefits)
+1. [Architecture Layers](#architecture-layers)
+2. [Pattern Implementations](#pattern-implementations)
+3. [Usage Locations](#usage-locations)
+4. [Model vs Domain](#model-vs-domain)
+5. [Benefits](#benefits)
 
-## Previous System Structure
+## Architecture Layers
 
-The original codebase had several structural limitations:
+### Domain Layer (`/domain`)
+Contains business logic and rules:
+- Value Objects (OrderId, CustomerInfo)
+- Domain Events (OrderCreatedEvent, ItemStatusChangedEvent)
+- Commands (UpdateItemStatusCommand, UpdateProductTypeCommand)
+- Specifications (OrderInvariantsSpecification, HasItemSpecification)
+- Domain Exceptions (InvalidStatusTransitionException)
+- Domain Objects (Order, OrderItem, OrderTimeline)
 
-### Service Layer Issues
+### Model Layer (`/model`)
+Contains persistence entities:
+- Database entities (Order, OrderDetails)
+- JPA mappings
+- No business logic
+- Maps to/from domain objects
+
+### Service Layer (`/service`)
+Orchestrates domain objects and persistence:
+- OrderService: Creates and manages orders
+- OrderProgressService: Handles order status changes
+- ProductTypeService: Manages product type transitions
+- Translates between domain and model objects
+
+### Controller Layer (`/controller`)
+Handles HTTP requests and responses:
+- OrderController: Exposes order operations
+- WebhookController: Handles external integrations
+- Works with DTOs and delegates to services
+
+## Pattern Implementations
+
+### Command Pattern
+Located in `domain/command/`:
+```java
+public interface OrderCommand {
+    void execute(Order order);
+}
+```
+
+Concrete implementations:
+1. `UpdateItemStatusCommand`: Updates item status
+   ```java
+   public class UpdateItemStatusCommand implements OrderCommand {
+       private final Long itemId;
+       private final OrderStatus newStatus;
+       
+       @Override
+       public void execute(Order order) {
+           order.updateItemStatus(itemId, newStatus);
+       }
+   }
+   ```
+
+2. `UpdateProductTypeCommand`: Changes product type
+   ```java
+   public class UpdateProductTypeCommand implements OrderCommand {
+       private final Long itemId;
+       private final ProductTypeTransition transition;
+       
+       @Override
+       public void execute(Order order) {
+           order.updateItemProductType(itemId, transition);
+       }
+   }
+   ```
+
+### Specification Pattern
+Located in `domain/specification/`:
+```java
+public interface OrderSpecification {
+    boolean isSatisfiedBy(Order order);
+    OrderSpecification and(OrderSpecification other);
+    OrderSpecification or(OrderSpecification other);
+    OrderSpecification not();
+}
+```
+
+Concrete implementations:
+1. `OrderInvariantsSpecification`: Validates order rules
+   ```java
+   public class OrderInvariantsSpecification implements OrderSpecification {
+       @Override
+       public boolean isSatisfiedBy(Order order) {
+           return order.getId() != null &&
+                  order.getCustomerInfo() != null &&
+                  order.getTimeline() != null;
+       }
+   }
+   ```
+
+2. `HasItemSpecification`: Checks item existence
+   ```java
+   public class HasItemSpecification implements OrderSpecification {
+       private final Long itemId;
+       
+       @Override
+       public boolean isSatisfiedBy(Order order) {
+           return order.findItem(itemId).isPresent();
+       }
+   }
+   ```
+
+## Model vs Domain
+
+### Domain Objects (domain/*)
+- Rich domain model with behavior
+- Business logic and rules
+- Immutable where possible
+- No persistence concerns
+- Example:
+  ```java
+  public class Order {
+      private final OrderId id;
+      private final CustomerInfo customerInfo;
+      private final Set<OrderItem> items;
+      
+      public void updateItemStatus(Long itemId, OrderStatus newStatus) {
+          // Business logic here
+      }
+  }
+  ```
+
+### Model Objects (model/*)
+- JPA entities
+- Persistence focused
+- Mutable for ORM
+- No business logic
+- Example:
+  ```java
+  @Entity
+  public class Order {
+      @Id
+      private Long id;
+      private String customerName;
+      private boolean priority;
+      
+      // Getters and setters
+  }
+  ```
+
+### Translation Layer (in Services)
+Services translate between domain and model:
 ```java
 @Service
 public class OrderService {
-    // Mixed business logic and data access
-    // No clear separation of concerns
-    // Generic error handling
-    // Limited validation
-}
-```
-
-### Webhook Processing Issues
-```java
-public class WebhookService {
-    public void createOrderInDatabase(WebhookPayload payload) {
-        // Direct manipulation of data
-        // No domain model usage
-        // Generic error handling
-        // Mixed responsibilities
+    public gruppe2.backend.model.Order createOrder(OrderDTO dto) {
+        // Create domain object
+        gruppe2.backend.domain.Order domainOrder = OrderFactory.createOrder(...);
+        
+        // Validate using domain rules
+        if (!invariants.isSatisfiedBy(domainOrder)) {
+            throw new IllegalStateException("Invalid order");
+        }
+        
+        // Convert to model object for persistence
+        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
+        orderEntity.setId(domainOrder.getId().getValue());
+        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
+        // ... more mapping ...
+        
+        return orderRepository.save(orderEntity);
     }
 }
 ```
 
-## New System Architecture
+## Benefits
 
-The improved system implements a structured, component-based architecture:
+1. **Clear Separation of Concerns**
+   - Domain logic isolated in domain layer
+   - Persistence concerns in model layer
+   - Services handle translation
+   - Controllers manage HTTP concerns
 
-### Core Domain Model
-```java
-public class Order {
-    private final CustomerInfo customerInfo;
-    private final Set<OrderItem> items;
-    private final OrderTimeline timeline;
-    private final OrderEstimation estimation;
-    private final List<OrderEvent> events;
-}
-```
+2. **Rich Domain Model**
+   - Business logic where it belongs
+   - Domain objects enforce invariants
+   - Commands encapsulate operations
+   - Specifications validate rules
 
-### Webhook Domain Model
-```java
-public class WebhookOrder {
-    private final Long orderId;
-    private final CustomerInfo customerInfo;
-    private final Map<Long, Integer> items;
+3. **Maintainable Persistence**
+   - Clean model objects
+   - Simple ORM mapping
+   - No business logic in entities
+   - Clear persistence boundaries
 
-    public static WebhookOrder fromPayload(WebhookPayload payload) {
-        // Structured conversion from webhook data
-    }
-}
-```
+4. **Flexible Architecture**
+   - Domain changes don't affect persistence
+   - New commands without changing existing code
+   - Business rules composed via specifications
+   - Events enable loose coupling
 
-## Detailed Component Overview
-
-### 1. Domain Objects
-- `Order`: Aggregate root for order management
-- `OrderItem`: Manages individual items
-- `OrderStatus`: Controls status transitions
-- `OrderTimeline`: Tracks temporal aspects
-- `OrderEstimation`: Handles time calculations
-- `WebhookOrder`: Encapsulates webhook data
-
-### 2. Value Objects
-```java
-public class CustomerInfo {
-    private final String name;
-    private final String notes;
-    private final boolean priority;
-}
-```
-
-### 3. Domain Events
-```java
-public abstract class OrderEvent {
-    private final Long orderId;
-    private final LocalDateTime timestamp;
-}
-```
-
-## Error Handling System
-
-### 1. Base Exception
-```java
-public abstract class OrderException extends RuntimeException {
-    protected OrderException(String message) {
-        super(message);
-    }
-}
-```
-
-### 2. Specific Exceptions
-```java
-public class WebhookProcessingException extends OrderException {
-    private final Long orderId;
-
-    public WebhookProcessingException(Long orderId, String message) {
-        super(String.format("Failed to process webhook order %d: %s", orderId, message));
-        this.orderId = orderId;
-    }
-}
-```
-
-## Event Management System
-
-### Event Types
-- `ItemAddedEvent`: Tracks item additions
-- `ItemStatusChangedEvent`: Monitors status changes
-- `ProductTypeChangedEvent`: Records product type updates
-
-## Webhook Integration
-
-### 1. Structured Data Processing
-```java
-@Service
-public class WebhookService {
-    @Transactional
-    public void processWebhookPayload(WebhookPayload payload) {
-        WebhookOrder webhookOrder = WebhookOrder.fromPayload(payload);
-        ensureItemsExist(webhookOrder);
-        createOrderFromWebhook(webhookOrder);
-    }
-}
-```
-
-### 2. Error Handling
-```java
-try {
-    webhookService.processWebhookPayload(payload);
-} catch (WebhookProcessingException e) {
-    // Specific error handling for webhook processing
-} catch (OrderException e) {
-    // General order-related error handling
-}
-```
-
-## Implementation Examples
-
-### Creating Orders from Webhook
-```java
-// Convert webhook payload to domain object
-WebhookOrder webhookOrder = WebhookOrder.fromPayload(payload);
-
-// Create order using domain model
-OrderDTO orderDTO = new OrderDTO(
-    webhookOrder.getOrderId(),
-    webhookOrder.getCustomerInfo().getName(),
-    webhookOrder.getCustomerInfo().isPriority(),
-    webhookOrder.getCustomerInfo().getNotes(),
-    webhookOrder.getItems(),
-    ""
-);
-
-orderService.createOrder(orderDTO);
-```
-
-## System Benefits
-
-1. **Improved Data Handling**
-   - Structured webhook processing
-   - Clear data transformation
-   - Better validation
-
-2. **Enhanced Error Management**
-   - Specific exception types
-   - Detailed error messages
-   - Better error tracing
-
-3. **Better Maintainability**
-   - Clear separation of concerns
-   - Domain-driven design
-   - Improved testability
-
-4. **Robust Integration**
-   - Structured webhook handling
-   - Reliable data processing
-   - Proper transaction management
-
-The new design provides:
-- Clear component responsibilities
-- Proper error handling
-- Transaction management
-- Domain model integrity
-- Better webhook integration
-
-This refactoring has transformed the codebase into a robust, maintainable system that properly handles both internal operations and external integrations through webhooks.
+The architecture achieves:
+- Clear boundaries between concerns
+- Rich domain model with behavior
+- Clean persistence layer
+- Maintainable and testable code
