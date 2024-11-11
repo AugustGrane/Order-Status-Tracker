@@ -240,6 +240,36 @@ public class OrderService {
      * @return a list of OrderDashboardDTO objects representing all orders and their details.
      */
 
+    public void setProductType(Long itemId, Long productTypeId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+
+        item.setProductTypeId(productTypeId);
+        itemRepository.save(item);
+
+    }
+
+    public void updateOrderProductTypeSteps(Long orderId, Long itemId, Long productTypeId) {
+        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
+        for (OrderDetails orderDetail : orderDetailsList) {
+            if (orderDetail.getItem().getId().equals(itemId)) {
+                // Set order product type steps to the new product type steps
+                ProductType productType = productTypeRepository.findById(productTypeId)
+                        .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
+                // Set each old step to the new step from the new product type
+                // Create a new array instead of using the reference directly
+
+                // Create a new array instead of using the reference directly
+                Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
+                        productType.getDifferentSteps().length);
+                orderDetail.setDifferentSteps(steps);
+
+                orderProductTypeRepository.save(orderDetail);
+            }
+        }
+    }
+
+
     public List<OrderDashboardDTO> getAllOrders() {
         List<Order> orders = orderRepository.findAllByOrderByOrderCreatedAsc();
 

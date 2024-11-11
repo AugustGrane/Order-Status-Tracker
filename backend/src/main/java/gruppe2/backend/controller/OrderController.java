@@ -61,6 +61,19 @@ public class OrderController {
         }
     }
 
+    @PostMapping("/test")
+    public ResponseEntity<?> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
+        try {
+                // Set product type
+                orderService.setProductType(dto.itemId(), dto.productTypeId());
+                orderService.updateOrderProductTypeSteps(dto. orderId(), dto.itemId(), dto.productTypeId());
+                return ResponseEntity.ok("Success");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+    }
+
+
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderDetails(@PathVariable Long orderId) {
         try {
