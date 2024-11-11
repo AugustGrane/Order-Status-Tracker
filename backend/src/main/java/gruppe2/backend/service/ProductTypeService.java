@@ -2,6 +2,7 @@ package gruppe2.backend.service;
 
 import gruppe2.backend.dto.ProductTypeDTO;
 import gruppe2.backend.domain.*;
+import gruppe2.backend.domain.command.CreateProductTypeCommand;
 import gruppe2.backend.domain.command.UpdateProductTypeCommand;
 import gruppe2.backend.domain.specification.CanChangeProductTypeSpecification;
 import gruppe2.backend.domain.specification.HasItemSpecification;
@@ -16,7 +17,6 @@ import gruppe2.backend.repository.StatusDefinitionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +43,12 @@ public class ProductTypeService {
     }
 
     public ProductType createProductType(ProductTypeDTO productTypeDTO) {
-        validateStepsExist(productTypeDTO.differentSteps());
-
-        ProductType productType = new ProductType();
-        productType.setName(productTypeDTO.name());
-        productType.setDifferentSteps(productTypeDTO.differentSteps());
-
-        return productTypeRepository.save(productType);
+        CreateProductTypeCommand command = new CreateProductTypeCommand(
+            productTypeDTO,
+            productTypeRepository,
+            statusDefinitionRepository
+        );
+        return command.execute();
     }
 
     @Transactional
@@ -132,13 +131,6 @@ public class ProductTypeService {
             .withTimeline(timeline)
             .withEstimation(estimation)
             .build();
-    }
-
-    private void validateStepsExist(Long[] stepIds) {
-        for (Long stepId : stepIds) {
-            statusDefinitionRepository.findById(stepId)
-                    .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId));
-        }
     }
 
     private void updateOrderDetailsForTransition(OrderDetails orderDetails, ProductTypeTransition transition) {

@@ -1,6 +1,7 @@
 package gruppe2.backend.service;
 
 import gruppe2.backend.dto.ItemDTO;
+import gruppe2.backend.domain.command.CreateItemCommand;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.repository.ItemRepository;
 import gruppe2.backend.repository.ProductTypeRepository;
@@ -17,20 +18,8 @@ public class ItemService {
     }
 
     public Item createItem(ItemDTO itemDTO) {
-        validateProductType(itemDTO.productTypeId());
-
-        Item item = new Item();
-        item.setId(itemDTO.id());
-        item.setName(itemDTO.name());
-        item.setProductTypeId(itemDTO.productTypeId());
-        item.setImage(itemDTO.item_image());
-
-        return itemRepository.save(item);
-    }
-
-    private void validateProductType(Long productTypeId) {
-        productTypeRepository.findById(productTypeId)
-                .orElseThrow(() -> new RuntimeException("Product type not found"));
+        CreateItemCommand command = new CreateItemCommand(itemDTO, itemRepository, productTypeRepository);
+        return command.execute();
     }
 
     public Item findById(Long itemId) {

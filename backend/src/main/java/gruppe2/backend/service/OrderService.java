@@ -79,40 +79,17 @@ public class OrderService {
         // Persist order using mapper
         gruppe2.backend.model.Order persistedOrder = orderRepository.save(orderMapper.toModelOrder(domainOrder));
 
-        // Create order items with their statuses
-        setupOrderDetails(persistedOrder.getId(), orderDTO.items());
+        // Create order items with their statuses using command
+        SetupOrderDetailsCommand setupCommand = new SetupOrderDetailsCommand(
+            persistedOrder.getId(),
+            orderDTO.items(),
+            itemRepository,
+            productTypeRepository,
+            orderProductTypeRepository
+        );
+        setupCommand.execute();
         
         return persistedOrder;
-    }
-
-    private void setupOrderDetails(Long orderId, Map<Long, Integer> items) {
-        items.forEach((itemId, quantity) -> {
-            Item item = itemRepository.findById(itemId)
-                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
-
-            ProductType productType = productTypeRepository.findById(item.getProductTypeId())
-                    .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
-
-            // Create OrderDetails with initial status
-            OrderDetails orderDetails = new OrderDetails();
-            orderDetails.setOrderId(orderId);
-            orderDetails.setItem(item);
-            orderDetails.setProduct_type(productType.getName());
-            orderDetails.setItemAmount(quantity);
-
-            // Set up steps
-            Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
-                    productType.getDifferentSteps().length);
-            orderDetails.setDifferentSteps(steps);
-            orderDetails.setCurrentStepIndex(0);
-
-            // Initialize status updates
-            Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
-            statusUpdates.put(steps[0], LocalDateTime.now());
-            orderDetails.setUpdated(statusUpdates);
-
-            orderProductTypeRepository.save(orderDetails);
-        });
     }
 
     private Long generateOrderId() {
@@ -151,11 +128,7 @@ public class OrderService {
     }
 
     public StatusDefinition createStatusDefinition(StatusDefinitionDTO dto) {
-        StatusDefinition statusDefinition = new StatusDefinition();
-        statusDefinition.setName(dto.name());
-        statusDefinition.setDescription(dto.description());
-        statusDefinition.setImage(dto.image());
-
-        return statusDefinitionRepository.save(statusDefinition);
+        CreateStatusDefinitionCommand command = new CreateStatusDefinitionCommand(dto, statusDefinitionRepository);
+        return command.execute();
     }
 }

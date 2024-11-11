@@ -32,9 +32,9 @@ package "Service Layer" {
         - orderMapper: OrderMapper
         - orderDetailsMapper: OrderDetailsMapper
         + createOrder(orderDTO: OrderDTO): Order
-        - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
         + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
         + getAllOrders(): List<OrderDashboardDTO>
+        + createStatusDefinition(dto: StatusDefinitionDTO): StatusDefinition
     }
 
     class WebhookService {
@@ -47,19 +47,18 @@ package "Service Layer" {
         - webhookMapper: WebhookMapper
         - orderMapper: OrderMapper
         + createOrderInDatabase(payload: WebhookPayload): void
-        - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
-        - createItemsMap(payload: WebhookPayload): Map<Long, Integer>
-        - ensureItemExists(item: LineItem): void
     }
 
     class ItemService {
         - itemRepository: ItemRepository
-        + getItem(id: Long): Item
-        + createItem(item: Item): Item
+        - productTypeRepository: ProductTypeRepository
+        + createItem(itemDTO: ItemDTO): Item
+        + findById(id: Long): Item
     }
 
     class ProductTypeService {
         - productTypeRepository: ProductTypeRepository
+        - statusDefinitionRepository: StatusDefinitionRepository
         + createProductType(productTypeDTO: ProductTypeDTO): ProductType
         + updateItemProductType(itemId: Long, targetProductTypeId: Long): void
     }
@@ -129,6 +128,41 @@ package "Domain Layer" {
         + execute(order: Order): void
     }
 
+    class CreateItemCommand {
+        - itemDTO: ItemDTO
+        - itemRepository: ItemRepository
+        - productTypeRepository: ProductTypeRepository
+        + execute(): Item
+    }
+
+    class CreateProductTypeCommand {
+        - productTypeDTO: ProductTypeDTO
+        - productTypeRepository: ProductTypeRepository
+        - statusDefinitionRepository: StatusDefinitionRepository
+        + execute(): ProductType
+    }
+
+    class CreateStatusDefinitionCommand {
+        - dto: StatusDefinitionDTO
+        - repository: StatusDefinitionRepository
+        + execute(): StatusDefinition
+    }
+
+    class ProcessWebhookCommand {
+        - payload: WebhookPayload
+        - orderService: OrderService
+        - itemService: ItemService
+        - repositories...
+        + execute(): void
+    }
+
+    class SetupOrderDetailsCommand {
+        - orderId: Long
+        - items: Map<Long, Integer>
+        - repositories...
+        + execute(): void
+    }
+
     interface OrderSpecification {
         + isSatisfiedBy(order: Order): boolean
     }
@@ -194,6 +228,7 @@ WebhookService ..> ItemService: ensures items exist
 WebhookService ..> OrderProductTypeRepository: creates order details
 WebhookService ..> WebhookMapper: uses
 WebhookService ..> OrderMapper: uses
+WebhookService ..> ProcessWebhookCommand: uses
 
 OrderService ..> OrderFactory: creates orders
 OrderService ..> OrderInvariantsSpecification: validates
@@ -204,11 +239,16 @@ OrderService ..> ProductTypeService: uses
 OrderService ..> OrderProductTypeRepository: creates order details
 OrderService ..> OrderMapper: uses
 OrderService ..> OrderDetailsMapper: uses
+OrderService ..> CreateStatusDefinitionCommand: uses
+OrderService ..> SetupOrderDetailsCommand: uses
+
+ItemService ..> CreateItemCommand: uses
+ProductTypeService ..> CreateProductTypeCommand: uses
+ProductTypeService ..> UpdateProductTypeCommand: uses
 
 OrderCommand <|.. CreateOrderCommand
 OrderCommand <|.. UpdateItemStatusCommand
 OrderCommand <|.. UpdateProductTypeCommand
-OrderSpecification <|.. OrderInvariantsSpecification
 
 OrderFactory ..> Order: creates
 WebhookOrder ..> CustomerInfo: creates
@@ -216,6 +256,8 @@ WebhookOrder ..> OrderId: creates
 
 UpdateProductTypeCommand ..> ProductTypeTransition: uses
 UpdateItemStatusCommand ..> OrderStatus: uses
+
+ProcessWebhookCommand ..> SetupOrderDetailsCommand: uses
 
 OrderMapper ..> Order: maps
 OrderDetailsMapper ..> OrderDetails: maps
