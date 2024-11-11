@@ -264,13 +264,19 @@ public class OrderService {
                 ProductType productType = productTypeRepository.findById(productTypeId)
                         .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
                 // Set each old step to the new step from the new product type
-                // Create a new array instead of using the reference directly
+
+                // Extract time from index 0 before overriding with new steps
+                LocalDateTime time = orderDetail.getUpdated().get(orderDetail.getDifferentSteps()[0]);
 
                 // Create a new array instead of using the reference directly
                 Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
                         productType.getDifferentSteps().length);
                 orderDetail.setDifferentSteps(steps);
 
+                // Set the time for the new initial step index
+                Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
+                statusUpdates.put(steps[0], time);
+                orderDetail.setUpdated(statusUpdates);
 
                 orderProductTypeRepository.save(orderDetail);
             }
