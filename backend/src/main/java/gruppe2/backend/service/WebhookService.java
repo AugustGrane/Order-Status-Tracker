@@ -120,7 +120,8 @@ public class WebhookService {
                 displayName,
                 false,
                 "",
-                itemsMap
+                itemsMap,
+                ""
         );
 
         System.out.println("OrderDTO" + orderDTO);
@@ -137,7 +138,7 @@ public class WebhookService {
             ItemDTO itemDTO = new ItemDTO(
                     item.getName(),
                     item.getProduct_id(),
-                    1L,   // HARDCODED PRODUCT TYPE !!!!!! #####################################
+                    0L,   // HARDCODED PRODUCT TYPE !!!!!! #####################################
                     item.getImg().getSrc()
             );
             createItem(itemDTO); // If item did not exist, create it.

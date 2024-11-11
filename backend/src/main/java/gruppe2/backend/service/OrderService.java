@@ -151,9 +151,15 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    // Uses the orderDetails id NOT the orderId or itemId!
     public Map<String, Object> moveToNextStep(Long id) {
         OrderDetails orderDetails = orderProductTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
+
+        // Check if we are on the generic product type which is product type 0
+        if (orderDetails.getItem().getProductTypeId() == 0) {
+            throw new RuntimeException("Error: Item cannot change step while item is generic product type");
+        }
 
         // Check if we're already at the last step
         if (orderDetails.getCurrentStepIndex() >= orderDetails.getDifferentSteps().length - 1) {
@@ -181,6 +187,10 @@ public class OrderService {
     public Map<String, Object> moveToPrevStep(Long id) {
         OrderDetails orderDetails = orderProductTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
+
+        if (orderDetails.getItem().getProductTypeId() == 0) {
+            throw new RuntimeException("Error: Item cannot change step while item is generic product type");
+        }
 
         // Check if we're already at the first step
         if (orderDetails.getCurrentStepIndex() <= 0) {
@@ -239,6 +249,50 @@ public class OrderService {
      *
      * @return a list of OrderDashboardDTO objects representing all orders and their details.
      */
+
+    public void setProductType(Long itemId, Long productTypeId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+
+        item.setProductTypeId(productTypeId);
+        itemRepository.save(item);
+
+    }
+
+    public void updateOrderProductTypeStepsFromGeneric(Long itemId, Long productTypeId) {
+        // check if item has produc type
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        if (item.getProductTypeId() != 0)
+        {
+            throw new RuntimeException("Error: Item product type not 0");
+        }
+        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByItemId(itemId);
+        for (OrderDetails orderDetail : orderDetailsList) {
+            if (orderDetail.getItem().getId().equals(itemId)) {
+                // Set order product type steps to the new product type steps
+                ProductType productType = productTypeRepository.findById(productTypeId)
+                        .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
+                // Set each old step to the new step from the new product type
+
+                // Extract time from index 0 before overriding with new steps
+                LocalDateTime time = orderDetail.getUpdated().get(orderDetail.getDifferentSteps()[0]);
+
+                // Create a new array instead of using the reference directly
+                Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
+                        productType.getDifferentSteps().length);
+                orderDetail.setDifferentSteps(steps);
+
+                // Set the time for the new initial step index
+                Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
+                statusUpdates.put(steps[0], time);
+                orderDetail.setUpdated(statusUpdates);
+
+                orderProductTypeRepository.save(orderDetail);
+            }
+        }
+    }
+
 
     public List<OrderDashboardDTO> getAllOrders() {
         List<Order> orders = orderRepository.findAllByOrderByOrderCreatedAsc();

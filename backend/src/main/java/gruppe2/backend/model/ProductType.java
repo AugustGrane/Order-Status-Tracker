@@ -1,6 +1,8 @@
 package gruppe2.backend.model;
 
 import jakarta.persistence.*;
+import org.hibernate.usertype.UserType;
+
 import java.util.List;
 
 @Entity

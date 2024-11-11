@@ -50,7 +50,8 @@ class OrderControllerTest {
             "Test Customer", 
             true, // priority 
             "Test Notes", 
-            items
+            items,
+            "" // shippingUrl
         );
 
         // Create a test Order
@@ -90,7 +91,8 @@ class OrderControllerTest {
                 "Test Customer", 
                 true, 
                 "Test Notes", 
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                    ""
             );
             when(orderService.createOrder(any(OrderDTO.class))).thenThrow(new RuntimeException("Empty items"));
 
