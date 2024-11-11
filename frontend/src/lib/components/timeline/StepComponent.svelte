@@ -1,10 +1,10 @@
 <script lang="ts">
     import Line from './LineComponent.svelte';
-    import type {OrderDetailsWithStatus} from "$lib/types";
+    import type {OrderDetailsWithStatus, StatusDefinition} from "$lib/types";
     import { onMount } from 'svelte';
 
     export let item: OrderDetailsWithStatus;
-    export let step: OrderDetailsWithStatus;
+    export let step: StatusDefinition;
     export let index: number;
     export let status: string;
     export let icon: string;
@@ -13,18 +13,31 @@
     export let firstItem: boolean = false;
     let toggleTooltip: boolean = false;
 
-
     // Remove 'frontend/static/' from the icon path if it exists
     $: cleanIconPath = icon.replace('frontend/static/', '');
 
     onMount(() => {
-        // Check if the tooltip should be toggled
+        // Check if the tooltip should be toggled when mobile view is active on load
+        toggleTooltip = window.innerWidth <= 1000;
+        if (toggleTooltip) {
+            document.querySelectorAll('.updated-text').forEach((element) => {
+                element.setAttribute('hidden', 'false');
+            });
+            document.querySelectorAll('.updated').forEach((element) => {
+                element.setAttribute('style', 'color: #ffffff');
+            });
+        }
+
+        // Check if the tooltip should be toggled when switching between mobile and desktop view
         window.addEventListener('resize', () => {
             toggleTooltip = window.innerWidth <= 1000;
             if (toggleTooltip) {
-                document.querySelector('.updated-text').setAttribute('hidden', 'true');
-                document.querySelectorAll('.updated').forEach((element) => {
-                    element.setAttribute('style', 'color: #fff');
+                document.querySelectorAll('.updated-text').forEach((element) => {
+                    element.setAttribute('hidden', 'false');
+                });
+            } else {
+                document.querySelectorAll('.updated-text').forEach((element) => {
+                    element.setAttribute('hidden', 'true');
                 });
             }
         });
@@ -54,13 +67,14 @@
                 {#if current}
                     <div class="updated" class:tooltip-text={toggleTooltip} style="color: #000000">
                         <div hidden class="updated-text">Updated:&nbsp;</div>
-                        <div>{formattedDate}</div>&nbsp;
-                        <div>({time})</div>
+                        <div>{formattedDate} -</div>&nbsp;
+                        <div>kl. {time}</div>
                     </div>
                 {:else}
                     <div class="updated" class:tooltip-text={toggleTooltip} style="color: #808080">
-                        <div>{formattedDate}</div>&nbsp;
-                        <div>({time})</div>
+                        <div hidden class="updated-text">Updated:&nbsp;</div>
+                        <div>{formattedDate} -</div>&nbsp;
+                        <div>kl. {time}</div>
                     </div>
                 {/if}
             {/if}
@@ -255,6 +269,7 @@
             white-space: normal;
             max-width: 50px;
             flex-wrap: wrap;
+            color: #ffffff !important;
         }
     }
 </style>
