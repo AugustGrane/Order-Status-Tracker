@@ -38,16 +38,37 @@ public class OrderItem {
         return isGenericType();
     }
 
-    public boolean canMoveToNextStep() {
-        return !isGenericType() && status.canMoveToNextStep();
+    public boolean canChangeStatus(OrderStatus newStatus) {
+        if (isGenericType()) {
+            return false;
+        }
+        
+        int currentIndex = status.getCurrentStepIndex();
+        int newIndex = newStatus.getCurrentStepIndex();
+        
+        // Can only move one step at a time, forward or backward
+        return Math.abs(newIndex - currentIndex) == 1;
     }
 
-    public boolean canMoveToPreviousStep() {
-        return !isGenericType() && status.canMoveToPreviousStep();
+    public OrderItem withStatus(OrderStatus newStatus) {
+        if (!canChangeStatus(newStatus)) {
+            throw new IllegalArgumentException("Invalid status transition");
+        }
+        return new OrderItem(item, quantity, productTypeName, newStatus);
     }
 
-    public OrderProgress getProgress() {
-        return status.toProgress();
+    public OrderItem withNewProductType(Long productTypeId, String newProductTypeName, OrderStatus newStatus) {
+        if (!canChangeProductType()) {
+            throw new IllegalArgumentException("Cannot change product type for non-generic items");
+        }
+        
+        Item updatedItem = new Item();
+        updatedItem.setId(item.getId());
+        updatedItem.setName(item.getName());
+        updatedItem.setImage(item.getImage());
+        updatedItem.setProductTypeId(productTypeId);
+        
+        return new OrderItem(updatedItem, quantity, newProductTypeName, newStatus);
     }
 
     public Item getItem() {
