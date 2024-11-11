@@ -61,7 +61,7 @@
         <div class="main2">
             <div class="background2">
                 <div class="logo2"></div>
-                <button class="backbutton" style="border:none; background-color:#dbdbdb00" on:click={() => goto("/track")}></button>
+                <button class="backbutton" style="border: none; background: none" on:click={() => goto("/track")}></button>
                 <div class="order-box-main">
                     <div class="title-wrapper">
                         <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
@@ -162,15 +162,15 @@
         left: 20px;
         padding: 0.5rem 1rem;
         border-radius: 0.5vw;
-        background: #454545;
-        color: #FFF;
-        opacity: 0.3;
+        background-color: #ffffff;
+        color: #000000;
         font-family: var(--font-primary);
         font-size: 1.0rem;
         font-weight: 250;
         border: none;
         cursor: pointer;
         text-align: center;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     }
 
     .order-box-main {
@@ -186,6 +186,7 @@
         align-self: stretch;
         width: 100%;
         flex: 0 0 auto;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     }
 
     .title-wrapper {

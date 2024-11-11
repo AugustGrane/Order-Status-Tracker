@@ -134,6 +134,7 @@
         gap: 1.65vw;
         border-radius: 1.5vw;
         background: #FDFDFD;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     }
 
     .logo {
