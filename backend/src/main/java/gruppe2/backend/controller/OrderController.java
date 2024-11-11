@@ -64,12 +64,13 @@ public class OrderController {
     @PostMapping("/test")
     public ResponseEntity<?> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
         try {
+                orderService.updateOrderProductTypeStepsFromGeneric(dto.itemId(), dto.productTypeId());
+
                 // Set product type
                 orderService.setProductType(dto.itemId(), dto.productTypeId());
-                orderService.updateOrderProductTypeSteps(dto. orderId(), dto.itemId(), dto.productTypeId());
                 return ResponseEntity.ok("Success");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
