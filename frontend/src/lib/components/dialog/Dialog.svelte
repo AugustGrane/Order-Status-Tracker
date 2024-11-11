@@ -9,7 +9,7 @@
     }
 
     function handleDialogClose() {
-        console.log("Dialog closed");
+        // console.log("Dialog closed");
     }
 </script>
 
@@ -18,18 +18,16 @@
         on:close={handleDialogClose}
 >
     <div class="dialog-content">
-        <div class="dialog-body">
-            <div class="dialog-header">
-                <h2 class="dialog-title">{title}</h2>
-                <button
-                        type="button"
-                        class="close-button"
-                        on:click={handleClose}
-                        aria-label="Close dialog"
-                >×</button>
-            </div>
-            <slot/>
+        <div class="dialog-header">
+            <h2 class="dialog-title">{title}</h2>
+            <button
+                    type="button"
+                    class="close-button"
+                    on:click={handleClose}
+                    aria-label="Close dialog"
+            >×</button>
         </div>
+        <slot/>
     </div>
 </dialog>
 
@@ -56,15 +54,32 @@
 
     .dialog-content {
         padding: 20px;
+        line-height: 1.5;
+        font-family: var(--font-primary);
     }
 
     .dialog-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: center;
+        align-items: center;
+        position: relative;
         margin-bottom: 16px;
     }
 
+    h2 {
+        margin-block-start: 0;
+        margin-block-end: 0;
+    }
+
+    .dialog-title {
+        flex-grow: 1;
+        text-align: center;
+    }
+
     .close-button {
+        position: absolute;
+        right: 0;
+        top: 0;
         background: none;
         border: none;
         font-size: 24px;
@@ -78,11 +93,5 @@
     .close-button:hover {
         background-color: #f0f0f0;
         color: #333;
-    }
-
-    .dialog-body {
-        line-height: 1.5;
-        color: #333;
-        font-family: var(--font-primary);
     }
 </style>

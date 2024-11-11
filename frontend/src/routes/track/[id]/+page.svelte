@@ -3,11 +3,12 @@
     import { browser } from '$app/environment';
     import type { OrderDetailsWithStatus } from '$lib/types';
     import ItemComponent from '$lib/components/timeline/ItemComponent.svelte';
-    import {onMount} from "svelte";
-    import {goto} from "$app/navigation";
+    import { onMount } from "svelte";
+    import { goto } from "$app/navigation";
     import confetti from 'canvas-confetti';
     import TrackForm from "$lib/components/TrackForm.svelte";
     import PageTransition from "$lib/components/PageTransition.svelte";
+    import OrderSent from "$lib/components/dialog/OrderSent.svelte";
 
     export let data: { 
         order: OrderDetailsWithStatus[] | null;
@@ -37,6 +38,7 @@
     }
 
     onMount(() => {
+        console.log(data.order);
         if (browser && allItemsComplete) {
             previousAllItemsComplete = true;
             confetti({
@@ -53,6 +55,9 @@
     {#if data.orderNotFound}
         <TrackForm initialValue={data.orderId} initialError="Ordrenummer findes ikke" />
     {:else}
+        {#if previousAllItemsComplete}
+            <OrderSent />
+        {/if}
         <div class="main2">
             <div class="background2">
                 <div class="logo2"></div>
@@ -189,7 +194,7 @@
         display: flex;
         flex-direction: row;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
         position: relative;
         align-self: stretch;
         width: 100%;
@@ -210,9 +215,8 @@
     }
 
     .order-sent {
-        position: absolute;
-        top: 10px;
-        right: 220px;
+        position: relative;
+        width: fit-content;
         font-family: var(--font-primary);
         font-size: 1.2rem;
         color: #24A147;
@@ -249,8 +253,8 @@
 
     .circle-done {
         position: relative;
-        width: 25px;
-        height: 25px;
+        width: 40px;
+        height: 15px;
         background-color: #24a147;
         border-radius: 15px;
         transform: rotate(180deg);
@@ -258,8 +262,8 @@
 
     .circle-active {
         position: relative;
-        width: 25px;
-        height: 25px;
+        width: 40px;
+        height: 15px;
         background-color: #1166ee;
         border-radius: 15px;
         transform: rotate(180deg);
@@ -267,8 +271,8 @@
 
     .circle-waiting {
         position: relative;
-        width: 25px;
-        height: 25px;
+        width: 40px;
+        height: 15px;
         background-color: #aaaaaa;
         border-radius: 15px;
         transform: rotate(180deg);
@@ -301,16 +305,16 @@
             align-items: center;
         }
         .circle-done{
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 12px;
         }
         .circle-active {
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 12px;
         }
         .circle-waiting {
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 12px;
         }
         .logo2 {
             width: 8rem;
