@@ -25,6 +25,9 @@ public class Order {
     @Column(name = "total_estimated_time")
     private int totalEstimatedTime;
 
+    @Column(name = "shipping_url")
+    private String shippingUrl;
+
 //    @ElementCollection
 //    @CollectionTable(name = "item_mapping",
 //                    joinColumns = @JoinColumn(name = "order_id"))
@@ -46,6 +49,16 @@ public class Order {
     }
 
     // Getters and Setters
+
+
+    public String getShippingUrl() {
+        return shippingUrl;
+    }
+
+    public void setShippingUrl(String shippingUrl) {
+        this.shippingUrl = shippingUrl;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
