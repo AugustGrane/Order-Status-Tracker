@@ -29,8 +29,9 @@ package "Service Layer" {
         - statusDefinitionRepository: StatusDefinitionRepository
         - productTypeRepository: ProductTypeRepository
         - itemRepository: ItemRepository
+        - orderMapper: OrderMapper
+        - orderDetailsMapper: OrderDetailsMapper
         + createOrder(orderDTO: OrderDTO): Order
-        - persistOrder(domainOrder: Order): Order
         - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
         + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
         + getAllOrders(): List<OrderDashboardDTO>
@@ -43,9 +44,10 @@ package "Service Layer" {
         - itemRepository: ItemRepository
         - productTypeRepository: ProductTypeRepository
         - orderProductTypeRepository: OrderProductTypeRepository
+        - webhookMapper: WebhookMapper
+        - orderMapper: OrderMapper
         + createOrderInDatabase(payload: WebhookPayload): void
         - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
-        - createCustomerInfo(payload: WebhookPayload): CustomerInfo
         - createItemsMap(payload: WebhookPayload): Map<Long, Integer>
         - ensureItemExists(item: LineItem): void
     }
@@ -66,6 +68,24 @@ package "Service Layer" {
         + getProgress(orderDetailsId: Long): OrderProgress
         + moveToNextStep(orderDetailsId: Long): OrderProgress
         + moveToPreviousStep(orderDetailsId: Long): OrderProgress
+    }
+}
+
+' Mapper Layer
+package "Mapper Layer" {
+    class OrderMapper {
+        + toModelOrder(domainOrder: Order): Order
+        + toOrderDTO(order: Order): OrderDTO
+    }
+
+    class OrderDetailsMapper {
+        - statusDefinitionRepository: StatusDefinitionRepository
+        + toOrderDetailsDTO(details: OrderDetails): OrderDetailsWithStatusDTO
+        + toOrderDashboardDTO(orderEntity: Order, orderDetails: List<OrderDetails>): OrderDashboardDTO
+    }
+
+    class WebhookMapper {
+        + toCustomerInfo(payload: WebhookPayload): CustomerInfo
     }
 }
 
@@ -172,6 +192,8 @@ WebhookService ..> OrderService: delegates order creation
 WebhookService ..> WebhookOrder: converts payload
 WebhookService ..> ItemService: ensures items exist
 WebhookService ..> OrderProductTypeRepository: creates order details
+WebhookService ..> WebhookMapper: uses
+WebhookService ..> OrderMapper: uses
 
 OrderService ..> OrderFactory: creates orders
 OrderService ..> OrderInvariantsSpecification: validates
@@ -180,6 +202,8 @@ OrderService ..> ItemRepository: uses
 OrderService ..> ItemService: uses
 OrderService ..> ProductTypeService: uses
 OrderService ..> OrderProductTypeRepository: creates order details
+OrderService ..> OrderMapper: uses
+OrderService ..> OrderDetailsMapper: uses
 
 OrderCommand <|.. CreateOrderCommand
 OrderCommand <|.. UpdateItemStatusCommand
@@ -192,5 +216,9 @@ WebhookOrder ..> OrderId: creates
 
 UpdateProductTypeCommand ..> ProductTypeTransition: uses
 UpdateItemStatusCommand ..> OrderStatus: uses
+
+OrderMapper ..> Order: maps
+OrderDetailsMapper ..> OrderDetails: maps
+WebhookMapper ..> CustomerInfo: maps
 
 @enduml

@@ -40,6 +40,14 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
   - `ProductTypeService`: Manages product types
   - `OrderProgressService`: Tracks order progress
 
+### Mapper Layer
+- Handles object transformations between different layers
+- Centralizes mapping logic for better maintainability
+- Key mappers:
+  - `OrderMapper`: Maps between domain Order and model Order/DTOs
+  - `OrderDetailsMapper`: Maps OrderDetails to various DTOs
+  - `WebhookMapper`: Maps webhook payloads to domain objects
+
 ### Domain Layer
 - Contains core business logic and rules
 - Implements command pattern for operations
@@ -76,10 +84,12 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 ## Layer Interactions
 
 1. Controllers receive requests and convert to DTOs
-2. Services create appropriate commands
-3. Commands execute on domain objects
-4. Domain objects enforce business rules
-5. Services handle persistence through repositories
+2. Services use mappers to transform data between layers
+3. Services create appropriate commands
+4. Commands execute on domain objects
+5. Domain objects enforce business rules
+6. Services use mappers to transform domain objects for persistence
+7. Services handle persistence through repositories
 
 ### Command Pattern Flow
 1. Service layer creates a command with necessary data
@@ -96,6 +106,12 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 - Validates business rules
 - Used before persisting changes
 - Ensures domain invariants are maintained
+
+### Mapper Pattern Usage
+- Centralizes transformation logic
+- Provides clean separation between layers
+- Makes data transformations maintainable and testable
+- Reduces coupling between layers
 
 ## Setup Instructions
 
