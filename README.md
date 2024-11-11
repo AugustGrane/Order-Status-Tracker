@@ -56,8 +56,13 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 - Key components:
   - Commands:
     - `CreateOrderCommand`: Creates new orders
+    - `CreateItemCommand`: Creates new items
+    - `CreateProductTypeCommand`: Creates product types
+    - `CreateStatusDefinitionCommand`: Creates status definitions
     - `UpdateItemStatusCommand`: Updates item status
     - `UpdateProductTypeCommand`: Changes product types
+    - `ProcessWebhookCommand`: Processes webhook payloads
+    - `SetupOrderDetailsCommand`: Sets up order details
   - Factory:
     - `OrderFactory`: Creates domain objects consistently
   - Specifications:
@@ -93,8 +98,8 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 
 ### Command Pattern Flow
 1. Service layer creates a command with necessary data
-2. Command executes on a domain object
-3. Domain object updates its state
+2. Command executes on a domain object or performs a specific operation
+3. Domain object updates its state (if applicable)
 4. Service layer persists the changes
 
 ### Factory Pattern Usage
