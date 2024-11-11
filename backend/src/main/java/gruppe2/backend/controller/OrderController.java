@@ -1,9 +1,9 @@
 package gruppe2.backend.controller;
 
 import gruppe2.backend.dto.*;
+import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.model.*;
-import gruppe2.backend.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import gruppe2.backend.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,19 +13,26 @@ import java.util.*;
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
 public class OrderController {
-
     private final OrderService orderService;
+    private final ItemService itemService;
+    private final ProductTypeService productTypeService;
+    private final OrderProgressService orderProgressService;
 
-    @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(
+            OrderService orderService,
+            ItemService itemService,
+            ProductTypeService productTypeService,
+            OrderProgressService orderProgressService) {
         this.orderService = orderService;
+        this.itemService = itemService;
+        this.productTypeService = productTypeService;
+        this.orderProgressService = orderProgressService;
     }
 
     @PostMapping("/items")
     public ResponseEntity<Item> createItem(@RequestBody ItemDTO itemDTO) {
         try {
-            Item item = orderService.createItem(itemDTO);
-            return ResponseEntity.ok(item);
+            return ResponseEntity.ok(itemService.createItem(itemDTO));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -34,8 +41,7 @@ public class OrderController {
     @PostMapping("/orders")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
         try {
-            Order order = orderService.createOrder(orderDTO);
-            return ResponseEntity.ok(order);
+            return ResponseEntity.ok(orderService.createOrder(orderDTO));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -44,8 +50,7 @@ public class OrderController {
     @PostMapping("/product-types")
     public ResponseEntity<ProductType> createProductType(@RequestBody ProductTypeDTO productTypeDTO) {
         try {
-            ProductType productType = orderService.createProductType(productTypeDTO);
-            return ResponseEntity.ok(productType);
+            return ResponseEntity.ok(productTypeService.createProductType(productTypeDTO));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -54,81 +59,68 @@ public class OrderController {
     @PostMapping("/status-definitions")
     public ResponseEntity<StatusDefinition> createStatusDefinition(@RequestBody StatusDefinitionDTO dto) {
         try {
-            StatusDefinition statusDefinition = orderService.createStatusDefinition(dto);
-            return ResponseEntity.ok(statusDefinition);
+            return ResponseEntity.ok(orderService.createStatusDefinition(dto));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
     
     @PostMapping("/update-generic-product-type")
-    public ResponseEntity<?> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
+    public ResponseEntity<String> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
         try {
-                orderService.updateOrderProductTypeStepsFromGeneric(dto.itemId(), dto.productTypeId());
-
-                // Set product type
-                orderService.setProductType(dto.itemId(), dto.productTypeId());
-                return ResponseEntity.ok("Success");
+            productTypeService.updateItemProductType(dto.itemId(), dto.productTypeId());
+            return ResponseEntity.ok("Success");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderDetails(@PathVariable Long orderId) {
         try {
-            List<OrderDetailsWithStatusDTO> orderDetails = orderService.getOrderDetails(orderId);
-            return ResponseEntity.ok(orderDetails);
+            return ResponseEntity.ok(orderService.getOrderDetails(orderId));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @PutMapping("/order-product-types/{id}/next-step")
-    public ResponseEntity<?> moveToNextStep(@PathVariable Long id) {
+    public ResponseEntity<OrderProgress> moveToNextStep(@PathVariable Long id) {
         try {
-            Map<String, Object> result = orderService.moveToNextStep(id);
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(orderProgressService.moveToNextStep(id));
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating step: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/order-product-types/{id}/prev-step")
-    public ResponseEntity<?> moveToPrevStep(@PathVariable Long id) {
+    public ResponseEntity<OrderProgress> moveToPrevStep(@PathVariable Long id) {
         try {
-            Map<String, Object> result = orderService.moveToPrevStep(id);
-            return ResponseEntity.ok(result);
+            return ResponseEntity.ok(orderProgressService.moveToPreviousStep(id));
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error updating step: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/get-all-orders")
     public ResponseEntity<List<OrderDashboardDTO>> getAllOrders() {
         try {
-            List<OrderDashboardDTO> orders = orderService.getAllOrders();
-            return ResponseEntity.ok(orders);
+            return ResponseEntity.ok(orderService.getAllOrders());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
     @GetMapping("/order-product-types/{id}/progress")
-    public ResponseEntity<?> getProgress(@PathVariable Long id) {
+    public ResponseEntity<OrderProgress> getProgress(@PathVariable Long id) {
         try {
-            Map<String, Object> progress = orderService.getProgress(id);
-            return ResponseEntity.ok(progress);
+            return ResponseEntity.ok(orderProgressService.getProgress(id));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error getting progress: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }
