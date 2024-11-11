@@ -2,172 +2,151 @@ package gruppe2.backend.service;
 
 import gruppe2.backend.service.webhook.LineItem;
 import gruppe2.backend.service.webhook.WebhookPayload;
+import gruppe2.backend.domain.*;
+import gruppe2.backend.domain.webhook.WebhookOrder;
+import gruppe2.backend.domain.exception.WebhookProcessingException;
 import gruppe2.backend.dto.ItemDTO;
 import gruppe2.backend.dto.OrderDTO;
 import gruppe2.backend.model.Item;
-import gruppe2.backend.model.Order;
-import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.model.ProductType;
 import gruppe2.backend.repository.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class WebhookService {
-
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
+    private final ItemService itemService;
+    private final ProductTypeService productTypeService;
     private final ItemRepository itemRepository;
     private final ProductTypeRepository productTypeRepository;
-    private final OrderProductTypeRepository orderProductTypeRepository;
-    private final StatusDefinitionRepository statusDefinitionRepository;
 
     public WebhookService(
-            OrderRepository orderRepository,
+            OrderService orderService,
+            ItemService itemService,
+            ProductTypeService productTypeService,
             ItemRepository itemRepository,
-            ProductTypeRepository productTypeRepository,
-            OrderProductTypeRepository orderProductTypeRepository,
-            StatusDefinitionRepository statusDefinitionRepository) {
-        this.orderRepository = orderRepository;
+            ProductTypeRepository productTypeRepository) {
+        this.orderService = orderService;
+        this.itemService = itemService;
+        this.productTypeService = productTypeService;
         this.itemRepository = itemRepository;
         this.productTypeRepository = productTypeRepository;
-        this.orderProductTypeRepository = orderProductTypeRepository;
-        this.statusDefinitionRepository = statusDefinitionRepository;
     }
 
+    @Transactional
     public void createOrderInDatabase(WebhookPayload payload) {
+        try {
+            // Convert webhook payload to domain object
+            WebhookOrder webhookOrder = WebhookOrder.fromPayload(payload);
+            
+            // Ensure all items exist
+            ensureItemsExist(webhookOrder, payload.getItems());
+            
+            // Create order using domain model
+            createOrderFromWebhook(webhookOrder);
+            
+        } catch (Exception e) {
+            throw new WebhookProcessingException(
+                payload.getId(),
+                "Failed to process webhook payload",
+                e
+            );
+        }
+    }
 
-        // 1. Filter Webhook payload to orderDTO format
-        OrderDTO orderDTO = createOrderDTOFromWebhookPayload(payload);
-        System.out.println(orderDTO);
+    private void ensureItemsExist(WebhookOrder webhookOrder, List<LineItem> lineItems) {
+        Map<Long, LineItem> lineItemMap = new HashMap<>();
+        lineItems.forEach(item -> lineItemMap.put(item.getProduct_id(), item));
 
-        // 2. Create the order
-        Order order = new Order();
-        order.setId(orderDTO.id());
-        order.setCustomerName(orderDTO.customerName());
-        order.setPriority(orderDTO.priority());
-        order.setNotes(orderDTO.notes());
-        order.setOrderCreated(LocalDateTime.now());
-
-        // 3. Calculate total estimated time
-        int totalTime = calculateEstimatedTime(orderDTO.items());
-        order.setTotalEstimatedTime(totalTime);
-
-        // Save the order first to get its ID
-        order = orderRepository.save(order);
-        final Long orderId = order.getId();
-
-        // 4. For each item in the order, create an OrderDetails
-        orderDTO.items().forEach((itemId, quantity) -> {
-            // Find the item
-            Item item = itemRepository.findById(itemId)
-                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
-
-            // Get the product type for this item
-            ProductType productType = productTypeRepository.findById(item.getProductTypeId())
-                    .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
-
-            // Create OrderDetails
-            OrderDetails orderDetails = new OrderDetails();
-            orderDetails.setOrderId(orderId);
-            orderDetails.setItem(item);  // Set the Item entity instead of just the ID
-            orderDetails.setProduct_type(productType.getName());
-            orderDetails.setItemAmount(quantity);
-
-            // Create a new array instead of using the reference directly
-            Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
-                    productType.getDifferentSteps().length);
-            orderDetails.setDifferentSteps(steps);
-
-            // Set the initial step index
-            orderDetails.setCurrentStepIndex(0);
-
-            // Initialize the status updates map with first step
-            Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
-            statusUpdates.put(steps[0], LocalDateTime.now());
-            orderDetails.setUpdated(statusUpdates);
-
-            orderProductTypeRepository.save(orderDetails);
+        webhookOrder.getItems().keySet().forEach(itemId -> {
+            if (!itemRepository.existsById(itemId)) {
+                LineItem lineItem = lineItemMap.get(itemId);
+                if (lineItem == null) {
+                    throw new WebhookProcessingException(
+                        itemId,
+                        "Unable to find line item information"
+                    );
+                }
+                createNewItem(lineItem);
+            }
         });
     }
 
-    private OrderDTO createOrderDTOFromWebhookPayload(WebhookPayload payload) {
-        // Extracting names from payload object - displayName depends on existance of company name
-        String companyName, name, displayName;
-        // Example: COWI | John Doe
-        if (!Objects.equals(payload.getBilling().getCompany(), "")) {
-            companyName = payload.getBilling().getCompany();
-            name = payload.getBilling().getFirstName() + " " + payload.getBilling().getLastName();
-            displayName = companyName + " | " + name;
+    private void createNewItem(LineItem lineItem) {
+        ItemDTO itemDTO = new ItemDTO(
+            lineItem.getName(),
+            lineItem.getProduct_id(),
+            0L, // Generic product type
+            lineItem.getImg().getSrc()
+        );
+        
+        try {
+            itemService.createItem(itemDTO);
+        } catch (Exception e) {
+            throw new WebhookProcessingException(
+                lineItem.getProduct_id(),
+                "Failed to create new item",
+                e
+            );
         }
-        // John Doe
-        else {
-            displayName = payload.getBilling().getFirstName() + " " + payload.getBilling().getLastName();
-        }
+    }
 
-        // Create itemsMap with all items in the payload:
-        Map<Long, Integer> itemsMap = new HashMap<>();
-        for (LineItem item : payload.getItems()) {
-            itemsMap.put(item.getProduct_id(), item.getQuantity());
-            checkItemExistence(item); // Checks if the items exists. Creates it otherwise
-        }
-
-        // Repackage to orderDTO
-        OrderDTO orderDTO = new OrderDTO(
-                payload.getId(),
-                displayName,
-                false,
-                "",
-                itemsMap,
-                ""
+    private void createOrderFromWebhook(WebhookOrder webhookOrder) {
+        // Create order timeline
+        OrderTimeline timeline = new OrderTimeline(
+            LocalDateTime.now(),
+            webhookOrder.getCustomerInfo().isPriority()
+        );
+        
+        // Create order estimation
+        Map<Long, Integer> processingTimes = getProcessingTimes(webhookOrder.getItems().keySet());
+        OrderEstimation estimation = new OrderEstimation(
+            webhookOrder.getItems(),
+            processingTimes,
+            webhookOrder.getCustomerInfo().isPriority()
         );
 
-        System.out.println("OrderDTO" + orderDTO);
+        // Create order DTO
+        OrderDTO orderDTO = new OrderDTO(
+            webhookOrder.getOrderId(),
+            webhookOrder.getCustomerInfo().getName(),
+            webhookOrder.getCustomerInfo().isPriority(),
+            webhookOrder.getCustomerInfo().getNotes(),
+            webhookOrder.getItems(),
+            ""
+        );
 
-        // Return the payload filtered payload object to sender (for check in postman)
-        return orderDTO;
-    }
-
-
-    public void checkItemExistence(LineItem item){
-        Optional<Item> itemDB = itemRepository.findById(item.getProduct_id());
-
-        if(itemDB.isEmpty()) {
-            ItemDTO itemDTO = new ItemDTO(
-                    item.getName(),
-                    item.getProduct_id(),
-                    0L,   // HARDCODED PRODUCT TYPE !!!!!! #####################################
-                    item.getImg().getSrc()
+        try {
+            orderService.createOrder(orderDTO);
+        } catch (Exception e) {
+            throw new WebhookProcessingException(
+                webhookOrder.getOrderId(),
+                "Failed to create order",
+                e
             );
-            createItem(itemDTO); // If item did not exist, create it.
         }
     }
 
-    private int calculateEstimatedTime(Map<Long, Integer> items) {
-        return items.entrySet().stream()
-                .mapToInt(entry -> {
-                    Item item = itemRepository.findById(entry.getKey())
-                            .orElseThrow(() -> new RuntimeException("Item not found"));
-                    // Get product type and calculate time based on steps
-                    // This is just a placeholder implementation
-                    return entry.getValue() * 10; // 10 minutes per item
-                })
-                .sum();
-    }
-
-    public ResponseEntity<Item> createItem(ItemDTO itemDTO) {
-        // Verify product type exists
-        productTypeRepository.findById(itemDTO.productTypeId())
-                .orElseThrow(() -> new RuntimeException("Product type not found"));
-
-        Item item = new Item();
-        item.setId(itemDTO.id());
-        item.setName(itemDTO.name());
-        item.setProductTypeId(itemDTO.productTypeId());
-        item.setImage(itemDTO.item_image());
-
-        return ResponseEntity.ok(itemRepository.save(item));
+    private Map<Long, Integer> getProcessingTimes(Set<Long> itemIds) {
+        Map<Long, Integer> processingTimes = new HashMap<>();
+        itemIds.forEach(itemId -> {
+            try {
+                Item item = itemRepository.findById(itemId)
+                        .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+                ProductType productType = productTypeRepository.findById(item.getProductTypeId())
+                        .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
+                processingTimes.put(itemId, productType.getDifferentSteps().length * 10); // Base estimation
+            } catch (Exception e) {
+                throw new WebhookProcessingException(
+                    itemId,
+                    "Failed to calculate processing time",
+                    e
+                );
+            }
+        });
+        return processingTimes;
     }
 }
