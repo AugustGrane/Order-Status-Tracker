@@ -19,18 +19,21 @@ public class OrderService {
     private final ItemService itemService;
     private final StatusDefinitionRepository statusDefinitionRepository;
     private final ProductTypeRepository productTypeRepository;
+    private final ItemRepository itemRepository;
 
     public OrderService(
             OrderRepository orderRepository,
             OrderProductTypeRepository orderProductTypeRepository,
             ItemService itemService,
             StatusDefinitionRepository statusDefinitionRepository,
-            ProductTypeRepository productTypeRepository) {
+            ProductTypeRepository productTypeRepository,
+            ItemRepository itemRepository) {
         this.orderRepository = orderRepository;
         this.orderProductTypeRepository = orderProductTypeRepository;
         this.itemService = itemService;
         this.statusDefinitionRepository = statusDefinitionRepository;
         this.productTypeRepository = productTypeRepository;
+        this.itemRepository = itemRepository;
     }
 
     @Transactional
@@ -66,7 +69,42 @@ public class OrderService {
         }
 
         // Persist order
-        return persistOrder(domainOrder);
+        gruppe2.backend.model.Order persistedOrder = persistOrder(domainOrder);
+
+        // Create order items with their statuses using the same logic as WebhookService
+        setupOrderDetails(persistedOrder.getId(), orderDTO.items());
+        
+        return persistedOrder;
+    }
+
+    private void setupOrderDetails(Long orderId, Map<Long, Integer> items) {
+        items.forEach((itemId, quantity) -> {
+            Item item = itemRepository.findById(itemId)
+                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+
+            ProductType productType = productTypeRepository.findById(item.getProductTypeId())
+                    .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
+
+            // Create OrderDetails with initial status
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.setOrderId(orderId);
+            orderDetails.setItem(item);
+            orderDetails.setProduct_type(productType.getName());
+            orderDetails.setItemAmount(quantity);
+
+            // Set up steps
+            Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
+                    productType.getDifferentSteps().length);
+            orderDetails.setDifferentSteps(steps);
+            orderDetails.setCurrentStepIndex(0);
+
+            // Initialize status updates
+            Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
+            statusUpdates.put(steps[0], LocalDateTime.now());
+            orderDetails.setUpdated(statusUpdates);
+
+            orderProductTypeRepository.save(orderDetails);
+        });
     }
 
     private Long generateOrderId() {
@@ -94,28 +132,7 @@ public class OrderService {
         orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
         orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
         orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
-        orderEntity = orderRepository.save(orderEntity);
-
-        // Create order items with their statuses
-        persistOrderItems(domainOrder.getItems(), orderEntity.getId(), domainOrder.getTimeline());
-        
-        return orderEntity;
-    }
-
-    private void persistOrderItems(Set<OrderItem> items, Long orderId, OrderTimeline timeline) {
-        items.forEach(orderItem -> {
-            OrderDetails orderDetails = new OrderDetails();
-            orderDetails.setOrderId(orderId);
-            orderDetails.setItem(orderItem.getItem());
-            orderDetails.setProduct_type(orderItem.getProductTypeName());
-            orderDetails.setItemAmount(orderItem.getQuantity());
-            orderDetails.setDifferentSteps(orderItem.getStatus().getSteps());
-            orderDetails.setCurrentStepIndex(orderItem.getCurrentStepIndex());
-            orderDetails.setUpdated(orderItem.getStatus().getStatusUpdates());
-
-            orderProductTypeRepository.save(orderDetails);
-            timeline.recordItemStatus(orderItem.getItem().getId(), orderItem.getCurrentStepId(), LocalDateTime.now());
-        });
+        return orderRepository.save(orderEntity);
     }
 
     public List<OrderDetailsWithStatusDTO> getOrderDetails(Long orderId) {

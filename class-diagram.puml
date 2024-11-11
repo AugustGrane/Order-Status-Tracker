@@ -28,8 +28,10 @@ package "Service Layer" {
         - itemService: ItemService
         - statusDefinitionRepository: StatusDefinitionRepository
         - productTypeRepository: ProductTypeRepository
+        - itemRepository: ItemRepository
         + createOrder(orderDTO: OrderDTO): Order
         - persistOrder(domainOrder: Order): Order
+        - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
         + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
         + getAllOrders(): List<OrderDashboardDTO>
     }
@@ -174,8 +176,10 @@ WebhookService ..> OrderProductTypeRepository: creates order details
 OrderService ..> OrderFactory: creates orders
 OrderService ..> OrderInvariantsSpecification: validates
 OrderService ..> OrderRepository: persists
+OrderService ..> ItemRepository: uses
 OrderService ..> ItemService: uses
 OrderService ..> ProductTypeService: uses
+OrderService ..> OrderProductTypeRepository: creates order details
 
 OrderCommand <|.. CreateOrderCommand
 OrderCommand <|.. UpdateItemStatusCommand
