@@ -205,7 +205,7 @@
         padding: 5px 0px;
         position: relative;
         flex: 0 0 auto;
-        border-radius: 5px;
+        border-radius: 7px;
         border: 1px;
     }
 
@@ -220,7 +220,7 @@
         font-size: 16px;
         letter-spacing: 0;
         line-height: normal;
-        border-radius: 5px;
+        border-radius: 7px;
     }
 
     .background .right {
@@ -246,7 +246,7 @@
         font-size: 16px;
         letter-spacing: 0;
         line-height: normal;
-        border-radius: 10px;
+        border-radius: 7px;
     }
 
     .background .order-overview {
