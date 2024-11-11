@@ -287,6 +287,12 @@
  */
 
     @media (max-width: 1000px){
+        .background2{
+            padding: 0px 2%;
+        }
+        .order-box-main{
+            padding: 10px 15px;
+        }
         .order-number-text{
             font-size: 1.5rem;
         }
