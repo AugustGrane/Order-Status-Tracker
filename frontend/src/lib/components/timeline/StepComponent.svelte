@@ -1,21 +1,45 @@
 <script lang="ts">
     import Line from './LineComponent.svelte';
+    import type {OrderDetailsWithStatus} from "$lib/types";
+    import { onMount } from 'svelte';
 
+    export let item: OrderDetailsWithStatus;
+    export let step: OrderDetailsWithStatus;
+    export let index: number;
     export let status: string;
     export let icon: string;
     export let current: boolean = false;
     export let done: boolean = false;
     export let firstItem: boolean = false;
+    let toggleTooltip: boolean = false;
+
 
     // Remove 'frontend/static/' from the icon path if it exists
     $: cleanIconPath = icon.replace('frontend/static/', '');
+
+    onMount(() => {
+        // Check if the tooltip should be toggled
+        window.addEventListener('resize', () => {
+            toggleTooltip = window.innerWidth <= 1000;
+            if (toggleTooltip) {
+                document.querySelector('.updated-text').setAttribute('hidden', 'true');
+                document.querySelectorAll('.updated').forEach((element) => {
+                    element.setAttribute('style', 'color: #fff');
+                });
+            }
+        });
+    });
+
+    const date = new Date(item.updated[step.id]);
+    let formattedDate = `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+    let time = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 </script>
 
 {#if !firstItem}
     <Line done={!current && done} current={current} />
 {/if}
 
-<div class="step">
+<div class="step" class:tooltip-container={toggleTooltip}>
     <div class="circle-wrapper">
         <div class="icon-wrapper" class:current={current} class:done={!current && done}>
             <div class="icon" style="background: url('/{cleanIconPath}') no-repeat center;"></div>
@@ -26,8 +50,23 @@
             {:else}
                 <div class="status">{status}</div>
             {/if}
+            {#if index <= item.currentStepIndex}
+                {#if current}
+                    <div class="updated" class:tooltip-text={toggleTooltip} style="color: #000000">
+                        <div hidden class="updated-text">Updated:&nbsp;</div>
+                        <div>{formattedDate}</div>&nbsp;
+                        <div>({time})</div>
+                    </div>
+                {:else}
+                    <div class="updated" class:tooltip-text={toggleTooltip} style="color: #808080">
+                        <div>{formattedDate}</div>&nbsp;
+                        <div>({time})</div>
+                    </div>
+                {/if}
+            {/if}
         </div>
     </div>
+
 </div>
 
 <style>
@@ -138,6 +177,60 @@
         white-space: nowrap;
     }
 
+    .updated {
+        display: inline-flex; /* Ensure date and time stay on the same line */
+        align-items: center;
+        font-family: var(--font-primary);
+        font-weight: 500;
+        font-size: 0.8rem;
+        line-height: normal;
+        padding: 4px 8px;
+        white-space: nowrap;
+    }
+
+    /* Tooltip container */
+    .tooltip-container {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+    }
+
+    /* Tooltip text */
+    .tooltip-container .tooltip-text {
+        visibility: hidden;
+        width: 160px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 4px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%; /* Position above the tooltip trigger */
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    /* Tooltip arrow */
+    .tooltip-container .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: 100%; /* Position at the bottom of tooltip box */
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: #333 transparent transparent transparent;
+    }
+
+    /* Show tooltip on hover */
+    .tooltip-container:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+
     @media (max-width: 1000px){
         .icon-wrapper{
             width: 30px;
@@ -156,6 +249,12 @@
         }
         .step {
             min-width: 50px;
+        }
+        .updated {
+            font-size: 0.6rem;
+            white-space: normal;
+            max-width: 50px;
+            flex-wrap: wrap;
         }
     }
 </style>

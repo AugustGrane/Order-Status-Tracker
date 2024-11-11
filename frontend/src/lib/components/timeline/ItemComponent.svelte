@@ -25,21 +25,21 @@
                 {#each orderItem.differentSteps as step, index}
                     {#if index === 0}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} firstItem={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} firstItem={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} done={true} firstItem={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} done={true} firstItem={true} />
                         {/if}
                     {:else if index <= orderItem.currentStepIndex}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} done={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} done={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} done={true}/>
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} done={true}/>
                         {/if}
                     {:else}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} />
                         {/if}
                     {/if}
                 {/each}
