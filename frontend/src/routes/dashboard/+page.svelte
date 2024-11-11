@@ -3,6 +3,7 @@
     export let data: PageData;
     const orders = data.orders; // If you want to create a shorter reference
     console.log(orders);
+    
 </script>
 
 <main>
@@ -15,16 +16,14 @@
             <div class="left">
                 <div class="active-orders-text">Aktive ordre</div>
                 <div class="active-orders">Se og opdater kundeordre</div>
-                <div class="search"><input class="text-wrapper" placeholder="Søg"></div>
+                <div class="search"><input class="search-field" placeholder="Søg efter navn, ordrenummer eller artikler"></div>
             </div>
             <div class="right">
-                <div class="filter">
-                    <select class="dropdown-filter">
-                        <option>Nyeste</option>
-                        <option>Ældste</option>
-                        <option>Længst i process</option>
-                    </select>
-                </div> <!-- Closed div here -->
+                <select class="dropdown-filter">
+                    <option>Nyeste</option>
+                    <option>Ældste</option>
+                    <option>Længst i process</option>
+                </select>
             </div>
         </div>
         <div class="order-overview">
@@ -49,8 +48,14 @@
                         <div class="status-container">
                             {#each order.items as item}
                                 <div class="actual-status">
-                                    <select class="dropdown-status">{item.differentSteps[item.currentStepIndex].name}&nbsp;
-                                        <option>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
+                                    <select class="dropdown-status">
+                                        {#each item.differentSteps as step}
+                                            {#if step.name == item.differentSteps[item.currentStepIndex].name}
+                                                <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
+                                            {:else}
+                                                <option>{step.name}&nbsp;</option>
+                                            {/if}
+                                        {/each}
                                     </select>
                                 </div>
                             {/each}
@@ -85,7 +90,6 @@
 
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-
       html {
         font-family: Roboto, Arial, sans-serif;
     }
@@ -95,7 +99,7 @@
         flex-direction: column;
         height: 1024px;
         align-items: center;
-        gap: 25px;
+        gap: 5px;
         position: relative;
         background-color: #ffffff;
     }
@@ -104,12 +108,10 @@
         display: flex;
         height: 81px;
         align-items: center;
+        justify-content: center;
         gap: 10px;
-        padding: 0px 30px;
-        position: relative;
-        align-self: stretch;
         width: 100%;
-        background-color: #b0b0b0;
+        background-color: #ffffff;
     }
 
     .background .logo {
@@ -142,6 +144,7 @@
         justify-content: space-between;
         position: relative;
         background-color: #ffffff;
+        padding-top: 25px;
     }
 
     .background .left {
@@ -194,12 +197,13 @@
         flex: 0 0 auto;
     }
 
-    .background .text-wrapper {
+    .background .search-field {
         position: relative;
-        width: 200px;
+        width: 300px;
+        height: 25px;
         margin-top: -2.00px;
         font-family: "Inter-Regular", Helvetica;
-        font-weight: 400;
+        font-weight: 300;
         color: #8b8b8b;
         font-size: 16px;
         letter-spacing: 0;
@@ -213,27 +217,18 @@
         align-items: flex-end;
         justify-content: flex-end;
         gap: 10px;
-        position: relative;
-    }
-
-    .background .filter {
-        display: flex;
-        width: 200px;
-        flex-direction: column;
-        align-items: flex-end;
-        justify-content: flex-end;
-        gap: 10px;
         padding: 5px 0px;
         position: relative;
         flex: 0 0 auto;
     }
 
     .background .dropdown-filter {
-        align-self: stretch;
+        width: 200px;
+        height: 32px;
         position: relative;
         margin-top: -2.00px;
         font-family: "Inter-Regular", Helvetica;
-        font-weight: 400;
+        font-weight: 300;
         color: #000000;
         font-size: 16px;
         letter-spacing: 0;
@@ -245,10 +240,11 @@
         flex-wrap: wrap;
         width: 1090px;
         height: 550px;
+        gap: 10px;
         align-items: flex-start;
         justify-content: center;
         position: relative;
-        background-color: #3c3c3c;
+        background-color: #ffffff;
     }
 
     .background .name-bar {
@@ -260,6 +256,7 @@
         padding: 0px 25px;
         position: relative;
         background-color: #9d9d9d;
+        border-radius: 15px;
     }
 
     .background .order-number {
@@ -327,23 +324,23 @@
         display: flex;
         flex-direction: column;
         width: 1090px;
-        height: 1200px;
-        margin-bottom: -25.00px;
         align-items: flex-start;
         gap: 10px;
         position: relative;
-        background-color: #9f9f9f;
+        background-color: #ffffff;
+        padding-bottom: 25px; /* Remove fixed height */
     }
 
     .background .order-container {
         width: 1040px;
-        height: 147px;
-        gap: 10px;
         padding: 20px 25px;
         background-color: #c3c3c3;
         display: flex;
+        flex-direction: row;
         align-items: flex-start;
-        position: relative;
+        gap: 10px;
+        border-radius: 15px;
+        border: none;
     }
 
     .background .actual-order-number {
@@ -387,19 +384,14 @@
 
     .background .item-container {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
         width: 275px;
-        height: 30px;
-        align-items: flex-start;
-        padding: 2px 0px;
-        position: relative;
     }
 
     .background .actual-item {
         position: relative;
         width: 250px;
         height: 35px;
-        margin-top: -1.00px;
         margin-bottom: -9.00px;
         font-family: "Inter-Regular", Helvetica;
         font-weight: 400;
@@ -407,16 +399,13 @@
         font-size: 16px;
         letter-spacing: 0;
         line-height: normal;
+        padding-bottom: 3px;
     }
 
     .background .status-container {
         display: flex;
         flex-direction: column;
-        flex-wrap: wrap;
         width: 200px;
-        align-items: flex-start;
-        position: relative;
-        margin-bottom: -3.00px;
     }
 
     .background .actual-status {
@@ -426,14 +415,13 @@
         max-width: 30px;
         align-items: center;
         gap: 10px;
-        padding: 2px 0px;
         position: relative;
+        padding-bottom: 7px;
     }
 
     .background .dropdown-status {
         width: fit-content;
         min-width: 150px;
-        margin-top: -1.50px;
         font-size: 16px;
         white-space: nowrap;
         position: relative;
