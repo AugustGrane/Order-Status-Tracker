@@ -90,9 +90,6 @@
         font-family: Roboto, Arial, sans-serif;
     }
 
-    main {
-        margin: 0 20px;
-    }
     .background {
         display: flex;
         flex-direction: column;
@@ -247,11 +244,11 @@
         display: flex;
         flex-wrap: wrap;
         width: 1090px;
-        height: 569px;
+        height: 550px;
         align-items: flex-start;
         justify-content: center;
         position: relative;
-        background-color: #ffffff;
+        background-color: #3c3c3c;
     }
 
     .background .name-bar {
@@ -330,7 +327,7 @@
         display: flex;
         flex-direction: column;
         width: 1090px;
-        height: 488px;
+        height: 1200px;
         margin-bottom: -25.00px;
         align-items: flex-start;
         gap: 10px;
