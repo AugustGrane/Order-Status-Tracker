@@ -69,14 +69,18 @@
         align-items: flex-start;
         justify-content: center;
         gap: 20px;
-        padding: 5px 10px;
+        padding: 5px 20px;
+        margin-bottom: 20px;
         position: relative;
         align-self: stretch;
         width: 100%;
-        border-radius: 5px;
+        border-radius: 20px;
         overflow: hidden;
-        border: 1px solid;
+        /*border: 4px solid;*/
+        border: none;
         border-color: #00000026;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
     }
 
     .item-title {
