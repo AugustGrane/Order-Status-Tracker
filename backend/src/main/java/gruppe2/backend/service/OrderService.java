@@ -151,9 +151,15 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    // Uses the orderDetails id NOT the orderId or itemId!
     public Map<String, Object> moveToNextStep(Long id) {
         OrderDetails orderDetails = orderProductTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
+
+        // Check if we are on the generic product type which is product type 0
+        if (orderDetails.getItem().getProductTypeId() == 0) {
+            throw new RuntimeException("Error: Item cannot change step while item is generic product type");
+        }
 
         // Check if we're already at the last step
         if (orderDetails.getCurrentStepIndex() >= orderDetails.getDifferentSteps().length - 1) {
@@ -181,6 +187,10 @@ public class OrderService {
     public Map<String, Object> moveToPrevStep(Long id) {
         OrderDetails orderDetails = orderProductTypeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + id));
+
+        if (orderDetails.getItem().getProductTypeId() == 0) {
+            throw new RuntimeException("Error: Item cannot change step while item is generic product type");
+        }
 
         // Check if we're already at the first step
         if (orderDetails.getCurrentStepIndex() <= 0) {
