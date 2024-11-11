@@ -33,15 +33,10 @@ public class OrderService {
 
     @Transactional
     public gruppe2.backend.model.Order createOrder(OrderDTO orderDTO) {
-        // Create domain objects
-        CustomerInfo customerInfo = new CustomerInfo(
-            orderDTO.customerName(),
-            orderDTO.notes(),
-            orderDTO.priority()
-        );
-
+        // Create order timeline
         OrderTimeline timeline = new OrderTimeline(LocalDateTime.now(), orderDTO.priority());
         
+        // Create order estimation
         Map<Long, Integer> processingTimes = getProcessingTimes(orderDTO.items().keySet());
         OrderEstimation estimation = new OrderEstimation(
             orderDTO.items(),
@@ -49,27 +44,20 @@ public class OrderService {
             orderDTO.priority()
         );
 
-        // Create and save JPA entity
+        // Create and save order entity
         gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        orderEntity.setCustomerName(customerInfo.getName());
-        orderEntity.setPriority(customerInfo.isPriority());
-        orderEntity.setNotes(customerInfo.getNotes());
+        if (orderDTO.id() != null) {
+            orderEntity.setId(orderDTO.id()); // Set ID if provided (for webhook orders)
+        }
+        orderEntity.setCustomerName(orderDTO.customerName());
+        orderEntity.setPriority(orderDTO.priority());
+        orderEntity.setNotes(orderDTO.notes());
         orderEntity.setOrderCreated(timeline.getOrderCreated());
         orderEntity.setTotalEstimatedTime(estimation.calculateTotalEstimatedTime());
         orderEntity = orderRepository.save(orderEntity);
 
-        // Create domain order
-        Set<OrderItem> orderItems = createOrderItems(orderDTO.items(), orderEntity.getId());
-        gruppe2.backend.domain.Order domainOrder = new gruppe2.backend.domain.Order.Builder()
-            .withId(orderEntity.getId())
-            .withCustomerInfo(customerInfo)
-            .withItems(orderItems)
-            .withTimeline(timeline)
-            .withEstimation(estimation)
-            .build();
-
-        // Save order details
-        saveOrderDetails(domainOrder);
+        // Create order items with their statuses
+        createOrderItems(orderDTO.items(), orderEntity.getId(), timeline);
         
         return orderEntity;
     }
@@ -85,8 +73,7 @@ public class OrderService {
         return processingTimes;
     }
 
-    private Set<OrderItem> createOrderItems(Map<Long, Integer> items, Long orderId) {
-        Set<OrderItem> orderItems = new HashSet<>();
+    private void createOrderItems(Map<Long, Integer> items, Long orderId, OrderTimeline timeline) {
         items.forEach((itemId, quantity) -> {
             Item item = itemService.findById(itemId);
             ProductType productType = productTypeRepository.findById(item.getProductTypeId())
@@ -94,28 +81,27 @@ public class OrderService {
 
             OrderStatus status = new OrderStatus(productType.getDifferentSteps());
             OrderItem orderItem = new OrderItem(item, quantity, productType.getName(), status);
-            orderItems.add(orderItem);
+
+            saveOrderDetails(orderItem, orderId, timeline);
         });
-        return orderItems;
     }
 
-    private void saveOrderDetails(gruppe2.backend.domain.Order domainOrder) {
-        domainOrder.getItems().forEach(item -> {
-            OrderDetails orderDetails = new OrderDetails();
-            orderDetails.setOrderId(domainOrder.getId());
-            orderDetails.setItem(item.getItem());
-            orderDetails.setProduct_type(item.getProductTypeName());
-            orderDetails.setItemAmount(item.getQuantity());
-            orderDetails.setDifferentSteps(item.getStatus().getSteps());
-            orderDetails.setCurrentStepIndex(item.getCurrentStepIndex());
-            orderDetails.setUpdated(item.getStatus().getStatusUpdates());
+    private void saveOrderDetails(OrderItem orderItem, Long orderId, OrderTimeline timeline) {
+        OrderDetails orderDetails = new OrderDetails();
+        orderDetails.setOrderId(orderId);
+        orderDetails.setItem(orderItem.getItem());
+        orderDetails.setProduct_type(orderItem.getProductTypeName());
+        orderDetails.setItemAmount(orderItem.getQuantity());
+        orderDetails.setDifferentSteps(orderItem.getStatus().getSteps());
+        orderDetails.setCurrentStepIndex(orderItem.getCurrentStepIndex());
+        orderDetails.setUpdated(orderItem.getStatus().getStatusUpdates());
 
-            orderProductTypeRepository.save(orderDetails);
-        });
+        orderProductTypeRepository.save(orderDetails);
+        timeline.recordItemStatus(orderItem.getItem().getId(), orderItem.getCurrentStepId(), LocalDateTime.now());
     }
 
     public List<OrderDetailsWithStatusDTO> getOrderDetails(Long orderId) {
-        gruppe2.backend.model.Order orderEntity = orderRepository.findById(orderId)
+        gruppe2.backend.model.Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
@@ -163,7 +149,9 @@ public class OrderService {
     }
 
     private OrderDashboardDTO createOrderDashboardDTO(gruppe2.backend.model.Order orderEntity) {
+        OrderTimeline timeline = new OrderTimeline(orderEntity.getOrderCreated(), orderEntity.isPriority());
         List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(orderEntity.getId());
+        
         List<OrderDetailsWithStatusDTO> items = orderDetails.stream()
                 .map(this::createOrderDetailsDTO)
                 .sorted(Comparator.comparing(OrderDetailsWithStatusDTO::id))
