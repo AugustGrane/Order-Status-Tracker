@@ -249,8 +249,15 @@ public class OrderService {
 
     }
 
-    public void updateOrderProductTypeSteps(Long orderId, Long itemId, Long productTypeId) {
-        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
+    public void updateOrderProductTypeStepsFromGeneric(Long itemId, Long productTypeId) {
+        // check if item has produc type
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+        if (item.getProductTypeId() != 0)
+        {
+            throw new RuntimeException("Error: Item product type not 0");
+        }
+        List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByItemId(itemId);
         for (OrderDetails orderDetail : orderDetailsList) {
             if (orderDetail.getItem().getId().equals(itemId)) {
                 // Set order product type steps to the new product type steps
@@ -263,6 +270,7 @@ public class OrderService {
                 Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
                         productType.getDifferentSteps().length);
                 orderDetail.setDifferentSteps(steps);
+
 
                 orderProductTypeRepository.save(orderDetail);
             }
