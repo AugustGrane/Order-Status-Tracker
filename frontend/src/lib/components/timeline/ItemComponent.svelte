@@ -25,21 +25,21 @@
                 {#each orderItem.differentSteps as step, index}
                     {#if index === 0}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} firstItem={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} firstItem={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} done={true} firstItem={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} done={true} firstItem={true} />
                         {/if}
                     {:else if index <= orderItem.currentStepIndex}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} done={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} done={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} done={true}/>
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} done={true}/>
                         {/if}
                     {:else}
                         {#if orderItem.currentStepIndex === index}
-                            <StepComponent status={step.name} icon={step.image} current={true} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} current={true} />
                         {:else}
-                            <StepComponent status={step.name} icon={step.image} />
+                            <StepComponent item={orderItem} step={step} index={index} status={step.name} icon={step.image} />
                         {/if}
                     {/if}
                 {/each}
@@ -69,14 +69,18 @@
         align-items: flex-start;
         justify-content: center;
         gap: 20px;
-        padding: 5px 10px;
+        padding: 5px 20px;
+        margin-bottom: 20px;
         position: relative;
         align-self: stretch;
         width: 100%;
-        border-radius: 5px;
+        border-radius: 20px;
         overflow: hidden;
-        border: 1px solid;
+        /*border: 4px solid;*/
+        border: none;
         border-color: #00000026;
+        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+        background-color: #ffffff;
     }
 
     .item-title {
