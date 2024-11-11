@@ -16,6 +16,87 @@ A full-stack application built with SvelteKit frontend and Spring Boot backend.
     └── ...
 ```
 
+## Architecture Overview
+
+The backend follows a domain-driven design (DDD) approach with clear separation of concerns and consistent use of design patterns:
+
+### Controller Layer
+- Entry point for all HTTP requests
+- Handles request/response mapping
+- Input validation
+- Routes requests to appropriate services
+- Key components:
+  - `OrderController`: Handles order-related endpoints
+  - `WebhookController`: Processes incoming webhooks
+
+### Service Layer
+- Orchestrates domain operations using command pattern
+- Manages transactions and persistence
+- Delegates business logic to domain layer
+- Key services:
+  - `OrderService`: Executes order commands and manages persistence
+  - `WebhookService`: Converts webhooks to domain commands
+  - `ItemService`: Handles item operations
+  - `ProductTypeService`: Manages product types
+  - `OrderProgressService`: Tracks order progress
+
+### Domain Layer
+- Contains core business logic and rules
+- Implements command pattern for operations
+- Uses factory pattern for object creation
+- Enforces invariants through specifications
+- Key components:
+  - Commands:
+    - `CreateOrderCommand`: Creates new orders
+    - `UpdateItemStatusCommand`: Updates item status
+    - `UpdateProductTypeCommand`: Changes product types
+  - Factory:
+    - `OrderFactory`: Creates domain objects consistently
+  - Specifications:
+    - `OrderInvariantsSpecification`: Validates business rules
+  - Entities:
+    - `Order`: Rich domain model with behavior
+    - `OrderItem`: Represents items in an order
+  - Value Objects:
+    - `OrderId`: Encapsulates order identity
+    - `CustomerInfo`: Contains customer details
+
+### Model/Repository Layer
+- Handles data persistence
+- Maps domain objects to database entities
+- Key components:
+  - Entities:
+    - `OrderEntity`: Database representation of orders
+    - `OrderDetails`: Stores order item details
+  - Repositories:
+    - `OrderRepository`: Persists orders
+    - `ItemRepository`: Manages items
+    - `ProductTypeRepository`: Handles product types
+
+## Layer Interactions
+
+1. Controllers receive requests and convert to DTOs
+2. Services create appropriate commands
+3. Commands execute on domain objects
+4. Domain objects enforce business rules
+5. Services handle persistence through repositories
+
+### Command Pattern Flow
+1. Service layer creates a command with necessary data
+2. Command executes on a domain object
+3. Domain object updates its state
+4. Service layer persists the changes
+
+### Factory Pattern Usage
+- `OrderFactory` creates consistent domain objects
+- Used by both `OrderService` and `WebhookService`
+- Ensures domain objects are created with valid state
+
+### Specification Pattern
+- Validates business rules
+- Used before persisting changes
+- Ensures domain invariants are maintained
+
 ## Setup Instructions
 
 ### Backend (Spring Boot)
