@@ -2,7 +2,7 @@ package gruppe2.backend.service;
 
 import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.*;
-import gruppe2.backend.domain.command.OrderFactory;
+import gruppe2.backend.domain.command.*;
 import gruppe2.backend.domain.specification.OrderInvariantsSpecification;
 import gruppe2.backend.model.*;
 import gruppe2.backend.repository.*;
@@ -45,11 +45,12 @@ public class OrderService {
             orderDTO.priority()
         );
 
-        // Create order using factory
+        // Create order ID
         OrderId orderId = orderDTO.id() != null ? 
             new OrderId(orderDTO.id()) : 
             new OrderId(generateOrderId());
 
+        // Create domain order using factory
         gruppe2.backend.domain.Order domainOrder = OrderFactory.createOrder(
             orderId,
             customerInfo,
@@ -64,20 +65,8 @@ public class OrderService {
             throw new IllegalStateException("Order validation failed");
         }
 
-        // Create and save order entity
-        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        orderEntity.setId(domainOrder.getId().getValue());
-        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
-        orderEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
-        orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
-        orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
-        orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
-        orderEntity = orderRepository.save(orderEntity);
-
-        // Create order items with their statuses
-        createOrderItems(orderDTO.items(), orderEntity.getId(), domainOrder.getTimeline());
-        
-        return orderEntity;
+        // Persist order
+        return persistOrder(domainOrder);
     }
 
     private Long generateOrderId() {
@@ -96,31 +85,37 @@ public class OrderService {
         return processingTimes;
     }
 
-    private void createOrderItems(Map<Long, Integer> items, Long orderId, OrderTimeline timeline) {
-        items.forEach((itemId, quantity) -> {
-            Item item = itemService.findById(itemId);
-            ProductType productType = productTypeRepository.findById(item.getProductTypeId())
-                    .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
+    private gruppe2.backend.model.Order persistOrder(gruppe2.backend.domain.Order domainOrder) {
+        // Create and save order entity
+        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
+        orderEntity.setId(domainOrder.getId().getValue());
+        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
+        orderEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
+        orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
+        orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
+        orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
+        orderEntity = orderRepository.save(orderEntity);
 
-            OrderStatus status = new OrderStatus(productType.getDifferentSteps());
-            OrderItem orderItem = new OrderItem(item, quantity, productType.getName(), status);
-
-            saveOrderDetails(orderItem, orderId, timeline);
-        });
+        // Create order items with their statuses
+        persistOrderItems(domainOrder.getItems(), orderEntity.getId(), domainOrder.getTimeline());
+        
+        return orderEntity;
     }
 
-    private void saveOrderDetails(OrderItem orderItem, Long orderId, OrderTimeline timeline) {
-        OrderDetails orderDetails = new OrderDetails();
-        orderDetails.setOrderId(orderId);
-        orderDetails.setItem(orderItem.getItem());
-        orderDetails.setProduct_type(orderItem.getProductTypeName());
-        orderDetails.setItemAmount(orderItem.getQuantity());
-        orderDetails.setDifferentSteps(orderItem.getStatus().getSteps());
-        orderDetails.setCurrentStepIndex(orderItem.getCurrentStepIndex());
-        orderDetails.setUpdated(orderItem.getStatus().getStatusUpdates());
+    private void persistOrderItems(Set<OrderItem> items, Long orderId, OrderTimeline timeline) {
+        items.forEach(orderItem -> {
+            OrderDetails orderDetails = new OrderDetails();
+            orderDetails.setOrderId(orderId);
+            orderDetails.setItem(orderItem.getItem());
+            orderDetails.setProduct_type(orderItem.getProductTypeName());
+            orderDetails.setItemAmount(orderItem.getQuantity());
+            orderDetails.setDifferentSteps(orderItem.getStatus().getSteps());
+            orderDetails.setCurrentStepIndex(orderItem.getCurrentStepIndex());
+            orderDetails.setUpdated(orderItem.getStatus().getStatusUpdates());
 
-        orderProductTypeRepository.save(orderDetails);
-        timeline.recordItemStatus(orderItem.getItem().getId(), orderItem.getCurrentStepId(), LocalDateTime.now());
+            orderProductTypeRepository.save(orderDetails);
+            timeline.recordItemStatus(orderItem.getItem().getId(), orderItem.getCurrentStepId(), LocalDateTime.now());
+        });
     }
 
     public List<OrderDetailsWithStatusDTO> getOrderDetails(Long orderId) {

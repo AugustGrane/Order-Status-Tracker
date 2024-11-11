@@ -1,0 +1,192 @@
+@startuml Order Status Tracker - Class Diagram
+
+' Style configurations
+skinparam class {
+    BackgroundColor White
+    ArrowColor Black
+    BorderColor Black
+}
+
+' Controllers
+package "Controller Layer" {
+    class OrderController {
+        + createOrder(orderDTO: OrderDTO): ResponseEntity
+        + getOrderDetails(orderId: Long): ResponseEntity
+        + getAllOrders(): ResponseEntity
+    }
+
+    class WebhookController {
+        + handleWebhook(payload: WebhookPayload): ResponseEntity
+    }
+}
+
+' Services
+package "Service Layer" {
+    class OrderService {
+        - orderRepository: OrderRepository
+        - orderProductTypeRepository: OrderProductTypeRepository
+        - itemService: ItemService
+        - statusDefinitionRepository: StatusDefinitionRepository
+        - productTypeRepository: ProductTypeRepository
+        + createOrder(orderDTO: OrderDTO): Order
+        - persistOrder(domainOrder: Order): Order
+        + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
+        + getAllOrders(): List<OrderDashboardDTO>
+    }
+
+    class WebhookService {
+        - orderService: OrderService
+        - itemService: ItemService
+        - productTypeService: ProductTypeService
+        - itemRepository: ItemRepository
+        - productTypeRepository: ProductTypeRepository
+        - orderProductTypeRepository: OrderProductTypeRepository
+        + createOrderInDatabase(payload: WebhookPayload): void
+        - setupOrderDetails(orderId: Long, items: Map<Long, Integer>): void
+        - createCustomerInfo(payload: WebhookPayload): CustomerInfo
+        - createItemsMap(payload: WebhookPayload): Map<Long, Integer>
+        - ensureItemExists(item: LineItem): void
+    }
+
+    class ItemService {
+        - itemRepository: ItemRepository
+        + getItem(id: Long): Item
+        + createItem(item: Item): Item
+    }
+
+    class ProductTypeService {
+        - productTypeRepository: ProductTypeRepository
+        + createProductType(productTypeDTO: ProductTypeDTO): ProductType
+        + updateItemProductType(itemId: Long, targetProductTypeId: Long): void
+    }
+
+    class OrderProgressService {
+        + getProgress(orderDetailsId: Long): OrderProgress
+        + moveToNextStep(orderDetailsId: Long): OrderProgress
+        + moveToPreviousStep(orderDetailsId: Long): OrderProgress
+    }
+}
+
+' Domain Layer
+package "Domain Layer" {
+    class Order {
+        - id: OrderId
+        - customerInfo: CustomerInfo
+        - items: Set<OrderItem>
+        - timeline: OrderTimeline
+        - estimation: OrderEstimation
+        - events: List<OrderEvent>
+    }
+
+    class OrderFactory {
+        + {static} createOrder(id: OrderId, customerInfo: CustomerInfo, items: Map<Long, Integer>, processingTimes: Map<Long, Integer>, priority: boolean): Order
+    }
+
+    interface OrderCommand {
+        + execute(order: Order): void
+    }
+
+    class CreateOrderCommand {
+        - id: OrderId
+        - customerInfo: CustomerInfo
+        - items: Map<Long, Integer>
+        - processingTimes: Map<Long, Integer>
+        - priority: boolean
+        + execute(order: Order): void
+    }
+
+    class UpdateItemStatusCommand {
+        - itemId: Long
+        - newStatus: OrderStatus
+        + execute(order: Order): void
+    }
+
+    class UpdateProductTypeCommand {
+        - itemId: Long
+        - transition: ProductTypeTransition
+        + execute(order: Order): void
+    }
+
+    interface OrderSpecification {
+        + isSatisfiedBy(order: Order): boolean
+    }
+
+    class OrderInvariantsSpecification {
+        + {static} getInstance(): OrderInvariantsSpecification
+        + isSatisfiedBy(order: Order): boolean
+    }
+
+    class WebhookOrder {
+        + {static} fromPayload(payload: WebhookPayload): WebhookOrder
+    }
+}
+
+' Model Layer
+package "Model Layer" {
+    interface OrderRepository {
+        + save(order: Order): Order
+        + findById(id: Long): Optional<Order>
+    }
+
+    interface OrderProductTypeRepository {
+        + save(orderDetails: OrderDetails): OrderDetails
+        + findByOrderId(orderId: Long): List<OrderDetails>
+    }
+
+    interface ItemRepository {
+        + save(item: Item): Item
+        + findById(id: Long): Optional<Item>
+    }
+
+    interface ProductTypeRepository {
+        + save(productType: ProductType): ProductType
+        + findById(id: Long): Optional<ProductType>
+    }
+
+    class OrderEntity {
+        - id: Long
+        - customerName: String
+        - priority: boolean
+        - notes: String
+    }
+
+    class OrderDetails {
+        - id: Long
+        - orderId: Long
+        - item: Item
+        - itemAmount: Integer
+        - product_type: String
+        - currentStepIndex: Integer
+        - differentSteps: Long[]
+        - updated: Map<Long, LocalDateTime>
+    }
+}
+
+' Relationships
+OrderController ..> OrderService: uses
+WebhookController ..> WebhookService: uses
+
+WebhookService ..> OrderService: delegates order creation
+WebhookService ..> WebhookOrder: converts payload
+WebhookService ..> ItemService: ensures items exist
+WebhookService ..> OrderProductTypeRepository: creates order details
+
+OrderService ..> OrderFactory: creates orders
+OrderService ..> OrderInvariantsSpecification: validates
+OrderService ..> OrderRepository: persists
+OrderService ..> ItemService: uses
+OrderService ..> ProductTypeService: uses
+
+OrderCommand <|.. CreateOrderCommand
+OrderCommand <|.. UpdateItemStatusCommand
+OrderCommand <|.. UpdateProductTypeCommand
+OrderSpecification <|.. OrderInvariantsSpecification
+
+OrderFactory ..> Order: creates
+WebhookOrder ..> CustomerInfo: creates
+WebhookOrder ..> OrderId: creates
+
+UpdateProductTypeCommand ..> ProductTypeTransition: uses
+UpdateItemStatusCommand ..> OrderStatus: uses
+
+@enduml
