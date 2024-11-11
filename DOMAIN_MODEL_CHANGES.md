@@ -6,39 +6,36 @@
 3. [Detailed Component Overview](#detailed-component-overview)
 4. [Error Handling System](#error-handling-system)
 5. [Event Management System](#event-management-system)
-6. [Implementation Examples](#implementation-examples)
-7. [System Benefits](#system-benefits)
-8. [Migration Guide](#migration-guide)
+6. [Webhook Integration](#webhook-integration)
+7. [Implementation Examples](#implementation-examples)
+8. [System Benefits](#system-benefits)
 
 ## Previous System Structure
 
-The original codebase had several structural limitations that affected maintainability and reliability:
+The original codebase had several structural limitations:
 
 ### Service Layer Issues
 ```java
 @Service
 public class OrderService {
-    public void moveToNextStep(Long id) {
-        OrderDetails orderDetails = repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Not found"));
-        
-        if (orderDetails.getCurrentStepIndex() >= orderDetails.getDifferentSteps().length - 1) {
-            throw new IllegalStateException("Already at final step");
-        }
-        
-        orderDetails.setCurrentStepIndex(orderDetails.getCurrentStepIndex() + 1);
-        repository.save(orderDetails);
-    }
+    // Mixed business logic and data access
+    // No clear separation of concerns
+    // Generic error handling
+    // Limited validation
 }
 ```
 
-Key problems:
-1. Business logic mixed with data access
-2. No validation encapsulation
-3. Generic error handling
-4. Difficult to extend or modify
-5. No clear separation of concerns
-6. Limited reusability of components
+### Webhook Processing Issues
+```java
+public class WebhookService {
+    public void createOrderInDatabase(WebhookPayload payload) {
+        // Direct manipulation of data
+        // No domain model usage
+        // Generic error handling
+        // Mixed responsibilities
+    }
+}
+```
 
 ## New System Architecture
 
@@ -47,101 +44,53 @@ The improved system implements a structured, component-based architecture:
 ### Core Domain Model
 ```java
 public class Order {
-    private final Long id;
     private final CustomerInfo customerInfo;
     private final Set<OrderItem> items;
     private final OrderTimeline timeline;
     private final OrderEstimation estimation;
     private final List<OrderEvent> events;
+}
+```
 
-    // Builder pattern for complex object creation
-    public static class Builder {
-        // Builder implementation
+### Webhook Domain Model
+```java
+public class WebhookOrder {
+    private final Long orderId;
+    private final CustomerInfo customerInfo;
+    private final Map<Long, Integer> items;
+
+    public static WebhookOrder fromPayload(WebhookPayload payload) {
+        // Structured conversion from webhook data
     }
 }
 ```
 
 ## Detailed Component Overview
 
-### 1. CustomerInfo Component
+### 1. Domain Objects
+- `Order`: Aggregate root for order management
+- `OrderItem`: Manages individual items
+- `OrderStatus`: Controls status transitions
+- `OrderTimeline`: Tracks temporal aspects
+- `OrderEstimation`: Handles time calculations
+- `WebhookOrder`: Encapsulates webhook data
+
+### 2. Value Objects
 ```java
 public class CustomerInfo {
     private final String name;
     private final String notes;
     private final boolean priority;
-
-    public CustomerInfo(String name, String notes, boolean priority) {
-        validateName(name);
-        this.name = name;
-        this.notes = notes;
-        this.priority = priority;
-    }
-
-    private void validateName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Customer name cannot be empty");
-        }
-    }
 }
 ```
 
-Purpose:
-- Encapsulates customer data
-- Ensures data validity
-- Provides immutable state
-- Implements value object pattern
-
-### 2. OrderItem Component
+### 3. Domain Events
 ```java
-public class OrderItem {
-    private final Item item;
-    private final int quantity;
-    private final String productTypeName;
-    private final OrderStatus status;
-
-    public boolean canChangeStatus(OrderStatus newStatus) {
-        if (isGenericType()) {
-            return false;
-        }
-        return Math.abs(newStatus.getCurrentStepIndex() - status.getCurrentStepIndex()) == 1;
-    }
-
-    public OrderItem withStatus(OrderStatus newStatus) {
-        validateStatusTransition(newStatus);
-        return new OrderItem(item, quantity, productTypeName, newStatus);
-    }
+public abstract class OrderEvent {
+    private final Long orderId;
+    private final LocalDateTime timestamp;
 }
 ```
-
-Features:
-- Manages item state
-- Validates status transitions
-- Implements immutable updates
-- Encapsulates business rules
-
-### 3. OrderStatus Component
-```java
-public class OrderStatus {
-    private final Long[] steps;
-    private final int currentStepIndex;
-    private final Map<Long, LocalDateTime> statusUpdates;
-
-    public boolean canMoveToNextStep() {
-        return currentStepIndex < steps.length - 1;
-    }
-
-    public OrderStatus moveToNextStep() {
-        validateNextStep();
-        return new OrderStatus(steps, currentStepIndex + 1, updateStatusTimestamp());
-    }
-}
-```
-
-Responsibilities:
-- Status progression control
-- Status history tracking
-- Timestamp management
-- Validation rules
 
 ## Error Handling System
 
@@ -156,163 +105,96 @@ public abstract class OrderException extends RuntimeException {
 
 ### 2. Specific Exceptions
 ```java
-public class InvalidStatusTransitionException extends OrderException {
-    private final Long itemId;
-    private final OrderStatus currentStatus;
-    private final OrderStatus targetStatus;
+public class WebhookProcessingException extends OrderException {
+    private final Long orderId;
 
-    public InvalidStatusTransitionException(Long itemId, OrderStatus current, OrderStatus target) {
-        super(formatMessage(itemId, current, target));
-        this.itemId = itemId;
-        this.currentStatus = current;
-        this.targetStatus = target;
+    public WebhookProcessingException(Long orderId, String message) {
+        super(String.format("Failed to process webhook order %d: %s", orderId, message));
+        this.orderId = orderId;
     }
 }
 ```
-
-Benefits:
-- Clear error identification
-- Detailed error context
-- Proper error hierarchy
-- Improved debugging
 
 ## Event Management System
 
-### 1. Base Event
+### Event Types
+- `ItemAddedEvent`: Tracks item additions
+- `ItemStatusChangedEvent`: Monitors status changes
+- `ProductTypeChangedEvent`: Records product type updates
+
+## Webhook Integration
+
+### 1. Structured Data Processing
 ```java
-public abstract class OrderEvent {
-    private final Long orderId;
-    private final LocalDateTime timestamp;
-
-    public abstract String getEventType();
-}
-```
-
-### 2. Specific Events
-```java
-public class ItemStatusChangedEvent extends OrderEvent {
-    private final Long itemId;
-    private final OrderStatus oldStatus;
-    private final OrderStatus newStatus;
-
-    @Override
-    public String getEventType() {
-        return "ITEM_STATUS_CHANGED";
+@Service
+public class WebhookService {
+    @Transactional
+    public void processWebhookPayload(WebhookPayload payload) {
+        WebhookOrder webhookOrder = WebhookOrder.fromPayload(payload);
+        ensureItemsExist(webhookOrder);
+        createOrderFromWebhook(webhookOrder);
     }
 }
 ```
 
-Features:
-- Event tracking
-- Audit trail
-- System monitoring
-- Integration capabilities
+### 2. Error Handling
+```java
+try {
+    webhookService.processWebhookPayload(payload);
+} catch (WebhookProcessingException e) {
+    // Specific error handling for webhook processing
+} catch (OrderException e) {
+    // General order-related error handling
+}
+```
 
 ## Implementation Examples
 
-### Creating Orders
+### Creating Orders from Webhook
 ```java
-// Create customer information
-CustomerInfo customerInfo = new CustomerInfo(
-    "John Smith",
-    "Priority handling required",
-    true
+// Convert webhook payload to domain object
+WebhookOrder webhookOrder = WebhookOrder.fromPayload(payload);
+
+// Create order using domain model
+OrderDTO orderDTO = new OrderDTO(
+    webhookOrder.getOrderId(),
+    webhookOrder.getCustomerInfo().getName(),
+    webhookOrder.getCustomerInfo().isPriority(),
+    webhookOrder.getCustomerInfo().getNotes(),
+    webhookOrder.getItems(),
+    ""
 );
 
-// Create order timeline
-OrderTimeline timeline = new OrderTimeline(
-    LocalDateTime.now(),
-    customerInfo.isPriority()
-);
-
-// Create order estimation
-OrderEstimation estimation = new OrderEstimation(
-    items,
-    processingTimes,
-    customerInfo.isPriority()
-);
-
-// Build the order
-Order order = new Order.Builder()
-    .withId(generatedId)
-    .withCustomerInfo(customerInfo)
-    .withTimeline(timeline)
-    .withEstimation(estimation)
-    .build();
-```
-
-### Updating Status
-```java
-try {
-    order.updateItemStatus(itemId, newStatus);
-} catch (InvalidStatusTransitionException e) {
-    // Handle invalid transition
-    logger.error("Status transition failed: {}", e.getMessage());
-} catch (OrderException e) {
-    // Handle other order-related errors
-    logger.error("Order operation failed: {}", e.getMessage());
-}
+orderService.createOrder(orderDTO);
 ```
 
 ## System Benefits
 
-### 1. Improved Code Organization
-- Clear component boundaries
-- Single responsibility principle
-- Easy to understand structure
-- Modular design
+1. **Improved Data Handling**
+   - Structured webhook processing
+   - Clear data transformation
+   - Better validation
 
-### 2. Enhanced Reliability
-- Comprehensive validation
+2. **Enhanced Error Management**
+   - Specific exception types
+   - Detailed error messages
+   - Better error tracing
+
+3. **Better Maintainability**
+   - Clear separation of concerns
+   - Domain-driven design
+   - Improved testability
+
+4. **Robust Integration**
+   - Structured webhook handling
+   - Reliable data processing
+   - Proper transaction management
+
+The new design provides:
+- Clear component responsibilities
 - Proper error handling
-- Consistent behavior
-- Traceable operations
+- Transaction management
+- Domain model integrity
+- Better webhook integration
 
-### 3. Better Maintainability
-- Isolated components
-- Clear dependencies
-- Easy to test
-- Simple to extend
-
-### 4. Operational Improvements
-- Clear audit trail
-- Better monitoring
-- Easier debugging
-- Performance optimization opportunities
-
-## Migration Guide
-
-### 1. Data Migration
-```java
-// Convert old order format to new domain model
-public Order convertToNewFormat(OldOrder oldOrder) {
-    CustomerInfo customerInfo = new CustomerInfo(
-        oldOrder.getCustomerName(),
-        oldOrder.getNotes(),
-        oldOrder.isPriority()
-    );
-    
-    // Continue conversion process
-}
-```
-
-### 2. Service Updates
-```java
-// Update service methods to use new domain model
-@Service
-public class OrderService {
-    @Transactional
-    public Order createOrder(OrderDTO dto) {
-        // Create domain objects
-        CustomerInfo customerInfo = new CustomerInfo(
-            dto.customerName(),
-            dto.notes(),
-            dto.priority()
-        );
-        
-        // Build and return order
-    }
-}
-```
-
-The new system provides a robust, maintainable, and extensible foundation for the Order Status Tracker application. Each component has clear responsibilities and boundaries, making the system easier to understand, maintain, and extend.
+This refactoring has transformed the codebase into a robust, maintainable system that properly handles both internal operations and external integrations through webhooks.
