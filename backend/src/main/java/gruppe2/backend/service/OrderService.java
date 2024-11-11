@@ -2,6 +2,8 @@ package gruppe2.backend.service;
 
 import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.*;
+import gruppe2.backend.domain.command.OrderFactory;
+import gruppe2.backend.domain.specification.OrderInvariantsSpecification;
 import gruppe2.backend.model.*;
 import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
@@ -33,33 +35,54 @@ public class OrderService {
 
     @Transactional
     public gruppe2.backend.model.Order createOrder(OrderDTO orderDTO) {
-        // Create order timeline
-        OrderTimeline timeline = new OrderTimeline(LocalDateTime.now(), orderDTO.priority());
-        
-        // Create order estimation
+        // Get processing times for items
         Map<Long, Integer> processingTimes = getProcessingTimes(orderDTO.items().keySet());
-        OrderEstimation estimation = new OrderEstimation(
+        
+        // Create domain objects
+        CustomerInfo customerInfo = new CustomerInfo(
+            orderDTO.customerName(),
+            orderDTO.notes(),
+            orderDTO.priority()
+        );
+
+        // Create order using factory
+        OrderId orderId = orderDTO.id() != null ? 
+            new OrderId(orderDTO.id()) : 
+            new OrderId(generateOrderId());
+
+        gruppe2.backend.domain.Order domainOrder = OrderFactory.createOrder(
+            orderId,
+            customerInfo,
             orderDTO.items(),
             processingTimes,
             orderDTO.priority()
         );
 
+        // Validate using specification
+        OrderInvariantsSpecification invariants = OrderInvariantsSpecification.getInstance();
+        if (!invariants.isSatisfiedBy(domainOrder)) {
+            throw new IllegalStateException("Order validation failed");
+        }
+
         // Create and save order entity
         gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        if (orderDTO.id() != null) {
-            orderEntity.setId(orderDTO.id()); // Set ID if provided (for webhook orders)
-        }
-        orderEntity.setCustomerName(orderDTO.customerName());
-        orderEntity.setPriority(orderDTO.priority());
-        orderEntity.setNotes(orderDTO.notes());
-        orderEntity.setOrderCreated(timeline.getOrderCreated());
-        orderEntity.setTotalEstimatedTime(estimation.calculateTotalEstimatedTime());
+        orderEntity.setId(domainOrder.getId().getValue());
+        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
+        orderEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
+        orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
+        orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
+        orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
         orderEntity = orderRepository.save(orderEntity);
 
         // Create order items with their statuses
-        createOrderItems(orderDTO.items(), orderEntity.getId(), timeline);
+        createOrderItems(orderDTO.items(), orderEntity.getId(), domainOrder.getTimeline());
         
         return orderEntity;
+    }
+
+    private Long generateOrderId() {
+        // Simple implementation - in practice, use a more robust ID generation strategy
+        return System.currentTimeMillis();
     }
 
     private Map<Long, Integer> getProcessingTimes(Set<Long> itemIds) {
