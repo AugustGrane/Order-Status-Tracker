@@ -41,23 +41,21 @@
                             <div class="actual-order-number">{order.orderId}</div>
                             <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
                             <div class="actual-customer">{order.customerName}</div>
-                            <div class="item-container">
+                            <div class="item-status-container">
                                 {#each order.items as item}
-                                    <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
-                                {/each}
-                            </div>
-                            <div class="status-container">
-                                {#each order.items as item}
-                                    <div class="actual-status">
-                                        <select class="dropdown-status">
-                                            {#each item.differentSteps as step}
-                                                {#if step.name == item.differentSteps[item.currentStepIndex].name}
-                                                    <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
-                                                {:else}
-                                                    <option>{step.name}&nbsp;</option>
-                                                {/if}
-                                            {/each}
-                                        </select>
+                                    <div class="item-status-instance">
+                                        <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
+                                        <div class="actual-status">
+                                            <select class="dropdown-status">
+                                                {#each item.differentSteps as step}
+                                                    {#if step.name == item.differentSteps[item.currentStepIndex].name}
+                                                        <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
+                                                    {:else}
+                                                        <option>{step.name}&nbsp;</option>
+                                                    {/if}
+                                                {/each}
+                                            </select>
+                                        </div>
                                     </div>
                                 {/each}
                             </div>
@@ -92,7 +90,7 @@
 
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-      html {
+    html {
         font-family: Roboto, Arial, sans-serif;
     }
 
@@ -143,7 +141,7 @@
         flex-direction: column;
         align-items: center; /* Centering content inside */
         padding: 5px;
-        width: 80%; /* Adjust as needed */
+        width: 90%; /* Adjust as needed */
         background-color: #f9f9f9; /* Background color for visibility */
         border-radius: 15px;
         box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
@@ -207,6 +205,8 @@
         padding: 5px 0px;
         position: relative;
         flex: 0 0 auto;
+        border-radius: 5px;
+        border: 1px;
     }
 
     .background .search-field {
@@ -216,10 +216,11 @@
         margin-top: -2.00px;
         font-family: "Inter-Regular", Helvetica;
         font-weight: 300;
-        color: #8b8b8b;
+        color: #000000;
         font-size: 16px;
         letter-spacing: 0;
         line-height: normal;
+        border-radius: 5px;
     }
 
     .background .right {
@@ -245,6 +246,7 @@
         font-size: 16px;
         letter-spacing: 0;
         line-height: normal;
+        border-radius: 10px;
     }
 
     .background .order-overview {
@@ -346,8 +348,7 @@
         background-color: #c3c3c3;
         display: flex;
         flex-direction: row;
-        align-items: flex-start;
-        gap: 10px;
+        justify-content: space-between;
         border-radius: 15px;
         border: none;
     }
@@ -391,54 +392,51 @@
         line-height: normal;
     }
 
-    .background .item-container {
+    .background .item-status-container {
         display: flex;
         flex-direction: column;
-        width: 275px;
+        gap: 10px;
+    }
+
+    .background .item-status-instance {
+        display: flex;
+        width: 520px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #9d9d9d;
+        padding: 5px 10px;
+        border-radius: 15px;
     }
 
     .background .actual-item {
         position: relative;
-        width: 250px;
-        height: 35px;
-        margin-bottom: -9.00px;
-        font-family: "Inter-Regular", Helvetica;
+        font-family: var(--font-primary);
         font-weight: 400;
         color: #000000;
         font-size: 16px;
-        letter-spacing: 0;
-        line-height: normal;
-        padding-bottom: 3px;
-    }
 
-    .background .status-container {
-        display: flex;
-        flex-direction: column;
-        width: 200px;
     }
 
     .background .actual-status {
         display: flex;
-        width: 200px;
-        min-width: 30px;
-        max-width: 30px;
-        align-items: center;
-        gap: 10px;
+        justify-content: flex-end;
         position: relative;
-        padding-bottom: 7px;
     }
 
     .background .dropdown-status {
-        width: fit-content;
+        width: 235px;
         min-width: 150px;
         font-size: 16px;
         white-space: nowrap;
         position: relative;
-        font-family: "Inter-Regular", Helvetica;
+        font-family: var(--font-primary);
         font-weight: 400;
         color: #000000;
         letter-spacing: 0;
         line-height: normal;
+        padding: 5px;
+        border-radius: 15px;
     }
 
 </style>
