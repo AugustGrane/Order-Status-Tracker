@@ -127,12 +127,12 @@ public class OrderProgressService {
             .build();
     }
 
-    private OrderDetails findOrderDetails(Long orderDetailsId) {
+    public OrderDetails findOrderDetails(Long orderDetailsId) {
         return orderProductTypeRepository.findById(orderDetailsId)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + orderDetailsId));
     }
 
-    private OrderStatus createOrderStatus(OrderDetails orderDetails) {
+    public OrderStatus createOrderStatus(OrderDetails orderDetails) {
         return new OrderStatus(
             orderDetails.getDifferentSteps(),
             orderDetails.getCurrentStepIndex(),
@@ -140,7 +140,7 @@ public class OrderProgressService {
         );
     }
 
-    private void validateGenericProductType(OrderDetails orderDetails) {
+    public void validateGenericProductType(OrderDetails orderDetails) {
         if (orderDetails.getItem().getProductTypeId() == 0) {
             throw new IllegalStateException("Item cannot change step while item is generic product type");
         }
