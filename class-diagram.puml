@@ -7,203 +7,243 @@ skinparam class {
     BorderColor Black
 }
 
-' Controllers
-package "Controller Layer" {
-    class OrderController {
-        + createOrder(orderDTO: OrderDTO): ResponseEntity
-        + getOrderDetails(orderId: Long): ResponseEntity
-        + getAllOrders(): ResponseEntity
-    }
-
-    class WebhookController {
-        + handleWebhook(payload: WebhookPayload): ResponseEntity
-    }
-}
-
-' Services
-package "Service Layer" {
-    class OrderService {
-        - orderRepository: OrderRepository
-        - orderProductTypeRepository: OrderProductTypeRepository
-        - itemService: ItemService
-        - statusDefinitionRepository: StatusDefinitionRepository
-        - productTypeRepository: ProductTypeRepository
-        - itemRepository: ItemRepository
-        - orderMapper: OrderMapper
-        - orderDetailsMapper: OrderDetailsMapper
-        + createOrder(orderDTO: OrderDTO): Order
-        + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
-        + getAllOrders(): List<OrderDashboardDTO>
-        + createStatusDefinition(dto: StatusDefinitionDTO): StatusDefinition
-    }
-
-    class WebhookService {
-        - orderService: OrderService
-        - itemService: ItemService
-        - productTypeService: ProductTypeService
-        - itemRepository: ItemRepository
-        - productTypeRepository: ProductTypeRepository
-        - orderProductTypeRepository: OrderProductTypeRepository
-        - webhookMapper: WebhookMapper
-        - orderMapper: OrderMapper
-        + createOrderInDatabase(payload: WebhookPayload): void
-    }
-
-    class ItemService {
-        - itemRepository: ItemRepository
-        - productTypeRepository: ProductTypeRepository
-        + createItem(itemDTO: ItemDTO): Item
-        + findById(id: Long): Item
-    }
-
-    class ProductTypeService {
-        - productTypeRepository: ProductTypeRepository
-        - statusDefinitionRepository: StatusDefinitionRepository
-        + createProductType(productTypeDTO: ProductTypeDTO): ProductType
-        + updateItemProductType(itemId: Long, targetProductTypeId: Long): void
-    }
-
-    class OrderProgressService {
-        + getProgress(orderDetailsId: Long): OrderProgress
-        + moveToNextStep(orderDetailsId: Long): OrderProgress
-        + moveToPreviousStep(orderDetailsId: Long): OrderProgress
-    }
-}
-
-' Mapper Layer
-package "Mapper Layer" {
-    class OrderMapper {
-        + toModelOrder(domainOrder: Order): Order
-        + toOrderDTO(order: Order): OrderDTO
-    }
-
-    class OrderDetailsMapper {
-        - statusDefinitionRepository: StatusDefinitionRepository
-        + toOrderDetailsDTO(details: OrderDetails): OrderDetailsWithStatusDTO
-        + toOrderDashboardDTO(orderEntity: Order, orderDetails: List<OrderDetails>): OrderDashboardDTO
-    }
-
-    class WebhookMapper {
-        + toCustomerInfo(payload: WebhookPayload): CustomerInfo
-    }
-}
-
 ' Domain Layer
 package "Domain Layer" {
-    class Order {
+    abstract class OrderEvent {
+        - orderId: Long
+        - timestamp: LocalDateTime
+        + getOrderId(): Long
+        + getTimestamp(): LocalDateTime
+        + {abstract} getEventType(): String
+    }
+
+    class DomainOrder {
         - id: OrderId
         - customerInfo: CustomerInfo
         - items: Set<OrderItem>
         - timeline: OrderTimeline
         - estimation: OrderEstimation
         - events: List<OrderEvent>
+        + addItem(item: OrderItem)
+        + updateItemStatus(itemId: Long, newStatus: OrderStatus)
+        + updateItemProductType(itemId: Long, transition: ProductTypeTransition)
+        + isDelayed(): boolean
+        + getCompletionPercentage(): double
+        + getItemDelayStatus(): Map<Long, Boolean>
+        + findItem(itemId: Long): Optional<OrderItem>
     }
 
-    class OrderFactory {
-        + {static} createOrder(id: OrderId, customerInfo: CustomerInfo, items: Map<Long, Integer>, processingTimes: Map<Long, Integer>, priority: boolean): Order
+    class OrderId {
+        - value: Long
+        + getValue(): Long
+    }
+
+    class CustomerInfo {
+        - name: String
+        - notes: String
+        - priority: boolean
+    }
+
+    class OrderItem {
+        - item: Item
+        - quantity: int
+        - productTypeName: String
+        - status: OrderStatus
+        + isGenericType(): boolean
+        + canChangeProductType(): boolean
+        + canChangeStatus(newStatus: OrderStatus): boolean
+        + withStatus(newStatus: OrderStatus): OrderItem
+        + withNewProductType(productTypeId: Long, newName: String, newStatus: OrderStatus): OrderItem
+        + getCurrentStepId(): Long
+        + getTotalSteps(): int
+        + getCurrentStepIndex(): int
+    }
+
+    class OrderStatus {
+        - steps: Long[]
+        - currentStepIndex: int
+        - statusUpdates: Map<Long, LocalDateTime>
+        + canMoveToNextStep(): boolean
+        + canMoveToPreviousStep(): boolean
+        + moveToNextStep()
+        + moveToPreviousStep()
+        + getCurrentStepId(): Long
+        + toProgress(): OrderProgress
+    }
+
+    class ProductTypeTransition {
+        - itemId: Long
+        - sourceProductTypeId: Long
+        - targetProductTypeId: Long
+        - targetProductType: ProductType
+        + createNewOrderStatus(initialStepTime: LocalDateTime): OrderStatus
+        + isValidTransition(): boolean
+        + getTargetProductTypeName(): String
+    }
+
+    class OrderProgress {
+        - currentStep: int
+        - totalSteps: int
+        - currentStepId: Long
+        - stepHistory: Map<Long, LocalDateTime>
+        + getPercentComplete(): double
+        + getCurrentStepId(): Long
+        + getStepHistory(): Map<Long, LocalDateTime>
+    }
+
+    class OrderTimeline {
+        - orderCreated: LocalDateTime
+        - itemStatusTimestamps: Map<Long, Map<Long, LocalDateTime>>
+        - isPriority: boolean
+        + recordItemStatus(itemId: Long, statusId: Long, timestamp: LocalDateTime)
+        + getItemDuration(itemId: Long): Duration
+        + getTotalDuration(): Duration
+        + getLatestUpdate(): LocalDateTime
+        + hasStatus(itemId: Long, statusId: Long): boolean
+        + getStatusTimestamp(itemId: Long, statusId: Long): Optional<LocalDateTime>
+        + getItemStatusesSorted(itemId: Long): List<Map.Entry<Long, LocalDateTime>>
+    }
+
+    class OrderEstimation {
+        - itemQuantities: Map<Long, Integer>
+        - itemProcessingTimes: Map<Long, Integer>
+        - isPriority: boolean
+        + calculateTotalEstimatedTime(): int
+        + calculateEstimatedCompletion(startTime: LocalDateTime): LocalDateTime
+        + getItemEstimations(): Map<Long, Duration>
+        + getEstimatedDuration(): Duration
+        + isDelayed(timeline: OrderTimeline): boolean
+        + getCompletionPercentage(timeline: OrderTimeline): double
+        + getItemDelayStatus(timeline: OrderTimeline): Map<Long, Boolean>
+    }
+
+    class OrderCreatedEvent
+    class ItemAddedEvent
+    class ItemStatusChangedEvent {
+        + isProgressionEvent(): boolean
+        + isRegressionEvent(): boolean
+    }
+    class ProductTypeChangedEvent {
+        + isInitialAssignment(): boolean
     }
 
     interface OrderCommand {
-        + execute(order: Order): void
+        + execute(order: DomainOrder): void
     }
 
-    class CreateOrderCommand {
-        - id: OrderId
-        - customerInfo: CustomerInfo
-        - items: Map<Long, Integer>
-        - processingTimes: Map<Long, Integer>
-        - priority: boolean
-        + execute(order: Order): void
-    }
-
-    class UpdateItemStatusCommand {
-        - itemId: Long
-        - newStatus: OrderStatus
-        + execute(order: Order): void
-    }
-
-    class UpdateProductTypeCommand {
-        - itemId: Long
-        - transition: ProductTypeTransition
-        + execute(order: Order): void
-    }
-
-    class CreateItemCommand {
-        - itemDTO: ItemDTO
-        - itemRepository: ItemRepository
-        - productTypeRepository: ProductTypeRepository
-        + execute(): Item
-    }
-
-    class CreateProductTypeCommand {
-        - productTypeDTO: ProductTypeDTO
-        - productTypeRepository: ProductTypeRepository
-        - statusDefinitionRepository: StatusDefinitionRepository
-        + execute(): ProductType
-    }
-
-    class CreateStatusDefinitionCommand {
-        - dto: StatusDefinitionDTO
-        - repository: StatusDefinitionRepository
-        + execute(): StatusDefinition
-    }
-
-    class ProcessWebhookCommand {
-        - payload: WebhookPayload
-        - orderService: OrderService
-        - itemService: ItemService
-        - repositories...
-        + execute(): void
-    }
-
-    class SetupOrderDetailsCommand {
-        - orderId: Long
-        - items: Map<Long, Integer>
-        - repositories...
-        + execute(): void
-    }
+    class CreateOrderCommand
+    class UpdateItemStatusCommand
+    class UpdateProductTypeCommand
+    class CreateItemCommand
+    class CreateProductTypeCommand
+    class ProcessWebhookCommand
+    class SetupOrderDetailsCommand
+    class CreateStatusDefinitionCommand
 
     interface OrderSpecification {
-        + isSatisfiedBy(order: Order): boolean
+        + isSatisfiedBy(order: DomainOrder): boolean
+        + and(other: OrderSpecification): OrderSpecification
+        + or(other: OrderSpecification): OrderSpecification
+        + not(): OrderSpecification
     }
 
-    class OrderInvariantsSpecification {
-        + {static} getInstance(): OrderInvariantsSpecification
-        + isSatisfiedBy(order: Order): boolean
+    class OrderInvariantsSpecification
+    class HasItemSpecification
+    class CanChangeProductTypeSpecification
+}
+
+' DTO Layer
+package "DTO Layer" {
+    class OrderDTO {
+        - customerName: String
+        - notes: String
+        - priority: boolean
+        - items: List<ItemDTO>
     }
 
-    class WebhookOrder {
-        + {static} fromPayload(payload: WebhookPayload): WebhookOrder
+    class ItemDTO {
+        - id: Long
+        - name: String
+        - image: String
+        - productTypeId: Long
+    }
+
+    class OrderDetailsWithStatusDTO {
+        - orderId: Long
+        - item: ItemDTO
+        - itemAmount: Integer
+        - productType: String
+        - currentStep: Integer
+        - totalSteps: Integer
+        - statusHistory: Map<Long, LocalDateTime>
+    }
+
+    class OrderDashboardDTO {
+        - id: Long
+        - customerName: String
+        - priority: boolean
+        - orderCreated: LocalDateTime
+        - completionPercentage: double
+        - isDelayed: boolean
+    }
+
+    class ProductTypeDTO {
+        - name: String
+        - steps: Long[]
+    }
+
+    class StatusDefinitionDTO {
+        - name: String
+        - description: String
+        - image: String
+    }
+
+    class UpdateProductTypeDTO {
+        - itemId: Long
+        - targetProductTypeId: Long
+    }
+}
+
+' Mapper Layer
+package "Mapper Layer" {
+    class OrderMapper {
+        + toDTO(order: ModelOrder): OrderDTO
+        + toDashboardDTO(order: ModelOrder): OrderDashboardDTO
+        + toDetailsDTO(orderDetails: OrderDetails): OrderDetailsWithStatusDTO
+        + fromDTO(dto: OrderDTO): ModelOrder
+    }
+
+    class OrderDetailsMapper {
+        + toDTO(orderDetails: OrderDetails): OrderDetailsWithStatusDTO
+        + fromDTO(dto: OrderDetailsWithStatusDTO): OrderDetails
+    }
+
+    class WebhookMapper {
+        + toOrder(payload: WebhookPayload): DomainOrder
+        + toOrderDetails(payload: WebhookPayload): OrderDetails
     }
 }
 
 ' Model Layer
 package "Model Layer" {
-    interface OrderRepository {
-        + save(order: Order): Order
-        + findById(id: Long): Optional<Order>
-    }
-
-    interface OrderProductTypeRepository {
-        + save(orderDetails: OrderDetails): OrderDetails
-        + findByOrderId(orderId: Long): List<OrderDetails>
-    }
-
-    interface ItemRepository {
-        + save(item: Item): Item
-        + findById(id: Long): Optional<Item>
-    }
-
-    interface ProductTypeRepository {
-        + save(productType: ProductType): ProductType
-        + findById(id: Long): Optional<ProductType>
-    }
-
-    class OrderEntity {
+    class Item {
         - id: Long
-        - customerName: String
-        - priority: boolean
-        - notes: String
+        - name: String
+        - image: String
+        - productTypeId: Long
+    }
+
+    class ProductType {
+        - id: Long
+        - name: String
+        - differentSteps: Long[]
+    }
+
+    class StatusDefinition {
+        - id: Long
+        - name: String
+        - description: String
+        - image: String
     }
 
     class OrderDetails {
@@ -216,51 +256,210 @@ package "Model Layer" {
         - differentSteps: Long[]
         - updated: Map<Long, LocalDateTime>
     }
+
+    class ModelOrder {
+        - id: Long
+        - customerName: String
+        - notes: String
+        - priority: boolean
+        - orderCreated: LocalDateTime
+        - shippingUrl: String
+        - totalEstimatedTime: int
+    }
+}
+
+' Repository Layer
+package "Repository Layer" {
+    interface JpaRepository<T, ID>
+
+    interface OrderRepository {
+        + findByCustomerNameContainingIgnoreCase(customerName: String): List<ModelOrder>
+        + findByPriorityTrue(): List<ModelOrder>
+        + findAllByOrderByOrderCreatedAsc(): List<ModelOrder>
+    }
+
+    interface ItemRepository {
+        + findByProductTypeId(productTypeId: Long): List<Item>
+        + findByNameContainingIgnoreCase(name: String): List<Item>
+    }
+
+    interface ProductTypeRepository {
+        + findByNameContainingIgnoreCase(name: String): List<ProductType>
+    }
+
+    interface StatusDefinitionRepository {
+        + findByNameContainingIgnoreCase(name: String): List<StatusDefinition>
+    }
+
+    interface OrderProductTypeRepository {
+        + findByOrderId(orderId: Long): List<OrderDetails>
+        + findByCurrentStepIndex(currentStepIndex: Integer): List<OrderDetails>
+        + findByItemId(itemId: Long): List<OrderDetails>
+    }
+}
+
+' Service Layer
+package "Service Layer" {
+    class OrderService {
+        - orderRepository: OrderRepository
+        - orderProductTypeRepository: OrderProductTypeRepository
+        - itemService: ItemService
+        - statusDefinitionRepository: StatusDefinitionRepository
+        - productTypeRepository: ProductTypeRepository
+        + createOrder(orderDTO: OrderDTO): ModelOrder
+        + getOrderDetails(orderId: Long): List<OrderDetailsWithStatusDTO>
+        + getAllOrders(): List<OrderDashboardDTO>
+        + createStatusDefinition(dto: StatusDefinitionDTO): StatusDefinition
+    }
+
+    class WebhookService {
+        - orderService: OrderService
+        - itemService: ItemService
+        - productTypeService: ProductTypeService
+        + createOrderInDatabase(payload: WebhookPayload): void
+    }
+
+    class ItemService {
+        - itemRepository: ItemRepository
+        - productTypeRepository: ProductTypeRepository
+        + createItem(itemDTO: ItemDTO): Item
+        + findById(itemId: Long): Item
+    }
+
+    class ProductTypeService {
+        - productTypeRepository: ProductTypeRepository
+        - statusDefinitionRepository: StatusDefinitionRepository
+        + createProductType(productTypeDTO: ProductTypeDTO): ProductType
+        + updateItemProductType(itemId: Long, targetProductTypeId: Long): void
+        + findById(productTypeId: Long): ProductType
+    }
+
+    class OrderProgressService {
+        + getProgress(orderDetailsId: Long): OrderProgress
+        + moveToNextStep(orderDetailsId: Long): OrderProgress
+        + moveToPreviousStep(orderDetailsId: Long): OrderProgress
+    }
+}
+
+' Controller Layer
+package "Controller Layer" {
+    class OrderController {
+        - orderService: OrderService
+        - itemService: ItemService
+        - productTypeService: ProductTypeService
+        - orderProgressService: OrderProgressService
+        + createOrder(orderDTO: OrderDTO): ResponseEntity
+        + getOrderDetails(orderId: Long): ResponseEntity
+        + createItem(itemDTO: ItemDTO): ResponseEntity
+        + createProductType(productTypeDTO: ProductTypeDTO): ResponseEntity
+        + createStatusDefinition(dto: StatusDefinitionDTO): ResponseEntity
+        + updateItemProductType(dto: UpdateProductTypeDTO): ResponseEntity
+        + moveToNextStep(id: Long): ResponseEntity
+        + moveToPrevStep(id: Long): ResponseEntity
+        + getAllOrders(): ResponseEntity
+        + getProgress(id: Long): ResponseEntity
+    }
+
+    class WebhookController {
+        - webhookService: WebhookService
+        + handleWebhook(payload: WebhookPayload): ResponseEntity
+    }
 }
 
 ' Relationships
-OrderController ..> OrderService: uses
-WebhookController ..> WebhookService: uses
 
-WebhookService ..> OrderService: delegates order creation
-WebhookService ..> WebhookOrder: converts payload
-WebhookService ..> ItemService: ensures items exist
-WebhookService ..> OrderProductTypeRepository: creates order details
-WebhookService ..> WebhookMapper: uses
-WebhookService ..> OrderMapper: uses
-WebhookService ..> ProcessWebhookCommand: uses
+' Core Domain Relationships
+DomainOrder *-- "1" OrderId
+DomainOrder *-- "1" CustomerInfo
+DomainOrder *-- "*" OrderItem
+DomainOrder *-- "1" OrderTimeline
+DomainOrder *-- "1" OrderEstimation
+DomainOrder o-- "*" OrderEvent
 
-OrderService ..> OrderFactory: creates orders
-OrderService ..> OrderInvariantsSpecification: validates
-OrderService ..> OrderRepository: persists
-OrderService ..> ItemRepository: uses
-OrderService ..> ItemService: uses
-OrderService ..> ProductTypeService: uses
-OrderService ..> OrderProductTypeRepository: creates order details
-OrderService ..> OrderMapper: uses
-OrderService ..> OrderDetailsMapper: uses
-OrderService ..> CreateStatusDefinitionCommand: uses
-OrderService ..> SetupOrderDetailsCommand: uses
+OrderItem o-- "1" Item
+OrderItem *-- "1" OrderStatus
+OrderStatus ..> OrderProgress : creates
+OrderStatus ..> "1..*" StatusDefinition : references by ID
 
-ItemService ..> CreateItemCommand: uses
-ProductTypeService ..> CreateProductTypeCommand: uses
-ProductTypeService ..> UpdateProductTypeCommand: uses
+ProductTypeTransition o-- "1" ProductType
+ProductTypeTransition ..> OrderStatus : creates
 
+' Event Hierarchy
+OrderEvent <|-- OrderCreatedEvent
+OrderEvent <|-- ItemAddedEvent
+OrderEvent <|-- ItemStatusChangedEvent
+OrderEvent <|-- ProductTypeChangedEvent
+
+' Command Hierarchy
 OrderCommand <|.. CreateOrderCommand
 OrderCommand <|.. UpdateItemStatusCommand
 OrderCommand <|.. UpdateProductTypeCommand
+OrderCommand <|.. CreateItemCommand
+OrderCommand <|.. CreateProductTypeCommand
+OrderCommand <|.. ProcessWebhookCommand
+OrderCommand <|.. SetupOrderDetailsCommand
 
-OrderFactory ..> Order: creates
-WebhookOrder ..> CustomerInfo: creates
-WebhookOrder ..> OrderId: creates
+' Specification Hierarchy
+OrderSpecification <|.. OrderInvariantsSpecification
+OrderSpecification <|.. HasItemSpecification
+OrderSpecification <|.. CanChangeProductTypeSpecification
 
-UpdateProductTypeCommand ..> ProductTypeTransition: uses
-UpdateItemStatusCommand ..> OrderStatus: uses
+' Model Relationships
+Item --> "0..1" ProductType : has type
+ProductType ..> "*" StatusDefinition : references by ID in differentSteps
+OrderDetails --> "1" Item : has
+OrderDetails --> "1" ModelOrder : belongs to
 
-ProcessWebhookCommand ..> SetupOrderDetailsCommand: uses
+' Repository Inheritance
+JpaRepository <|.. OrderRepository
+JpaRepository <|.. ItemRepository
+JpaRepository <|.. ProductTypeRepository
+JpaRepository <|.. StatusDefinitionRepository
+JpaRepository <|.. OrderProductTypeRepository
 
-OrderMapper ..> Order: maps
-OrderDetailsMapper ..> OrderDetails: maps
-WebhookMapper ..> CustomerInfo: maps
+' Repository to Model Relationships
+OrderRepository ..> ModelOrder : manages
+ItemRepository ..> Item : manages
+ProductTypeRepository ..> ProductType : manages
+StatusDefinitionRepository ..> StatusDefinition : manages
+OrderProductTypeRepository ..> OrderDetails : manages
+
+' Service Dependencies
+OrderService ..> OrderRepository : uses
+OrderService ..> ModelOrder : manages
+WebhookService ..> DomainOrder : creates
+ItemService ..> ItemRepository : uses
+ItemService ..> Item : manages
+ProductTypeService ..> ProductTypeRepository : uses
+ProductTypeService ..> ProductType : manages
+OrderProgressService ..> OrderProgress : manages
+OrderProgressService ..> OrderDetails : uses
+
+' Controller Dependencies
+OrderController ..> OrderService : uses
+OrderController ..> ItemService : uses
+OrderController ..> ProductTypeService : uses
+OrderController ..> OrderProgressService : uses
+WebhookController ..> WebhookService : uses
+
+' DTO and Mapper Dependencies
+OrderService ..> OrderDTO : uses
+OrderService ..> OrderDetailsWithStatusDTO : uses
+OrderService ..> OrderDashboardDTO : uses
+OrderService ..> OrderMapper : uses
+OrderService ..> OrderDetailsMapper : uses
+
+WebhookService ..> WebhookMapper : uses
+
+OrderMapper ..> ModelOrder : transforms
+OrderMapper ..> OrderDTO : transforms
+OrderMapper ..> OrderDashboardDTO : transforms
+OrderMapper ..> OrderDetailsWithStatusDTO : transforms
+
+OrderDetailsMapper ..> OrderDetails : transforms
+OrderDetailsMapper ..> OrderDetailsWithStatusDTO : transforms
+
+WebhookMapper ..> DomainOrder : transforms
+WebhookMapper ..> OrderDetails : transforms
 
 @enduml
