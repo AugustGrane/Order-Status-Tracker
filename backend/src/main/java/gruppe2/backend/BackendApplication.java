@@ -14,6 +14,7 @@ public class BackendApplication {
         
         System.setProperty("NEON_DB_USERNAME", dotenv.get("NEON_DB_USERNAME"));
         System.setProperty("NEON_DB_PASSWORD", dotenv.get("NEON_DB_PASSWORD"));
+        System.setProperty("NEON_DB_URL", dotenv.get("NEON_DB_URL"));
         
         SpringApplication.run(BackendApplication.class, args);
     }
