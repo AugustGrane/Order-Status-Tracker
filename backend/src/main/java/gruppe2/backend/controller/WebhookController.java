@@ -18,7 +18,6 @@ public class WebhookController {
     private static final Logger log = LoggerFactory.getLogger(WebhookController.class);
     private final WebhookService webhookService;
 
-    // Dependency injection of WebhookService
     @Autowired
     public WebhookController(WebhookService webhookService) {
         this.webhookService = webhookService;
@@ -27,11 +26,20 @@ public class WebhookController {
     @PostMapping("/wooOrder")
     public ResponseEntity<WebhookPayload> handleWebhook(@RequestBody WebhookPayload payload) {
         try {
+            // Validate required fields
+            if (payload == null || 
+                payload.getId() == 0 || 
+                payload.getBilling() == null || 
+                payload.getItems() == null || 
+                payload.getItems().isEmpty()) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
             webhookService.createOrderInDatabase(payload);
             return ResponseEntity.ok(payload);
         } catch (Exception e) {
             log.error("Error processing webhook payload: ", e);
             return ResponseEntity.status(500).body(null);
-            }
         }
     }
+}
