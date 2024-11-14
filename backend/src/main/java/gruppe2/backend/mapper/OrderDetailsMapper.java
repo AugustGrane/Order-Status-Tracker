@@ -5,6 +5,7 @@ import gruppe2.backend.domain.OrderStatus;
 import gruppe2.backend.dto.OrderDashboardDTO;
 import gruppe2.backend.dto.OrderDetailsWithStatusDTO;
 import gruppe2.backend.model.OrderDetails;
+import gruppe2.backend.model.OrderModel;
 import gruppe2.backend.model.StatusDefinition;
 import gruppe2.backend.repository.StatusDefinitionRepository;
 import org.springframework.stereotype.Component;
@@ -53,18 +54,18 @@ public class OrderDetailsMapper {
         );
     }
 
-    public OrderDashboardDTO toOrderDashboardDTO(gruppe2.backend.model.Order orderEntity, List<OrderDetails> orderDetails) {
+    public OrderDashboardDTO toOrderDashboardDTO(OrderModel orderModelEntity, List<OrderDetails> orderDetails) {
         List<OrderDetailsWithStatusDTO> items = orderDetails.stream()
                 .map(this::toOrderDetailsDTO)
                 .sorted(Comparator.comparing(OrderDetailsWithStatusDTO::id))
                 .collect(Collectors.toList());
 
         return new OrderDashboardDTO(
-            orderEntity.getId(),
-            orderEntity.getOrderCreated(),
-            orderEntity.isPriority(),
-            orderEntity.getCustomerName(),
-            orderEntity.getNotes(),
+            orderModelEntity.getId(),
+            orderModelEntity.getOrderCreated(),
+            orderModelEntity.isPriority(),
+            orderModelEntity.getCustomerName(),
+            orderModelEntity.getNotes(),
             items
         );
     }

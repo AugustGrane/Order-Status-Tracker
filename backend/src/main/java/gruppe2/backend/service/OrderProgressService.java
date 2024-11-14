@@ -52,7 +52,7 @@ public class OrderProgressService {
             status
         );
 
-        // Create Order domain object and execute command
+        // Create OrderModel domain object and execute command
         Order order = createOrderFromDetails(orderDetails);
         command.execute(order);
 
@@ -83,7 +83,7 @@ public class OrderProgressService {
             status
         );
 
-        // Create Order domain object and execute command
+        // Create OrderModel domain object and execute command
         Order order = createOrderFromDetails(orderDetails);
         command.execute(order);
 
@@ -95,7 +95,7 @@ public class OrderProgressService {
 
     private Order createOrderFromDetails(OrderDetails orderDetails) {
         var orderEntity = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
 
         CustomerInfo customerInfo = new CustomerInfo(
             orderEntity.getCustomerName(),
@@ -154,7 +154,7 @@ public class OrderProgressService {
 
         // Create timeline for status tracking
         var order = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
 
         OrderTimeline timeline = new OrderTimeline(order.getOrderCreated(), order.isPriority());
         timeline.recordItemStatus(orderDetails.getItem().getId(),

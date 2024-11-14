@@ -8,7 +8,7 @@ public class OrderId {
 
     public OrderId(Long value) {
         if (value == null || value <= 0) {
-            throw new OrderException("Order ID must be a positive number") {};
+            throw new OrderException("OrderModel ID must be a positive number") {};
         }
         this.value = value;
     }

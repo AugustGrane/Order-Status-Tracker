@@ -1,6 +1,6 @@
 package gruppe2.backend.controller;
 
-import gruppe2.backend.model.Order;
+import gruppe2.backend.model.OrderModel;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.ProductType;
 import gruppe2.backend.model.StatusDefinition;
@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OrderControllerTest {
+class OrderModelControllerTest {
 
     @Mock
     private OrderService orderService;
@@ -47,7 +47,7 @@ class OrderControllerTest {
     @InjectMocks
     private OrderController orderController;
 
-    private Order testOrder;
+    private OrderModel testOrderModel;
     private OrderDTO testOrderDTO;
     private Item testItem;
     private ItemDTO testItemDTO;
@@ -72,13 +72,13 @@ class OrderControllerTest {
             ""
         );
 
-        // Create a test Order
-        testOrder = new Order();
-        testOrder.setId(1L);
-        testOrder.setCustomerName("Test Customer");
-        testOrder.setPriority(true);
-        testOrder.setNotes("Test Notes");
-        testOrder.setOrderCreated(LocalDateTime.now());
+        // Create a test OrderModel
+        testOrderModel = new OrderModel();
+        testOrderModel.setId(1L);
+        testOrderModel.setCustomerName("Test Customer");
+        testOrderModel.setPriority(true);
+        testOrderModel.setNotes("Test Notes");
+        testOrderModel.setOrderCreated(LocalDateTime.now());
 
         // Create test Item and ItemDTO
         testItem = new Item();
@@ -140,14 +140,14 @@ class OrderControllerTest {
     }
 
     @Nested
-    @DisplayName("Order Creation Tests")
-    class OrderCreationTests {
+    @DisplayName("OrderModel Creation Tests")
+    class OrderModelCreationTests {
         @Test
-        @DisplayName("Create Order Successfully")
+        @DisplayName("Create OrderModel Successfully")
         void createOrderSuccessfully() {
-            when(orderService.createOrder(any(OrderDTO.class))).thenReturn(testOrder);
+            when(orderService.createOrder(any(OrderDTO.class))).thenReturn(testOrderModel);
 
-            ResponseEntity<Order> response = orderController.createOrder(testOrderDTO);
+            ResponseEntity<OrderModel> response = orderController.createOrder(testOrderDTO);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -155,21 +155,21 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("Create Order with Empty Items")
+        @DisplayName("Create OrderModel with Empty Items")
         void createOrderWithEmptyItems() {
             OrderDTO emptyOrderDTO = new OrderDTO(null, "Test Customer", true, "Test Notes", Collections.emptyMap(), "");
             when(orderService.createOrder(any(OrderDTO.class))).thenThrow(new RuntimeException("Empty items"));
 
-            ResponseEntity<Order> response = orderController.createOrder(emptyOrderDTO);
+            ResponseEntity<OrderModel> response = orderController.createOrder(emptyOrderDTO);
 
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNull(response.getBody());
         }
 
         @Test
-        @DisplayName("Create Order with Null DTO")
+        @DisplayName("Create OrderModel with Null DTO")
         void createOrderWithNullDTO() {
-            ResponseEntity<Order> response = orderController.createOrder(null);
+            ResponseEntity<OrderModel> response = orderController.createOrder(null);
 
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNull(response.getBody());
@@ -294,8 +294,8 @@ class OrderControllerTest {
     }
 
     @Nested
-    @DisplayName("Order Progress Tests")
-    class OrderProgressTests {
+    @DisplayName("OrderModel Progress Tests")
+    class OrderModelProgressTests {
         @Test
         @DisplayName("Move To Next Step Successfully")
         void moveToNextStepSuccessfully() {
@@ -422,10 +422,10 @@ class OrderControllerTest {
     }
 
     @Nested
-    @DisplayName("Order Retrieval Tests")
-    class OrderRetrievalTests {
+    @DisplayName("OrderModel Retrieval Tests")
+    class OrderModelRetrievalTests {
         @Test
-        @DisplayName("Get Order Details by Valid ID")
+        @DisplayName("Get OrderModel Details by Valid ID")
         void getOrderDetailsByValidId() {
             Long orderId = 1L;
             List<OrderDetailsWithStatusDTO> mockOrderDetails = Collections.emptyList();
@@ -439,10 +439,10 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("Get Order Details by Non-Existent ID")
+        @DisplayName("Get OrderModel Details by Non-Existent ID")
         void getOrderDetailsByNonExistentId() {
             Long orderId = 999L;
-            when(orderService.getOrderDetails(orderId)).thenThrow(new RuntimeException("Order not found"));
+            when(orderService.getOrderDetails(orderId)).thenThrow(new RuntimeException("OrderModel not found"));
 
             ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetails(orderId);
 
@@ -451,7 +451,7 @@ class OrderControllerTest {
         }
 
         @Test
-        @DisplayName("Get Order Details with Null ID")
+        @DisplayName("Get OrderModel Details with Null ID")
         void getOrderDetailsWithNullId() {
             ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetails(null);
 

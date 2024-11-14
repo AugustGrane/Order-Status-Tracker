@@ -1,9 +1,34 @@
 <script lang="ts">
     import type { PageData } from './$types';
-    export let data: PageData;
-    const orders = data.orders; // If you want to create a shorter reference
-    console.log(orders);
+    import { onMount } from 'svelte';
     
+    export let data: PageData;
+    let orders = data.orders;
+    let orderDetails = data.initialDetails;
+    
+    const loadOrderDetails = async (orderId: number) => {
+        if (!orderDetails[orderId]) {
+            try {
+                const response = await fetch(`/api/orders/${orderId}/details`);
+                const details = await response.json();
+                orderDetails[orderId] = details;
+                orderDetails = orderDetails; // Trigger reactivity
+            } catch (error) {
+                console.error('Error loading order details:', error);
+            }
+        }
+    };
+
+    const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('da-DK', { 
+            year: 'numeric', 
+            month: '2-digit', 
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 </script>
 
 <main>
@@ -32,33 +57,36 @@
                     <div class="order-number">Ordrenummer</div>
                     <div class="date">Dato</div>
                     <div class="customer">Kundens navn</div>
-                    <div class="items-and-amount">Artikler og mængde</div>
-                    <div class="status">Artikelstatus</div> <!-- Changed class name here -->
+                    <div class="items-and-amount">Antal artikler</div>
+                    <div class="priority">Prioritet</div>
                 </div>
                 <div class="order">
                     {#each orders as order}
-                        <div class="order-container">
+                        <div class="order-container" 
+                             class:priority={order.priority}
+                             on:mouseenter={() => loadOrderDetails(order.orderId)}>
                             <div class="actual-order-number">{order.orderId}</div>
-                            <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
+                            <div class="actual-date">{formatDate(order.orderCreated)}</div>
                             <div class="actual-customer">{order.customerName}</div>
-                            <div class="item-status-container">
-                                {#each order.items as item}
-                                    <div class="item-status-instance">
-                                        <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
-                                        <div class="actual-status">
-                                            <select class="dropdown-status">
-                                                {#each item.differentSteps as step}
-                                                    {#if step.name == item.differentSteps[item.currentStepIndex].name}
-                                                        <option selected>{item.differentSteps[item.currentStepIndex].name}&nbsp;</option>
-                                                    {:else}
-                                                        <option>{step.name}&nbsp;</option>
-                                                    {/if}
-                                                {/each}
-                                            </select>
+                            <div class="actual-items">{order.totalItems} artikler</div>
+                            <div class="actual-priority">{order.priority ? 'Ja' : 'Nej'}</div>
+                            
+                            {#if orderDetails[order.orderId]}
+                                <div class="details-container">
+                                    {#each orderDetails[order.orderId].items || [] as item}
+                                        <div class="item-status-instance">
+                                            <div class="actual-item">{item.item.name} - {item.itemAmount}</div>
+                                            <div class="actual-status">
+                                                <select class="dropdown-status">
+                                                    {#each item.differentSteps as step}
+                                                        <option>{step}</option>
+                                                    {/each}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
-                                {/each}
-                            </div>
+                                    {/each}
+                                </div>
+                            {/if}
                         </div>
                     {/each}
                 </div>
@@ -68,26 +96,6 @@
 </main>
 
 <style>
-
-    /*{#if orders} <!-- Now we can check just orders -->
-        {#each orders as order}
-            <p>Order ID: {order.orderId}</p>
-            <p>Date created: {new Date(order.orderCreated).toLocaleDateString()}</p>
-            <p>Customer name: {order.customerName}</p>
-            <h3>Products:
-                {#each order.items as item}
-                    Name: {item.item.name},
-                    Amount: {item.itemAmount},
-                    Status: {item.differentSteps[item.currentStepIndex].name}&nbsp;
-                {/each}
-            </h3>
-            <p>Notes: {order.Notes}</p>
-            <br>
-        {/each}
-    {:else}
-        <p>Loading...</p>
-    {/if}*/
-
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     html {
@@ -439,4 +447,44 @@
         border-radius: 15px;
     }
 
+    .order-container {
+        display: flex;
+        padding: 15px;
+        border-bottom: 1px solid #eee;
+        align-items: center;
+        transition: background-color 0.2s;
+    }
+
+    .order-container:hover {
+        background-color: #f5f5f5;
+    }
+
+    .order-container.priority {
+        background-color: #fff3e0;
+    }
+
+    .order-container > div {
+        flex: 1;
+        padding: 0 10px;
+    }
+
+    .actual-priority {
+        color: #666;
+    }
+
+    .details-container {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .order-container:hover .details-container {
+        display: block;
+    }
 </style>

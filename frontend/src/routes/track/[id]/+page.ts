@@ -1,31 +1,33 @@
 import type { PageLoad } from './$types';
+import type { OrderDetailsWithStatus } from '$lib/types';
 
 export const load = (async ({ fetch, params }) => {
     try {
         const response = await fetch(`/api/orders/${params.id}`);
         if (!response.ok) {
             return { 
-                order: null,
+                orderModel: null,
                 orderNotFound: true,
                 orderId: params.id
             };
         }
-        const order = await response.json();
-        if (!order) {
+        const orderDetails: OrderDetailsWithStatus[] = await response.json();
+        if (!orderDetails || orderDetails.length === 0) {
             return { 
-                order: null,
+                orderModel: null,
                 orderNotFound: true,
                 orderId: params.id
             };
         }
         return { 
-            order,
+            orderModel: orderDetails,
             orderNotFound: false,
             orderId: params.id
         };
     } catch (e) {
+        console.error('Error loading order:', e);
         return { 
-            order: null,
+            orderModel: null,
             orderNotFound: true,
             orderId: params.id
         };

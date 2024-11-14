@@ -2,6 +2,7 @@ package gruppe2.backend.mapper;
 
 import gruppe2.backend.domain.Order;
 import gruppe2.backend.dto.OrderDTO;
+import gruppe2.backend.model.OrderModel;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -9,15 +10,15 @@ import java.util.HashMap;
 @Component
 public class OrderMapper {
     
-    public gruppe2.backend.model.Order toModelOrder(Order domainOrder) {
-        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        orderEntity.setId(domainOrder.getId().getValue());
-        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
-        orderEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
-        orderEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
-        orderEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
-        orderEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
-        return orderEntity;
+    public OrderModel toModelOrder(Order domainOrder) {
+        OrderModel orderModelEntity = new OrderModel();
+        orderModelEntity.setId(domainOrder.getId().getValue());
+        orderModelEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
+        orderModelEntity.setPriority(domainOrder.getCustomerInfo().isPriority());
+        orderModelEntity.setNotes(domainOrder.getCustomerInfo().getNotes());
+        orderModelEntity.setOrderCreated(domainOrder.getTimeline().getOrderCreated());
+        orderModelEntity.setTotalEstimatedTime(domainOrder.getEstimation().calculateTotalEstimatedTime());
+        return orderModelEntity;
     }
 
     public OrderDTO toOrderDTO(Order order) {

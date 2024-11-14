@@ -10,7 +10,7 @@ import gruppe2.backend.model.*;
 import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -45,7 +45,7 @@ public class OrderService {
     }
 
     @Transactional
-    public gruppe2.backend.model.Order createOrder(OrderDTO orderDTO) {
+    public OrderModel createOrder(OrderDTO orderDTO) {
         // Get processing times for items
         Map<Long, Integer> processingTimes = getProcessingTimes(orderDTO.items().keySet());
         
@@ -73,15 +73,15 @@ public class OrderService {
         // Validate using specification
         OrderInvariantsSpecification invariants = OrderInvariantsSpecification.getInstance();
         if (!invariants.isSatisfiedBy(domainOrder)) {
-            throw new IllegalStateException("Order validation failed");
+            throw new IllegalStateException("OrderModel validation failed");
         }
 
         // Persist order using mapper
-        gruppe2.backend.model.Order persistedOrder = orderRepository.save(orderMapper.toModelOrder(domainOrder));
+        OrderModel persistedOrderModel = orderRepository.save(orderMapper.toModelOrder(domainOrder));
 
         // Create order items with their statuses using command
         SetupOrderDetailsCommand setupCommand = new SetupOrderDetailsCommand(
-            persistedOrder.getId(),
+            persistedOrderModel.getId(),
             orderDTO.items(),
             itemRepository,
             productTypeRepository,
@@ -89,7 +89,7 @@ public class OrderService {
         );
         setupCommand.execute();
         
-        return persistedOrder;
+        return persistedOrderModel;
     }
 
     private Long generateOrderId() {
@@ -107,8 +107,20 @@ public class OrderService {
         return processingTimes;
     }
 
-    public List<OrderDetailsWithStatusDTO> getOrderDetails(Long orderId) {
-        gruppe2.backend.model.Order order = orderRepository.findById(orderId)
+    @Transactional(readOnly = true)
+    public List<OrderSummaryProjection> getAllOrderSummaries() {
+        return orderRepository.findAllOrderSummaries();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderModel getOrderDetails(Long orderId) {
+        return orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderDetailsWithStatusDTO> getOrderDetailsWithStatus(Long orderId) {
+        OrderModel orderModel = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
@@ -118,12 +130,9 @@ public class OrderService {
     }
 
     public List<OrderDashboardDTO> getAllOrders() {
-        List<gruppe2.backend.model.Order> orderEntities = orderRepository.findAllByOrderByOrderCreatedAsc();
-        return orderEntities.stream()
-                .map(order -> {
-                    List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(order.getId());
-                    return orderDetailsMapper.toOrderDashboardDTO(order, orderDetails);
-                })
+        List<OrderModel> orderModelEntities = orderRepository.findAllWithDetailsOrderByOrderCreatedAsc();
+        return orderModelEntities.stream()
+                .map(order -> orderDetailsMapper.toOrderDashboardDTO(order, order.getOrderDetails()))
                 .collect(Collectors.toList());
     }
 

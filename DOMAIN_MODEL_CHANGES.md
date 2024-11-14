@@ -28,13 +28,13 @@ Contains persistence entities:
 ### Service Layer (`/service`)
 Orchestrates domain objects and persistence:
 - OrderService: Creates and manages orders
-- OrderProgressService: Handles order status changes
+- OrderProgressService: Handles orderModel status changes
 - ProductTypeService: Manages product type transitions
 - Translates between domain and model objects
 
 ### Controller Layer (`/controller`)
 Handles HTTP requests and responses:
-- OrderController: Exposes order operations
+- OrderController: Exposes orderModel operations
 - WebhookController: Handles external integrations
 - Works with DTOs and delegates to services
 
@@ -44,7 +44,7 @@ Handles HTTP requests and responses:
 Located in `domain/command/`:
 ```java
 public interface OrderCommand {
-    void execute(Order order);
+    void execute(Order orderModel);
 }
 ```
 
@@ -56,8 +56,8 @@ Concrete implementations:
        private final OrderStatus newStatus;
        
        @Override
-       public void execute(Order order) {
-           order.updateItemStatus(itemId, newStatus);
+       public void execute(Order orderModel) {
+           orderModel.updateItemStatus(itemId, newStatus);
        }
    }
    ```
@@ -69,8 +69,8 @@ Concrete implementations:
        private final ProductTypeTransition transition;
        
        @Override
-       public void execute(Order order) {
-           order.updateItemProductType(itemId, transition);
+       public void execute(Order orderModel) {
+           orderModel.updateItemProductType(itemId, transition);
        }
    }
    ```
@@ -79,7 +79,7 @@ Concrete implementations:
 Located in `domain/specification/`:
 ```java
 public interface OrderSpecification {
-    boolean isSatisfiedBy(Order order);
+    boolean isSatisfiedBy(Order orderModel);
     OrderSpecification and(OrderSpecification other);
     OrderSpecification or(OrderSpecification other);
     OrderSpecification not();
@@ -87,14 +87,14 @@ public interface OrderSpecification {
 ```
 
 Concrete implementations:
-1. `OrderInvariantsSpecification`: Validates order rules
+1. `OrderInvariantsSpecification`: Validates orderModel rules
    ```java
    public class OrderInvariantsSpecification implements OrderSpecification {
        @Override
-       public boolean isSatisfiedBy(Order order) {
-           return order.getId() != null &&
-                  order.getCustomerInfo() != null &&
-                  order.getTimeline() != null;
+       public boolean isSatisfiedBy(Order orderModel) {
+           return orderModel.getId() != null &&
+                  orderModel.getCustomerInfo() != null &&
+                  orderModel.getTimeline() != null;
        }
    }
    ```
@@ -105,8 +105,8 @@ Concrete implementations:
        private final Long itemId;
        
        @Override
-       public boolean isSatisfiedBy(Order order) {
-           return order.findItem(itemId).isPresent();
+       public boolean isSatisfiedBy(Order orderModel) {
+           return orderModel.findItem(itemId).isPresent();
        }
    }
    ```
@@ -154,22 +154,22 @@ Services translate between domain and model:
 ```java
 @Service
 public class OrderService {
-    public gruppe2.backend.model.Order createOrder(OrderDTO dto) {
+    public gruppe2.backend.model.OrderModel createOrder(OrderDTO dto) {
         // Create domain object
         gruppe2.backend.domain.Order domainOrder = OrderFactory.createOrder(...);
         
         // Validate using domain rules
         if (!invariants.isSatisfiedBy(domainOrder)) {
-            throw new IllegalStateException("Invalid order");
+            throw new IllegalStateException("Invalid orderModel");
         }
         
         // Convert to model object for persistence
-        gruppe2.backend.model.Order orderEntity = new gruppe2.backend.model.Order();
-        orderEntity.setId(domainOrder.getId().getValue());
-        orderEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
+        gruppe2.backend.model.OrderModel orderModelEntity = new gruppe2.backend.model.OrderModel();
+        orderModelEntity.setId(domainOrder.getId().getValue());
+        orderModelEntity.setCustomerName(domainOrder.getCustomerInfo().getName());
         // ... more mapping ...
         
-        return orderRepository.save(orderEntity);
+        return orderRepository.save(orderModelEntity);
     }
 }
 ```

@@ -3,7 +3,7 @@ package gruppe2.backend.domain.specification;
 import gruppe2.backend.domain.Order;
 
 /**
- * Specification pattern interface for Order-related business rules.
+ * Specification pattern interface for OrderModel-related business rules.
  */
 @FunctionalInterface
 public interface OrderSpecification {

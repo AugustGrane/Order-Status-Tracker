@@ -3,6 +3,7 @@ package gruppe2.backend.controller;
 import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.model.*;
+import gruppe2.backend.repository.OrderSummaryProjection;
 import gruppe2.backend.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +43,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders")
-    public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
+    public ResponseEntity<OrderModel> createOrder(@RequestBody OrderDTO orderDTO) {
         if (orderDTO == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -76,7 +77,7 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
-    
+
     @PostMapping("/update-generic-product-type")
     public ResponseEntity<String> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
         if (dto == null) {
@@ -90,13 +91,34 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/orders/{orderId}")
-    public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderDetails(@PathVariable Long orderId) {
+    @GetMapping("/orders/summaries")
+    public ResponseEntity<List<OrderSummaryProjection>> getAllOrderSummaries() {
+        try {
+            return ResponseEntity.ok(orderService.getAllOrderSummaries());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/orders/{orderId}/details")
+    public ResponseEntity<OrderModel> getOrderDetails(@PathVariable Long orderId) {
         if (orderId == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         try {
             return ResponseEntity.ok(orderService.getOrderDetails(orderId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderDetailsWithStatus(@PathVariable Long orderId) {
+        if (orderId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        try {
+            return ResponseEntity.ok(orderService.getOrderDetailsWithStatus(orderId));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }

@@ -21,7 +21,7 @@ public class UpdateItemStatusCommand implements OrderCommand {
     @Override
     public void execute(Order order) {
         if (order == null) {
-            throw new IllegalArgumentException("Order cannot be null");
+            throw new IllegalArgumentException("OrderModel cannot be null");
         }
         order.updateItemStatus(itemId, newStatus);
     }

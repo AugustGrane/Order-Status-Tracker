@@ -2,11 +2,12 @@ package gruppe2.backend.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
-public class Order {
+public class OrderModel {
     @Id
     private Long id;
 
@@ -28,24 +29,20 @@ public class Order {
     @Column(name = "shipping_url")
     private String shippingUrl;
 
-//    @ElementCollection
-//    @CollectionTable(name = "item_mapping",
-//                    joinColumns = @JoinColumn(name = "order_id"))
-//    @MapKeyColumn(name = "item_id")
-//    @Column(name = "amount")
-//    private Map<Long, Integer> itemMapping;
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    private List<OrderDetails> orderDetails = new ArrayList<>();
 
-    public Order() {}
+    public OrderModel() {}
 
-    public Order(Long id, String customerName, boolean priority, String notes, 
-                LocalDateTime orderCreated, int totalEstimatedTime) {
+    public OrderModel(Long id, String customerName, boolean priority, String notes,
+                      LocalDateTime orderCreated, int totalEstimatedTime) {
         this.id = id;
         this.customerName = customerName;
         this.priority = priority;
         this.notes = notes;
         this.orderCreated = orderCreated;
         this.totalEstimatedTime = totalEstimatedTime;
-//        this.itemMapping = itemMapping;
     }
 
     // Getters and Setters
@@ -77,4 +74,6 @@ public class Order {
     public int getTotalEstimatedTime() { return totalEstimatedTime; }
     public void setTotalEstimatedTime(int totalEstimatedTime) { this.totalEstimatedTime = totalEstimatedTime; }
 
+    public List<OrderDetails> getOrderDetails() { return orderDetails; }
+    public void setOrderDetails(List<OrderDetails> orderDetails) { this.orderDetails = orderDetails; }
 }

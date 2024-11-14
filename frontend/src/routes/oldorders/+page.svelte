@@ -30,21 +30,21 @@
                     </select>
                 </div>
             </div>
-            <div class="order-overview">
+            <div class="orderModel-overview">
                 <div class="name-bar">
-                    <div class="order-number">Ordrenummer</div>
+                    <div class="orderModel-number">Ordrenummer</div>
                     <div class="date">Dato</div>
                     <div class="customer">Kundens navn</div>
                     <div class="items-and-amount">Artikler, mængde og status</div>
                 </div>
-                <div class="order">
-                    {#each orders as order}
-                        <div class="order-container">
-                            <div class="actual-order-number">{order.orderId}</div>
-                            <div class="actual-date">{new Date(order.orderCreated).toLocaleDateString()}</div>
-                            <div class="actual-customer">{order.customerName}</div>
+                <div class="orderModel">
+                    {#each orders as orderModel}
+                        <div class="orderModel-container">
+                            <div class="actual-orderModel-number">{orderModel.orderId}</div>
+                            <div class="actual-date">{new Date(orderModel.orderCreated).toLocaleDateString()}</div>
+                            <div class="actual-customer">{orderModel.customerName}</div>
                             <div class="item-status-container">
-                                {#each order.items as item}
+                                {#each orderModel.items as item}
                                     <div class="item-status-instance">
                                         <div class="actual-item">{item.item.name} &nbsp-&nbsp  {item.itemAmount}</div>
                                         <div class="actual-status">
@@ -72,18 +72,18 @@
 <style>
 
     /*{#if orders} <!-- Now we can check just orders -->
-        {#each orders as order}
-            <p>Order ID: {order.orderId}</p>
-            <p>Date created: {new Date(order.orderCreated).toLocaleDateString()}</p>
-            <p>Customer name: {order.customerName}</p>
+        {#each orders as orderModel}
+            <p>Order ID: {orderModel.orderId}</p>
+            <p>Date created: {new Date(orderModel.orderCreated).toLocaleDateString()}</p>
+            <p>Customer name: {orderModel.customerName}</p>
             <h3>Products:
-                {#each order.items as item}
+                {#each orderModel.items as item}
                     Name: {item.item.name},
                     Amount: {item.itemAmount},
                     Status: {item.differentSteps[item.currentStepIndex].name}&nbsp;
                 {/each}
             </h3>
-            <p>Notes: {order.Notes}</p>
+            <p>Notes: {orderModel.Notes}</p>
             <br>
         {/each}
     {:else}
@@ -191,7 +191,7 @@
         border: 1px solid #ccc;
     }
 
-    .order-overview {
+    .orderModel-overview {
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -209,7 +209,7 @@
         font-weight: bold;
     }
 
-    .order-container {
+    .orderModel-container {
         display: flex; /* Enable flexbox */
         justify-content: space-between; /* Ensure spacing between items */
         align-items: center; /* Align items vertically in the center */
@@ -219,7 +219,7 @@
         margin-bottom: 5px;
     }
 
-    .order-number,
+    .orderModel-number,
     .date,
     .customer {
         flex: 1; /* Each element takes an equal share of 3/5 */
@@ -236,7 +236,7 @@
         padding-right: 20px;
     }
 
-    .actual-order-number,
+    .actual-orderModel-number,
     .actual-date,
     .actual-customer {
         flex: 1; /* Each element takes an equal share of 3/5 */
@@ -244,10 +244,10 @@
         min-width: 10%;
     }
 
-    .order-container {
+    .orderModel-container {
         background-color: #c3c3c3;
     }
-    .order-container > *:last-child {
+    .orderModel-container > *:last-child {
         margin-right: 0; /* Remove spacing for the last element */
     }
 

@@ -26,7 +26,7 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 - Input validation
 - Routes requests to appropriate services
 - Key components:
-  - `OrderController`: Handles order-related endpoints
+  - `OrderController`: Handles orderModel-related endpoints
   - `WebhookController`: Processes incoming webhooks
 
 ### Service Layer
@@ -34,11 +34,11 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 - Manages transactions and persistence
 - Delegates business logic to domain layer
 - Key services:
-  - `OrderService`: Executes order commands and manages persistence
+  - `OrderService`: Executes orderModel commands and manages persistence
   - `WebhookService`: Converts webhooks to domain commands
   - `ItemService`: Handles item operations
   - `ProductTypeService`: Manages product types
-  - `OrderProgressService`: Tracks order progress
+  - `OrderProgressService`: Tracks orderModel progress
 
 ### Mapper Layer
 - Handles object transformations between different layers
@@ -62,16 +62,16 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
     - `UpdateItemStatusCommand`: Updates item status
     - `UpdateProductTypeCommand`: Changes product types
     - `ProcessWebhookCommand`: Processes webhook payloads
-    - `SetupOrderDetailsCommand`: Sets up order details
+    - `SetupOrderDetailsCommand`: Sets up orderModel details
   - Factory:
     - `OrderFactory`: Creates domain objects consistently
   - Specifications:
     - `OrderInvariantsSpecification`: Validates business rules
   - Entities:
     - `Order`: Rich domain model with behavior
-    - `OrderItem`: Represents items in an order
+    - `OrderItem`: Represents items in an orderModel
   - Value Objects:
-    - `OrderId`: Encapsulates order identity
+    - `OrderId`: Encapsulates orderModel identity
     - `CustomerInfo`: Contains customer details
 
 ### Model/Repository Layer
@@ -80,7 +80,7 @@ The backend follows a domain-driven design (DDD) approach with clear separation 
 - Key components:
   - Entities:
     - `OrderEntity`: Database representation of orders
-    - `OrderDetails`: Stores order item details
+    - `OrderDetails`: Stores orderModel item details
   - Repositories:
     - `OrderRepository`: Persists orders
     - `ItemRepository`: Manages items

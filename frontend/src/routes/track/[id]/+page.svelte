@@ -11,18 +11,18 @@
     import OrderSent from "$lib/components/dialog/OrderSent.svelte";
 
     export let data: { 
-        order: OrderDetailsWithStatus[] | null;
+        orderModel: OrderDetailsWithStatus[] | null;
         orderNotFound: boolean;
         orderId: string;
     };
 
     let previousAllItemsComplete = false;
 
-    // Sort order items by article number (item.id)
-    $: sortedOrder = data.order ? [...data.order].sort((a, b) => a.item.id - b.item.id) : null;
+    // Sort orderModel items by article number (item.id)
+    $: sortedOrder = data.orderModel ? [...data.orderModel].sort((a, b) => a.item.id - b.item.id) : [];
 
-    // Check if all items in the order are at their last step
-    $: allItemsComplete = data.order?.every(item => 
+    // Check if all items in the orderModel are at their last step
+    $: allItemsComplete = data.orderModel?.every(item =>
         item.currentStepIndex === item.differentSteps.length - 1
     ) ?? false;
 
@@ -38,7 +38,7 @@
     }
 
     onMount(() => {
-        console.log(data.order);
+        console.log(data.orderModel);
         if (browser && allItemsComplete) {
             previousAllItemsComplete = true;
             confetti({
@@ -62,11 +62,11 @@
             <div class="background2">
                 <div class="logo2"></div>
                 <button class="backbutton" style="border: none; background: none" on:click={() => goto("/track")}></button>
-                <div class="order-box-main">
+                <div class="orderModel-box-main">
                     <div class="title-wrapper">
-                        <div class="order-number-text">Ordrenummer: #{data.orderId}</div>
+                        <div class="orderModel-number-text">Ordrenummer: #{data.orderId}</div>
                         {#if allItemsComplete}
-                            <div class="order-sent">Ordren er sendt</div>
+                            <div class="orderModel-sent">Ordren er sendt</div>
                         {/if}
                         <div class="circle-explanations">
                             <div class="circle-explanation">
@@ -83,21 +83,19 @@
                             </div>
                         </div>
                     </div>
-                    <div class="order-box-items">
-                        {#if sortedOrder}
-                            {#if sortedOrder.length === 0}
-                                <p style="color: red">No items found for this order.</p>
-                            {:else}
-                                {#each sortedOrder as item (item.id)}
-                                    <ItemComponent 
-                                        orderItem={item} 
-                                        name={item.item.name} 
-                                        quantity={item.itemAmount}
-                                    />
-                                {/each}
-                            {/if}
-                        {:else}
+                    <div class="orderModel-box-items">
+                        {#if data.orderModel === null}
                             <p>Loading order details...</p>
+                        {:else if sortedOrder.length === 0}
+                            <p style="color: red">No items found for this order.</p>
+                        {:else}
+                            {#each sortedOrder as item (item.id)}
+                                <ItemComponent 
+                                    orderItem={item} 
+                                    name={item.item.name} 
+                                    quantity={item.itemAmount}
+                                />
+                            {/each}
                         {/if}
                     </div>
                 </div>
@@ -173,7 +171,7 @@
         box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
     }
 
-    .order-box-main {
+    .orderModel-box-main {
         align-items: flex-start;
         padding: 30px 40px;
         background-color: #fdfdfd;
@@ -202,7 +200,7 @@
         flex: 0 0 auto;
     }
 
-    .order-number-text {
+    .orderModel-number-text {
         position: relative;
         width: fit-content;
         margin-top: -1.00px;
@@ -215,7 +213,7 @@
         white-space: nowrap;
     }
 
-    .order-sent {
+    .orderModel-sent {
         position: relative;
         width: fit-content;
         font-family: var(--font-primary);
@@ -224,7 +222,7 @@
         font-weight: 500;
     }
 
-    .order-box-items {
+    .orderModel-box-items {
         align-items: center;
         gap: 0px;
         padding: 10px 0px;
@@ -289,16 +287,16 @@
     }
     /*
     Scaling for phones ( <1000 px width)
- */
+    */
 
     @media (max-width: 1000px){
         .background2{
             padding: 0px 2%;
         }
-        .order-box-main{
+        .orderModel-box-main{
             padding: 10px 15px;
         }
-        .order-number-text{
+        .orderModel-number-text{
             font-size: 1.5rem;
         }
         .title-wrapper{

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
- * Factory for creating Order objects.
+ * Factory for creating OrderModel objects.
  * This complements the Command pattern by handling initial order creation.
  */
 public class OrderFactory {

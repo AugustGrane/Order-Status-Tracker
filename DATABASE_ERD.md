@@ -75,9 +75,9 @@ erDiagram
 ### Core Tables
 
 1. **Orders**
-   - Main table storing order information
+   - Main table storing orderModel information
    - Contains customer details, priority, and timestamps
-   - Links to OrderDetails for specific items in the order
+   - Links to OrderDetails for specific items in the orderModel
 
 2. **Items**
    - Stores available items that can be ordered
@@ -96,16 +96,16 @@ erDiagram
 
 ### Step Management
 
-The system uses a cloning mechanism for steps, allowing each order to have its own independent progression:
+The system uses a cloning mechanism for steps, allowing each orderModel to have its own independent progression:
 
 1. **Template Steps**
    - `ProductTypeSteps`: Defines the template/base steps for each product type
    - These are the master steps that new orders will copy from
 
 2. **Order-Specific Steps**
-   - `OrderSteps`: Contains the actual steps for each specific order
-   - `OrderProductTypeSteps`: Stores the cloned steps when an order is created
-   - This allows each order to progress independently through its steps
+   - `OrderSteps`: Contains the actual steps for each specific orderModel
+   - `OrderProductTypeSteps`: Stores the cloned steps when an orderModel is created
+   - This allows each orderModel to progress independently through its steps
    - Changes to the template steps (ProductTypeSteps) won't affect existing orders
 
 ### Status Tracking
@@ -113,25 +113,25 @@ The system uses a cloning mechanism for steps, allowing each order to have its o
 Status updates are tracked through:
 
 1. **Order Progress**
-   - `OrderDetails.currentStepIndex`: Tracks the current step for each order item
+   - `OrderDetails.currentStepIndex`: Tracks the current step for each orderModel item
    - `OrderProductTypeUpdated`: Records timestamps when steps are completed
    - Maintains a complete history of when each step was reached
 
 ### How It Works
 
-1. When a new order is created:
+1. When a new orderModel is created:
    - Entry created in `Orders` table
-   - `OrderDetails` created for each item in the order
+   - `OrderDetails` created for each item in the orderModel
    - Steps are cloned from `ProductTypeSteps` into `OrderSteps`
    - Initial status is recorded in `OrderProductTypeUpdated`
 
-2. As the order progresses:
+2. As the orderModel progresses:
    - Current step is tracked in `OrderDetails.currentStepIndex`
    - Status changes are recorded in `OrderProductTypeUpdated`
-   - Each order maintains its own independent progression
+   - Each orderModel maintains its own independent progression
 
 3. This structure ensures:
-   - Each order has its own copy of steps
+   - Each orderModel has its own copy of steps
    - Orders can be tracked independently
    - Product type templates can be modified without affecting existing orders
    - Complete history of status changes is maintained through OrderProductTypeUpdated

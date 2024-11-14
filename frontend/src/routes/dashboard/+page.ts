@@ -2,13 +2,28 @@ import type { PageLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
     try {
-        const response = await fetch('/api/get-all-orders'); // Note: removed http://localhost:8080
+        const response = await fetch('/api/orders/summaries');
         const orders = await response.json();
-        return { orders };
+        
+        // Pre-fetch first few order details
+        const detailsPromises = orders.slice(0, 5).map(async (order: any) => {
+            const detailsResponse = await fetch(`/api/orders/${order.orderId}/details`);
+            return detailsResponse.json();
+        });
+        
+        const initialDetails = await Promise.all(detailsPromises);
+        
+        return { 
+            orders,
+            initialDetails: Object.fromEntries(
+                initialDetails.map((detail, index) => [orders[index].orderId, detail])
+            )
+        };
     } catch (e) {
         console.error('Error loading orders:', e);
         return {
-            orders: null,
+            orders: [],
+            initialDetails: {},
             error: e instanceof Error ? e.message : 'An error occurred loading orders'
         };
     }

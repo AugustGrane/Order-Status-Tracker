@@ -100,7 +100,7 @@ public class ProductTypeService {
 
     private Order createOrderFromDetails(OrderDetails orderDetails) {
         var orderEntity = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
 
         CustomerInfo customerInfo = new CustomerInfo(
             orderEntity.getCustomerName(),

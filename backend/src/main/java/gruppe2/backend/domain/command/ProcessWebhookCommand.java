@@ -1,5 +1,6 @@
 package gruppe2.backend.domain.command;
 
+import gruppe2.backend.model.OrderModel;
 import gruppe2.backend.service.webhook.WebhookPayload;
 import gruppe2.backend.domain.*;
 import gruppe2.backend.domain.exception.WebhookProcessingException;
@@ -7,12 +8,11 @@ import gruppe2.backend.mapper.OrderMapper;
 import gruppe2.backend.mapper.WebhookMapper;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.ProductType;
-import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.repository.*;
 import gruppe2.backend.service.OrderService;
 import gruppe2.backend.dto.ItemDTO;
 import gruppe2.backend.service.ItemService;
-import java.time.LocalDateTime;
+
 import java.util.*;
 
 public class ProcessWebhookCommand {
@@ -61,11 +61,11 @@ public class ProcessWebhookCommand {
             );
 
             // Persist order using OrderService
-            gruppe2.backend.model.Order persistedOrder = orderService.createOrder(orderMapper.toOrderDTO(order));
+            OrderModel persistedOrderModel = orderService.createOrder(orderMapper.toOrderDTO(order));
 
             // Setup order details using command
             SetupOrderDetailsCommand setupCommand = new SetupOrderDetailsCommand(
-                persistedOrder.getId(),
+                persistedOrderModel.getId(),
                 items,
                 itemRepository,
                 productTypeRepository,

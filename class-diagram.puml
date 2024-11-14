@@ -128,7 +128,7 @@ package "Domain Layer" {
     }
 
     interface OrderCommand {
-        + execute(order: DomainOrder): void
+        + execute(orderModel: DomainOrder): void
     }
 
     class CreateOrderCommand
@@ -141,7 +141,7 @@ package "Domain Layer" {
     class CreateStatusDefinitionCommand
 
     interface OrderSpecification {
-        + isSatisfiedBy(order: DomainOrder): boolean
+        + isSatisfiedBy(orderModel: DomainOrder): boolean
         + and(other: OrderSpecification): OrderSpecification
         + or(other: OrderSpecification): OrderSpecification
         + not(): OrderSpecification
@@ -207,8 +207,8 @@ package "DTO Layer" {
 ' Mapper Layer
 package "Mapper Layer" {
     class OrderMapper {
-        + toDTO(order: ModelOrder): OrderDTO
-        + toDashboardDTO(order: ModelOrder): OrderDashboardDTO
+        + toDTO(orderModel: ModelOrder): OrderDTO
+        + toDashboardDTO(orderModel: ModelOrder): OrderDashboardDTO
         + toDetailsDTO(orderDetails: OrderDetails): OrderDetailsWithStatusDTO
         + fromDTO(dto: OrderDTO): ModelOrder
     }

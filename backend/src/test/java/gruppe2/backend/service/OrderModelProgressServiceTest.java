@@ -2,7 +2,7 @@ package gruppe2.backend.service;
 
 import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.model.Item;
-import gruppe2.backend.model.Order;
+import gruppe2.backend.model.OrderModel;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.repository.OrderRepository;
 import gruppe2.backend.repository.OrderProductTypeRepository;
@@ -24,7 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class OrderProgressServiceTest {
+public class OrderModelProgressServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
@@ -38,11 +38,11 @@ public class OrderProgressServiceTest {
     OrderDetails orderDetails = null; // Readable to the whole test script
     Map<Long, LocalDateTime> updates; // Same goes for this one
     Item item = null;
-    Order order = null;
+    OrderModel orderModel = null;
 
     @BeforeEach
     void beforeEach() {
-        orderDetails = new OrderDetails(); // Create order details
+        orderDetails = new OrderDetails(); // Create orderModel details
         orderDetails.setId(1L);
         orderDetails.setCurrentStepIndex(1);
         orderDetails.setDifferentSteps(new Long[]{1L, 7L, 3L});
@@ -52,17 +52,17 @@ public class OrderProgressServiceTest {
 
         //status.
         item = new Item();
-        item.setId(1L); // Create item for order details
+        item.setId(1L); // Create item for orderModel details
         item.setName("T-shirt m. print");
         item.setProductTypeId(1L);
         orderDetails.setItem(item);
 
-        order = new Order();
-        order.setId(1L); // Create order for order details
-        order.setCustomerName("Test Name");
-        order.setPriority(false);
-        order.setNotes("");
-        order.setTotalEstimatedTime(1);
+        orderModel = new OrderModel();
+        orderModel.setId(1L); // Create orderModel for orderModel details
+        orderModel.setCustomerName("Test Name");
+        orderModel.setPriority(false);
+        orderModel.setNotes("");
+        orderModel.setTotalEstimatedTime(1);
         orderDetails.setOrderId(1L);
     }
 
@@ -76,7 +76,7 @@ public class OrderProgressServiceTest {
         // Don't need for createOrderStatus
         // Don't need for .canMoveToNextStep
         // Don't need for UpdateItemStatusCommand
-        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order)); // Used in createOrderFromDetails and updateOrderDetails
+        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(orderModel)); // Used in createOrderFromDetails and updateOrderDetails
         when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails); // Used in updateOrderDetails
 
         // Act
@@ -114,7 +114,7 @@ public class OrderProgressServiceTest {
         // Mockito
         when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails)); // Used in "findOrderDetails"
         // Used in createOrderFromDetails and updateOrderDetails. Lenient() as we only call it with createOrderFromDetails but not with updateOrderDetails
-        lenient().when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order));
+        lenient().when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(orderModel));
 
         // Act
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
@@ -130,7 +130,7 @@ public class OrderProgressServiceTest {
 
         // Mockito
         when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails));
-        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order));
+        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(orderModel));
         when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails);
 
         // Act
@@ -168,7 +168,7 @@ public class OrderProgressServiceTest {
         // Mockito
         when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails)); // Used in "findOrderDetails"
         // Used in createOrderFromDetails and updateOrderDetails. Lenient() as we only call it with createOrderFromDetails but not with updateOrderDetails
-        lenient().when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order));
+        lenient().when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(orderModel));
 
         // Act
         IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {

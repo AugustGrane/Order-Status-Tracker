@@ -27,16 +27,16 @@ public class Order {
 
     private void validateInvariants() {
         if (id == null) {
-            throw new OrderException("Order must have an ID") {};
+            throw new OrderException("OrderModel must have an ID") {};
         }
         if (customerInfo == null) {
-            throw new OrderException("Order must have customer information") {};
+            throw new OrderException("OrderModel must have customer information") {};
         }
         if (timeline == null) {
-            throw new OrderException("Order must have a timeline") {};
+            throw new OrderException("OrderModel must have a timeline") {};
         }
         if (estimation == null) {
-            throw new OrderException("Order must have an estimation") {};
+            throw new OrderException("OrderModel must have an estimation") {};
         }
     }
 
@@ -169,7 +169,7 @@ public class Order {
 
         public Order build() {
             if (id == null || customerInfo == null || timeline == null || estimation == null) {
-                throw new IllegalStateException("Cannot build Order: missing required fields");
+                throw new IllegalStateException("Cannot build OrderModel: missing required fields");
             }
             return new Order(id, customerInfo, items, timeline, estimation);
         }
