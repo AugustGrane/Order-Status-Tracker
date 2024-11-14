@@ -1,8 +1,9 @@
 <script lang="ts">
     import type { PageData } from './$types';
     export let data: PageData;
-    const orders = data.orders; // If you want to create a shorter reference
-    console.log(orders);
+    const orders = data.orders; // Filtered orders
+
+    console.log("filtered orders: ", orders);
 
 </script>
 
@@ -15,8 +16,8 @@
         <div class="container">
             <div class="search-filter">
                 <div class="left">
-                    <div class="active-orders-text">Gamle ordre</div>
-                    <div class="active-orders">Se de færdige ordre</div>
+                    <div class="active-orders-text">Gamle ordrer</div>
+                    <div class="active-orders">Se de færdige ordrer</div>
                     <div class="search"><input class="search-field" placeholder="Søg efter navn, ordrenummer eller artikler"></div>
                 </div>
                 <div class="right">
