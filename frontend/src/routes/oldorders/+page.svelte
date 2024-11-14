@@ -10,7 +10,7 @@
     <div class="background">
         <div class="navbar">
             <div class="logo"></div>
-            <div class="title">Dashboard</div>
+            <div class="title">Gamle ordrer</div>
         </div>
         <div class="container">
             <div class="search-filter">
