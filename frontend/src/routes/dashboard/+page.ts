@@ -2,6 +2,7 @@ import type { PageLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
     try {
+        // Fetch order summaries first
         const response = await fetch('/api/orders/summaries', {
             method: 'GET',
             headers: {
@@ -15,16 +16,15 @@ export const load = (async ({ fetch }) => {
 
         const orders = await response.json();
         
-        return { 
+        return {
             orders,
-            initialDetails: {}
+            initialDetails: {}  // Initial details will be loaded in the background
         };
-    } catch (e) {
-        console.error('Error loading orders:', e);
+    } catch (error) {
+        console.error('Error loading orders:', error);
         return {
             orders: [],
-            initialDetails: {},
-            error: e instanceof Error ? e.message : 'An error occurred loading orders'
+            initialDetails: {}
         };
     }
 }) satisfies PageLoad;
