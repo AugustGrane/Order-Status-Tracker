@@ -31,6 +31,9 @@ public class OrderController {
 
     @PostMapping("/items")
     public ResponseEntity<Item> createItem(@RequestBody ItemDTO itemDTO) {
+        if (itemDTO == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         try {
             return ResponseEntity.ok(itemService.createItem(itemDTO));
         } catch (RuntimeException e) {
@@ -40,6 +43,9 @@ public class OrderController {
 
     @PostMapping("/orders")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
+        if (orderDTO == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         try {
             return ResponseEntity.ok(orderService.createOrder(orderDTO));
         } catch (RuntimeException e) {
@@ -49,6 +55,9 @@ public class OrderController {
 
     @PostMapping("/product-types")
     public ResponseEntity<ProductType> createProductType(@RequestBody ProductTypeDTO productTypeDTO) {
+        if (productTypeDTO == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         try {
             return ResponseEntity.ok(productTypeService.createProductType(productTypeDTO));
         } catch (RuntimeException e) {
@@ -58,6 +67,9 @@ public class OrderController {
 
     @PostMapping("/status-definitions")
     public ResponseEntity<StatusDefinition> createStatusDefinition(@RequestBody StatusDefinitionDTO dto) {
+        if (dto == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
         try {
             return ResponseEntity.ok(orderService.createStatusDefinition(dto));
         } catch (RuntimeException e) {
@@ -67,6 +79,9 @@ public class OrderController {
     
     @PostMapping("/update-generic-product-type")
     public ResponseEntity<String> updateItemProductType(@RequestBody UpdateProductTypeDTO dto) {
+        if (dto == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: DTO is null");
+        }
         try {
             productTypeService.updateItemProductType(dto.itemId(), dto.productTypeId());
             return ResponseEntity.ok("Success");
@@ -77,6 +92,9 @@ public class OrderController {
 
     @GetMapping("/orders/{orderId}")
     public ResponseEntity<List<OrderDetailsWithStatusDTO>> getOrderDetails(@PathVariable Long orderId) {
+        if (orderId == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
         try {
             return ResponseEntity.ok(orderService.getOrderDetails(orderId));
         } catch (RuntimeException e) {
@@ -86,6 +104,9 @@ public class OrderController {
 
     @PutMapping("/order-product-types/{id}/next-step")
     public ResponseEntity<OrderProgress> moveToNextStep(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             return ResponseEntity.ok(orderProgressService.moveToNextStep(id));
         } catch (IllegalStateException e) {
@@ -97,6 +118,9 @@ public class OrderController {
 
     @PutMapping("/order-product-types/{id}/prev-step")
     public ResponseEntity<OrderProgress> moveToPrevStep(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.badRequest().build();
+        }
         try {
             return ResponseEntity.ok(orderProgressService.moveToPreviousStep(id));
         } catch (IllegalStateException e) {
@@ -117,6 +141,9 @@ public class OrderController {
 
     @GetMapping("/order-product-types/{id}/progress")
     public ResponseEntity<OrderProgress> getProgress(@PathVariable Long id) {
+        if (id == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         try {
             return ResponseEntity.ok(orderProgressService.getProgress(id));
         } catch (RuntimeException e) {

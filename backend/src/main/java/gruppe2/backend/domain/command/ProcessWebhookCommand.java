@@ -2,7 +2,6 @@ package gruppe2.backend.domain.command;
 
 import gruppe2.backend.service.webhook.WebhookPayload;
 import gruppe2.backend.domain.*;
-import gruppe2.backend.domain.webhook.WebhookOrder;
 import gruppe2.backend.domain.exception.WebhookProcessingException;
 import gruppe2.backend.mapper.OrderMapper;
 import gruppe2.backend.mapper.WebhookMapper;
