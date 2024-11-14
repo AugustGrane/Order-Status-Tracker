@@ -68,7 +68,7 @@ public class OrderStatus {
 
     public OrderProgress toProgress() {
         return new OrderProgress(
-            currentStepIndex + 1,
+            currentStepIndex,
             steps.length,
             getCurrentStepId(),
             getStatusUpdates()
