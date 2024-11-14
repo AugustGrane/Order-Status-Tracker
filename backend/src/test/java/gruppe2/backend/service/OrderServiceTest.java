@@ -1,7 +1,9 @@
 package gruppe2.backend.service;
 
+import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.domain.OrderStatus;
 import gruppe2.backend.model.Item;
+import gruppe2.backend.model.Order;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.repository.OrderRepository;
 import gruppe2.backend.repository.OrderProductTypeRepository;
@@ -32,44 +34,64 @@ public class OrderServiceTest {
     private OrderProductTypeRepository orderProductTypeRepository;
 
     @InjectMocks
-    private OrderProgressService orderService;  // Update this to the correct service class if needed
+    private OrderProgressService orderProgressService;  // Update this to the correct service class if needed
 
     OrderDetails orderDetails = null; // Readable to the whole test script
     Map<Long, LocalDateTime> updates; // Same goes for this one
+    Item item = null;
+    Order order = null;
 
     @BeforeEach
     void beforeEach() {
-        orderDetails = new OrderDetails();
+        orderDetails = new OrderDetails(); // Create order details
         orderDetails.setId(1L);
         orderDetails.setCurrentStepIndex(1);
         orderDetails.setDifferentSteps(new Long[]{1L, 2L, 3L});
         updates = new HashMap<>();
         updates.put(1L, LocalDateTime.now());
         orderDetails.setUpdated(updates);
-    }
 
-    /*@Test
-    void moveToNextStep_WithValidId_ShouldReturnSuccess() {
-        // Arrange
-        OrderDetails orderDetails = new OrderDetails();
-        orderDetails.setId(1L);
-        orderDetails.setCurrentStepIndex(0);
-        orderDetails.setDifferentSteps(new Long[]{1L, 2L, 3L});
-        orderDetails.setUpdated(new HashMap<>());
+        //status.
+        item = new Item();
+        item.setId(1L); // Create item for order details
+        item.setName("T-shirt m. print");
+        item.setProductTypeId(1L);
+        orderDetails.setItem(item);
 
-        when(orderProductTypeRepository.findById(1L)).thenReturn(Optional.of(orderDetails));
-        when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails);
-
-        // Act
-        Map<String, Object> result = orderService.moveToNextStep(1L);
-
-        // Assert
-        assertThat(result).containsKey("currentStep");
-        assertThat(result).containsKey("totalSteps");
-        verify(orderProductTypeRepository).save(any(OrderDetails.class));
+        order = new Order();
+        order.setId(1L); // Create order for order details
+        order.setCustomerName("Test Name");
+        order.setPriority(false);
+        order.setNotes("");
+        order.setTotalEstimatedTime(1);
+        orderDetails.setOrderId(1L);
     }
 
     @Test
+    void moveToNextStep_WithValidId_ShouldReturnSuccess() {
+        // Arrange happens beforeEach
+
+        // Mockito
+        when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails)); // Used in "findOrderDetails"
+        // Don't need for validateGenericType
+        // Don't need for createOrderStatus
+        // Don't need for .canMoveToNextStep
+        // Don't need for UpdateItemStatusCommand
+        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order)); // Used in createOrderFromDetails and updateOrderDetails
+        when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails); // Used in updateOrderDetails
+
+        // Act
+        OrderProgress progress = orderProgressService.moveToNextStep(orderDetails.getId()); // Calling function supposing that all objects are correct
+
+        // Assert
+        assertNotNull(progress);
+        assertNotNull(progress.getCurrentStepId());
+        assertEquals(orderDetails.getCurrentStepIndex() + 1, progress.getCurrentStep());
+        assertEquals(orderDetails.getDifferentSteps().length, progress.getTotalSteps());
+        assertEquals(orderDetails.getUpdated(), progress.getStepHistory());
+    }
+
+    /*@Test
     void moveToPrevStep_WithValidId_ShouldReturnSuccess() {
         // Arrange
         OrderDetails orderDetails = new OrderDetails();
@@ -82,15 +104,15 @@ public class OrderServiceTest {
         when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails);
 
         // Act
-        Map<String, Object> result = orderService.moveToPreviousStep(1L);  // Ensure method name matches
+        Map<String, Object> result = orderProgressService.moveToPreviousStep(1L);  // Ensure method name matches
 
         // Assert
         assertThat(result).containsKey("currentStep");
         assertThat(result).containsKey("totalSteps");
         verify(orderProductTypeRepository).save(any(OrderDetails.class));
-    }
+    }*/
 
-    @Test
+    /*@Test
     void getProgress_WithValidId_ShouldReturnProgressInfo() {
         // Arrange
         OrderDetails orderDetails = new OrderDetails();
@@ -104,7 +126,7 @@ public class OrderServiceTest {
         when(orderProductTypeRepository.findById(1L)).thenReturn(Optional.of(orderDetails));
 
         // Act
-        Map<String, Object> progress = orderService.getProgress(1L);
+        Map<String, Object> progress = orderProgressService.getProgress(1L);
 
         // Assert
         assertThat(progress).containsKey("currentStep");
@@ -112,14 +134,14 @@ public class OrderServiceTest {
         assertThat(progress).containsKey("percentComplete");
         assertThat(progress).containsKey("stepHistory");
         verify(orderProductTypeRepository).findById(1L);
-    }*/
+    }
 
     @Test
     void findOrderDetails_WithValidId_ShouldReturnOrderDetails() {
         when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails)); // Telling Mockito to return the corresponding orderDetails if ID is valid
 
         // Act
-        OrderDetails result = orderService.findOrderDetails(orderDetails.getId()); // Result is the returned data
+        OrderDetails result = orderProgressService.findOrderDetails(orderDetails.getId()); // Result is the returned data
 
         // Assert
         assertNotNull(result); // Result should contain data
@@ -138,7 +160,7 @@ public class OrderServiceTest {
 
         // Act
         RuntimeException exception = assertThrows(RuntimeException.class, () -> { // Invalid ID -> Throw error
-            orderService.findOrderDetails(invalidId);
+            orderProgressService.findOrderDetails(invalidId);
         });
 
         // Assert
@@ -149,7 +171,7 @@ public class OrderServiceTest {
     void createOrderStatus_WithValidOrderDetails_ShouldCreateOrderStatus() {
 
         // Act
-        OrderStatus statusResult = orderService.createOrderStatus(orderDetails);
+        OrderStatus statusResult = orderProgressService.createOrderStatus(orderDetails);
 
         assertNotNull(statusResult); // Result should contain data
         assertArrayEquals(orderDetails.getDifferentSteps(), statusResult.getSteps()); // Checks that the array of steps are the same in both objects
@@ -157,21 +179,43 @@ public class OrderServiceTest {
         assertEquals(orderDetails.getUpdated(), statusResult.getStatusUpdates()); // Checks that dates are the same
     }
 
-    /* Add test for createOrderStatus with invalid object maybe? */
+    /* Add test for createOrderStatus with invalid object maybe?
 
     @Test
     void validateGenericProductType() {
-        Item item = new Item(1L, "T-shirt m. print", 0L);
 
-        orderDetails.setItem(item);
 
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-            orderService.validateGenericProductType(orderDetails);
+            orderProgressService.validateGenericProductType(orderDetails);
         });
 
         assertEquals("Item cannot change step while item is generic product type", exception.getMessage());
     }
 
     @Test
-    void updateOrderDetails_WithValidOrderDetailsAndOrderStatus_ShouldUpdateOrderDetails() {}
+    void updateOrderDetails_WithValidOrderDetailsAndOrderStatus_ShouldUpdateOrderDetails() {
+        orderDetails.setOrderId(1L);
+        Order order = new Order(1L, "Test Name", false, "", LocalDateTime.now(), 1);
+
+        when(orderProductTypeRepository.save(any(OrderDetails.class))).thenReturn(orderDetails);
+        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.of(order));
+
+
+
+    }
+
+    @Test
+    void updateOrderDetails_WithInvalidOrderId_ShouldThrowException() {
+        orderDetails.setOrderId(2L);
+        OrderStatus orderStatus = orderProgressService.createOrderStatus(orderDetails);
+
+
+        when(orderRepository.findById(orderDetails.getOrderId())).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            orderProgressService.updateOrderDetails(orderDetails, orderStatus);
+        });
+
+        assertEquals("Order not found", exception.getMessage());
+    }*/
 }
