@@ -13,11 +13,9 @@
     export let firstItem: boolean = false;
     let toggleTooltip: boolean = false;
 
-    // Remove 'frontend/static/' from the icon path if it exists
     $: cleanIconPath = icon.replace('frontend/static/', '');
 
     onMount(() => {
-        // Check if the tooltip should be toggled when mobile view is active on load
         toggleTooltip = window.innerWidth <= 1000;
         if (toggleTooltip) {
             document.querySelectorAll('.updated-text').forEach((element) => {
@@ -28,7 +26,6 @@
             });
         }
 
-        // Check if the tooltip should be toggled when switching between mobile and desktop view
         window.addEventListener('resize', () => {
             toggleTooltip = window.innerWidth <= 1000;
             if (toggleTooltip) {
@@ -56,6 +53,11 @@
     <div class="circle-wrapper">
         <div class="icon-wrapper" class:current={current} class:done={!current && done}>
             <div class="icon" style="background: url('/{cleanIconPath}') no-repeat center;"></div>
+            <!-- Desktop tooltip -->
+            <div class="hello-world-tooltip">
+                {step.description}
+                <div class="hello-world-tooltip-arrow"></div>
+            </div>
         </div>
         <div class="status-text">
             {#if current}
@@ -80,11 +82,9 @@
             {/if}
         </div>
     </div>
-
 </div>
 
 <style>
-    /* Add a Google Font import for Roboto */
     @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
     :root {
@@ -129,6 +129,7 @@
         padding: 10px;
         border: 3px solid #dddddd;
         transition: all 0.3s ease;
+        position: relative;
     }
 
     .icon-wrapper.current {
@@ -192,7 +193,7 @@
     }
 
     .updated {
-        display: inline-flex; /* Ensure date and time stay on the same line */
+        display: inline-flex;
         align-items: center;
         font-family: var(--font-primary);
         font-weight: 500;
@@ -220,7 +221,7 @@
         padding: 8px;
         position: absolute;
         z-index: 1;
-        bottom: 125%; /* Position above the tooltip trigger */
+        bottom: 125%;
         left: 50%;
         transform: translateX(-50%);
         opacity: 0;
@@ -231,7 +232,7 @@
     .tooltip-container .tooltip-text::after {
         content: "";
         position: absolute;
-        top: 100%; /* Position at the bottom of tooltip box */
+        top: 100%;
         left: 50%;
         transform: translateX(-50%);
         border-width: 5px;
@@ -245,20 +246,64 @@
         opacity: 1;
     }
 
-    @media (max-width: 1000px){
-        .icon-wrapper{
+    /* Hello World tooltip */
+    .hello-world-tooltip {
+        visibility: hidden;
+        width: 200px; /* Increased from 100px to 200px */
+        min-width: 100px; /* Added to ensure tooltip is at least as wide as its content */
+        max-width: 300px; /* Added maximum width to prevent extremely long tooltips */
+        background-color: #333;
+        color: #fff;
+        font-family: var(--font-primary);
+        text-align: center;
+        border-radius: 4px;
+        padding: 8px;
+        position: absolute;
+        z-index: 1;
+        top: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        white-space: normal; /* Allow text to wrap */
+        font-size: 0.9rem; /* Added for better readability */
+        line-height: 1.4; /* Added for better readability */
+    }
+
+    .hello-world-tooltip-arrow {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent #333 transparent;
+    }
+
+
+    /* Show Hello World tooltip on hover for desktop */
+    @media (min-width: 1001px) {
+        .icon-wrapper:hover .hello-world-tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+
+    @media (max-width: 1000px) {
+        .icon-wrapper {
             width: 30px;
             height: 30px;
             padding: 2px;
         }
         .status {
-            white-space: normal; /* Allows text to wrap */
-            max-width: 50px; /* Sets max width to contain text */
+            white-space: normal;
+            max-width: 50px;
             font-size: 0.6rem;
         }
-        .current-status{
-            white-space: normal; /* Allows text to wrap */
-            max-width: 50px; /* Sets max width to contain text */
+        .current-status {
+            white-space: normal;
+            max-width: 50px;
             font-size: 0.6rem;
         }
         .step {
@@ -270,6 +315,9 @@
             max-width: 50px;
             flex-wrap: wrap;
             color: #ffffff !important;
+        }
+        .hello-world-tooltip {
+            display: none;
         }
     }
 </style>
