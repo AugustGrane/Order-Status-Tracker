@@ -8,6 +8,7 @@ import gruppe2.backend.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,27 +38,27 @@ public class OrderProgressService {
 
         // Create current order status
         OrderStatus status = createOrderStatus(orderDetails);
-        
+
         if (!status.canMoveToNextStep()) {
             throw new IllegalStateException("Cannot move to next step: already at final step");
         }
-        
+
         // Move to next step
         status.moveToNextStep();
-        
+
         // Create and execute the command
         UpdateItemStatusCommand command = new UpdateItemStatusCommand(
-            orderDetails.getItem().getId(), 
+            orderDetails.getItem().getId(),
             status
         );
-        
+
         // Create Order domain object and execute command
         Order order = createOrderFromDetails(orderDetails);
         command.execute(order);
-        
+
         // Update persistence
         updateOrderDetails(orderDetails, status);
-        
+
         return status.toProgress();
     }
 
@@ -68,27 +69,27 @@ public class OrderProgressService {
 
         // Create current order status
         OrderStatus status = createOrderStatus(orderDetails);
-        
+
         if (!status.canMoveToPreviousStep()) {
             throw new IllegalStateException("Cannot move to previous step: already at first step");
         }
-        
+
         // Move to previous step
         status.moveToPreviousStep();
-        
+
         // Create and execute the command
         UpdateItemStatusCommand command = new UpdateItemStatusCommand(
-            orderDetails.getItem().getId(), 
+            orderDetails.getItem().getId(),
             status
         );
-        
+
         // Create Order domain object and execute command
         Order order = createOrderFromDetails(orderDetails);
         command.execute(order);
-        
+
         // Update persistence
         updateOrderDetails(orderDetails, status);
-        
+
         return status.toProgress();
     }
 
@@ -127,12 +128,12 @@ public class OrderProgressService {
             .build();
     }
 
-    public OrderDetails findOrderDetails(Long orderDetailsId) {
+    private OrderDetails findOrderDetails(Long orderDetailsId) {
         return orderProductTypeRepository.findById(orderDetailsId)
                 .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + orderDetailsId));
     }
 
-    public OrderStatus createOrderStatus(OrderDetails orderDetails) {
+    private OrderStatus createOrderStatus(OrderDetails orderDetails) {
         return new OrderStatus(
             orderDetails.getDifferentSteps(),
             orderDetails.getCurrentStepIndex(),
@@ -140,7 +141,7 @@ public class OrderProgressService {
         );
     }
 
-    public void validateGenericProductType(OrderDetails orderDetails) {
+    private void validateGenericProductType(OrderDetails orderDetails) {
         if (orderDetails.getItem().getProductTypeId() == 0) {
             throw new IllegalStateException("Item cannot change step while item is generic product type");
         }
@@ -154,10 +155,10 @@ public class OrderProgressService {
         // Create timeline for status tracking
         var order = orderRepository.findById(orderDetails.getOrderId())
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-                
+
         OrderTimeline timeline = new OrderTimeline(order.getOrderCreated(), order.isPriority());
-        timeline.recordItemStatus(orderDetails.getItem().getId(), 
-                                status.getCurrentStepId(), 
+        timeline.recordItemStatus(orderDetails.getItem().getId(),
+                                status.getCurrentStepId(),
                                 LocalDateTime.now());
     }
 }

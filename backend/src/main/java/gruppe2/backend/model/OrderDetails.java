@@ -49,7 +49,6 @@ public class OrderDetails {
 
     // Getters and Setters
 
-
     public Item getItem() {
         return item;
     }

@@ -38,7 +38,7 @@ public class Order {
     public Order() {}
 
     public Order(Long id, String customerName, boolean priority, String notes, 
-                LocalDateTime orderCreated, int totalEstimatedTime, Map<Long, Integer> itemMapping) {
+                LocalDateTime orderCreated, int totalEstimatedTime) {
         this.id = id;
         this.customerName = customerName;
         this.priority = priority;
