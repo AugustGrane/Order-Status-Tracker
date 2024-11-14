@@ -2,22 +2,22 @@ import type { PageLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
     try {
-        const response = await fetch('/api/orders/summaries');
-        const orders = await response.json();
-        
-        // Pre-fetch first few order details
-        const detailsPromises = orders.slice(0, 5).map(async (order: any) => {
-            const detailsResponse = await fetch(`/api/orders/${order.orderId}/details`);
-            return detailsResponse.json();
+        const response = await fetch('/api/orders/summaries', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
         });
-        
-        const initialDetails = await Promise.all(detailsPromises);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const orders = await response.json();
         
         return { 
             orders,
-            initialDetails: Object.fromEntries(
-                initialDetails.map((detail, index) => [orders[index].orderId, detail])
-            )
+            initialDetails: {}
         };
     } catch (e) {
         console.error('Error loading orders:', e);
@@ -28,3 +28,5 @@ export const load = (async ({ fetch }) => {
         };
     }
 }) satisfies PageLoad;
+
+export const ssr = false;
