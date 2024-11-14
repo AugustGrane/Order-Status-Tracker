@@ -2,9 +2,17 @@ import type { PageLoad } from './$types';
 
 export const load = (async ({ fetch }) => {
     try {
-        const response = await fetch('/api/get-all-orders'); // Note: removed http://localhost:8080
+        const response = await fetch('/api/get-all-orders');
         const orders = await response.json();
-        return { orders };
+
+        // Filter orders where all items are at their last step
+        const filteredOrders = orders.filter((order: any) =>
+            order.items.every((item: any) =>
+                item.currentStepIndex === item.differentSteps.length - 1
+            )
+        );
+
+        return { orders: filteredOrders };
     } catch (e) {
         console.error('Error loading orders:', e);
         return {
