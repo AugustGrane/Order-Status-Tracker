@@ -29,6 +29,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 class OrderModelControllerTest {
 
@@ -415,7 +419,7 @@ class OrderModelControllerTest {
         void getProgressWithNullId() {
             ResponseEntity<OrderProgress> response = orderController.getProgress(null);
 
-            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNull(response.getBody());
             verify(orderProgressService, never()).getProgress(any());
         }
@@ -428,23 +432,22 @@ class OrderModelControllerTest {
         @DisplayName("Get OrderModel Details by Valid ID")
         void getOrderDetailsByValidId() {
             Long orderId = 1L;
-            List<OrderDetailsWithStatusDTO> mockOrderDetails = Collections.emptyList();
-            when(orderService.getOrderDetails(orderId)).thenReturn(mockOrderDetails);
+            when(orderService.getOrderDetailsWithStatus(orderId)).thenReturn(Collections.emptyList());
 
-            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetails(orderId);
+            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetailsWithStatus(orderId);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
-            verify(orderService).getOrderDetails(orderId);
+            verify(orderService).getOrderDetailsWithStatus(orderId);
         }
 
         @Test
         @DisplayName("Get OrderModel Details by Non-Existent ID")
         void getOrderDetailsByNonExistentId() {
             Long orderId = 999L;
-            when(orderService.getOrderDetails(orderId)).thenThrow(new RuntimeException("OrderModel not found"));
+            when(orderService.getOrderDetailsWithStatus(orderId)).thenThrow(new RuntimeException("Order not found"));
 
-            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetails(orderId);
+            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetailsWithStatus(orderId);
 
             assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
             assertNull(response.getBody());
@@ -453,11 +456,11 @@ class OrderModelControllerTest {
         @Test
         @DisplayName("Get OrderModel Details with Null ID")
         void getOrderDetailsWithNullId() {
-            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetails(null);
+            ResponseEntity<List<OrderDetailsWithStatusDTO>> response = orderController.getOrderDetailsWithStatus(null);
 
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
             assertNull(response.getBody());
-            verify(orderService, never()).getOrderDetails(any());
+            verify(orderService, never()).getOrderDetailsWithStatus(any());
         }
 
         @Test
@@ -480,7 +483,7 @@ class OrderModelControllerTest {
 
             ResponseEntity<List<OrderDashboardDTO>> response = orderController.getAllOrders();
 
-            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
             assertNull(response.getBody());
         }
     }

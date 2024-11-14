@@ -5,7 +5,11 @@ import gruppe2.backend.model.ProductType;
 import gruppe2.backend.repository.ProductTypeRepository;
 import gruppe2.backend.repository.StatusDefinitionRepository;
 
-public class CreateProductTypeCommand {
+/**
+ * Command for creating a new ProductType entity.
+ * Implements the base Command interface with ProductType as the result type.
+ */
+public class CreateProductTypeCommand implements Command<ProductType> {
     private final ProductTypeDTO productTypeDTO;
     private final ProductTypeRepository productTypeRepository;
     private final StatusDefinitionRepository statusDefinitionRepository;
@@ -19,6 +23,7 @@ public class CreateProductTypeCommand {
         this.statusDefinitionRepository = statusDefinitionRepository;
     }
 
+    @Override
     public ProductType execute() {
         validateStepsExist(productTypeDTO.differentSteps());
 
@@ -30,7 +35,14 @@ public class CreateProductTypeCommand {
     }
 
     private void validateStepsExist(Long[] stepIds) {
+        if (stepIds == null || stepIds.length == 0) {
+            throw new IllegalArgumentException("Product type must have at least one step");
+        }
+
         for (Long stepId : stepIds) {
+            if (stepId == null) {
+                throw new IllegalArgumentException("Step ID cannot be null");
+            }
             statusDefinitionRepository.findById(stepId)
                     .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId));
         }

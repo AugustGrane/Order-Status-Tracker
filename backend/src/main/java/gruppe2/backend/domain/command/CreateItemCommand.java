@@ -5,7 +5,11 @@ import gruppe2.backend.model.Item;
 import gruppe2.backend.repository.ItemRepository;
 import gruppe2.backend.repository.ProductTypeRepository;
 
-public class CreateItemCommand {
+/**
+ * Command for creating a new Item entity.
+ * Implements the base Command interface with Item as the result type.
+ */
+public class CreateItemCommand implements Command<Item> {
     private final ItemDTO itemDTO;
     private final ItemRepository itemRepository;
     private final ProductTypeRepository productTypeRepository;
@@ -19,6 +23,7 @@ public class CreateItemCommand {
         this.productTypeRepository = productTypeRepository;
     }
 
+    @Override
     public Item execute() {
         validateProductType(itemDTO.productTypeId());
 
@@ -33,6 +38,6 @@ public class CreateItemCommand {
 
     private void validateProductType(Long productTypeId) {
         productTypeRepository.findById(productTypeId)
-                .orElseThrow(() -> new RuntimeException("Product type not found"));
+                .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
     }
 }

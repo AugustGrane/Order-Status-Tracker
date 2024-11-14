@@ -5,14 +5,18 @@ import gruppe2.backend.domain.command.UpdateItemStatusCommand;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.repository.OrderProductTypeRepository;
 import gruppe2.backend.repository.OrderRepository;
+import gruppe2.backend.service.util.OrderFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Service for managing order progress and status updates.
+ * This service handles the movement of orders through their workflow steps.
+ */
 @Service
 public class OrderProgressService {
     private final OrderProductTypeRepository orderProductTypeRepository;
@@ -25,112 +29,87 @@ public class OrderProgressService {
         this.orderRepository = orderRepository;
     }
 
+    /**
+     * Retrieves the current progress of an order.
+     *
+     * @param orderDetailsId ID of the order details to check
+     * @return Current order progress
+     * @throws RuntimeException if order details not found
+     */
+    @Transactional(readOnly = true)
     public OrderProgress getProgress(Long orderDetailsId) {
         OrderDetails orderDetails = findOrderDetails(orderDetailsId);
         OrderStatus status = createOrderStatus(orderDetails);
         return status.toProgress();
     }
 
+    /**
+     * Moves an order to its next step in the workflow.
+     *
+     * @param orderDetailsId ID of the order details to move
+     * @return Updated order progress
+     * @throws IllegalStateException if the order cannot move to next step
+     */
     @Transactional
     public OrderProgress moveToNextStep(Long orderDetailsId) {
         OrderDetails orderDetails = findOrderDetails(orderDetailsId);
         validateGenericProductType(orderDetails);
 
-        // Create current order status
         OrderStatus status = createOrderStatus(orderDetails);
-
         if (!status.canMoveToNextStep()) {
             throw new IllegalStateException("Cannot move to next step: already at final step");
         }
 
-        // Move to next step
         status.moveToNextStep();
 
-        // Create and execute the command
         UpdateItemStatusCommand command = new UpdateItemStatusCommand(
             orderDetails.getItem().getId(),
             status
         );
 
-        // Create OrderModel domain object and execute command
-        Order order = createOrderFromDetails(orderDetails);
+        Order order = OrderFactory.createFromOrderDetails(orderDetails, orderRepository);
         command.execute(order);
 
-        // Update persistence
         updateOrderDetails(orderDetails, status);
 
         return status.toProgress();
     }
 
+    /**
+     * Moves an order to its previous step in the workflow.
+     *
+     * @param orderDetailsId ID of the order details to move
+     * @return Updated order progress
+     * @throws IllegalStateException if the order cannot move to previous step
+     */
     @Transactional
     public OrderProgress moveToPreviousStep(Long orderDetailsId) {
         OrderDetails orderDetails = findOrderDetails(orderDetailsId);
         validateGenericProductType(orderDetails);
 
-        // Create current order status
         OrderStatus status = createOrderStatus(orderDetails);
-
         if (!status.canMoveToPreviousStep()) {
             throw new IllegalStateException("Cannot move to previous step: already at first step");
         }
 
-        // Move to previous step
         status.moveToPreviousStep();
 
-        // Create and execute the command
         UpdateItemStatusCommand command = new UpdateItemStatusCommand(
             orderDetails.getItem().getId(),
             status
         );
 
-        // Create OrderModel domain object and execute command
-        Order order = createOrderFromDetails(orderDetails);
+        Order order = OrderFactory.createFromOrderDetails(orderDetails, orderRepository);
         command.execute(order);
 
-        // Update persistence
         updateOrderDetails(orderDetails, status);
 
         return status.toProgress();
     }
 
-    private Order createOrderFromDetails(OrderDetails orderDetails) {
-        var orderEntity = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
-
-        CustomerInfo customerInfo = new CustomerInfo(
-            orderEntity.getCustomerName(),
-            orderEntity.getNotes(),
-            orderEntity.isPriority()
-        );
-
-        OrderTimeline timeline = new OrderTimeline(
-            orderEntity.getOrderCreated(),
-            orderEntity.isPriority()
-        );
-
-        Map<Long, Integer> items = new HashMap<>();
-        items.put(orderDetails.getItem().getId(), orderDetails.getItemAmount());
-
-        Map<Long, Integer> processingTimes = new HashMap<>();
-        processingTimes.put(orderDetails.getItem().getId(), orderEntity.getTotalEstimatedTime());
-
-        OrderEstimation estimation = new OrderEstimation(
-            items,
-            processingTimes,
-            orderEntity.isPriority()
-        );
-
-        return new Order.Builder()
-            .withId(new OrderId(orderEntity.getId()))
-            .withCustomerInfo(customerInfo)
-            .withTimeline(timeline)
-            .withEstimation(estimation)
-            .build();
-    }
-
     private OrderDetails findOrderDetails(Long orderDetailsId) {
         return orderProductTypeRepository.findById(orderDetailsId)
-                .orElseThrow(() -> new RuntimeException("OrderDetails not found with id: " + orderDetailsId));
+                .orElseThrow(() -> new RuntimeException("Order details not found: " + orderDetailsId));
     }
 
     private OrderStatus createOrderStatus(OrderDetails orderDetails) {
@@ -153,10 +132,8 @@ public class OrderProgressService {
         orderProductTypeRepository.save(orderDetails);
 
         // Create timeline for status tracking
-        var order = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
-
-        OrderTimeline timeline = new OrderTimeline(order.getOrderCreated(), order.isPriority());
+        Order order = OrderFactory.createFromOrderDetails(orderDetails, orderRepository);
+        OrderTimeline timeline = order.getTimeline();
         timeline.recordItemStatus(orderDetails.getItem().getId(),
                                 status.getCurrentStepId(),
                                 LocalDateTime.now());

@@ -1,26 +1,26 @@
 package gruppe2.backend.service;
 
-import gruppe2.backend.dto.ProductTypeDTO;
 import gruppe2.backend.domain.*;
 import gruppe2.backend.domain.command.CreateProductTypeCommand;
 import gruppe2.backend.domain.command.UpdateProductTypeCommand;
 import gruppe2.backend.domain.specification.CanChangeProductTypeSpecification;
 import gruppe2.backend.domain.specification.HasItemSpecification;
+import gruppe2.backend.dto.ProductTypeDTO;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.model.ProductType;
-import gruppe2.backend.repository.ItemRepository;
-import gruppe2.backend.repository.OrderProductTypeRepository;
-import gruppe2.backend.repository.OrderRepository;
-import gruppe2.backend.repository.ProductTypeRepository;
-import gruppe2.backend.repository.StatusDefinitionRepository;
+import gruppe2.backend.repository.*;
+import gruppe2.backend.service.util.OrderFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+/**
+ * Service for managing product types and their transitions.
+ * This service handles the creation and modification of product types,
+ * as well as the transition of items between different product types.
+ */
 @Service
 public class ProductTypeService {
     private final ProductTypeRepository productTypeRepository;
@@ -42,6 +42,13 @@ public class ProductTypeService {
         this.orderRepository = orderRepository;
     }
 
+    /**
+     * Creates a new product type.
+     *
+     * @param productTypeDTO The DTO containing product type details
+     * @return The created product type
+     */
+    @Transactional
     public ProductType createProductType(ProductTypeDTO productTypeDTO) {
         CreateProductTypeCommand command = new CreateProductTypeCommand(
             productTypeDTO,
@@ -51,13 +58,19 @@ public class ProductTypeService {
         return command.execute();
     }
 
+    /**
+     * Updates an item's product type and handles all necessary transitions.
+     *
+     * @param itemId ID of the item to update
+     * @param targetProductTypeId ID of the target product type
+     * @throws IllegalStateException if the transition is invalid
+     */
     @Transactional
     public void updateItemProductType(Long itemId, Long targetProductTypeId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
 
-        ProductType targetProductType = productTypeRepository.findById(targetProductTypeId)
-                .orElseThrow(() -> new RuntimeException("Product type not found: " + targetProductTypeId));
+        ProductType targetProductType = findById(targetProductTypeId);
 
         ProductTypeTransition transition = new ProductTypeTransition(
             itemId,
@@ -70,14 +83,11 @@ public class ProductTypeService {
             throw new IllegalStateException("Invalid product type transition");
         }
 
-        // Find all order details for this item
         List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByItemId(itemId);
         
         for (OrderDetails orderDetails : orderDetailsList) {
-            // Create domain objects
-            Order order = createOrderFromDetails(orderDetails);
+            Order order = OrderFactory.createFromOrderDetails(orderDetails, orderRepository);
             
-            // Create and validate specifications
             HasItemSpecification hasItem = new HasItemSpecification(itemId);
             CanChangeProductTypeSpecification canChange = new CanChangeProductTypeSpecification(itemId);
             
@@ -87,50 +97,26 @@ public class ProductTypeService {
                 );
             }
 
-            // Create and execute command
             UpdateProductTypeCommand command = new UpdateProductTypeCommand(itemId, transition);
             command.execute(order);
             
-            // Update persistence
             updateOrderDetailsForTransition(orderDetails, transition);
         }
 
         updateItemProductTypeId(item, targetProductTypeId);
     }
 
-    private Order createOrderFromDetails(OrderDetails orderDetails) {
-        var orderEntity = orderRepository.findById(orderDetails.getOrderId())
-                .orElseThrow(() -> new RuntimeException("OrderModel not found"));
-
-        CustomerInfo customerInfo = new CustomerInfo(
-            orderEntity.getCustomerName(),
-            orderEntity.getNotes(),
-            orderEntity.isPriority()
-        );
-
-        OrderTimeline timeline = new OrderTimeline(
-            orderEntity.getOrderCreated(),
-            orderEntity.isPriority()
-        );
-
-        Map<Long, Integer> items = new HashMap<>();
-        items.put(orderDetails.getItem().getId(), orderDetails.getItemAmount());
-
-        Map<Long, Integer> processingTimes = new HashMap<>();
-        processingTimes.put(orderDetails.getItem().getId(), orderEntity.getTotalEstimatedTime());
-
-        OrderEstimation estimation = new OrderEstimation(
-            items,
-            processingTimes,
-            orderEntity.isPriority()
-        );
-
-        return new Order.Builder()
-            .withId(new OrderId(orderEntity.getId()))
-            .withCustomerInfo(customerInfo)
-            .withTimeline(timeline)
-            .withEstimation(estimation)
-            .build();
+    /**
+     * Finds a product type by its ID.
+     *
+     * @param productTypeId ID of the product type to find
+     * @return The found product type
+     * @throws RuntimeException if the product type is not found
+     */
+    @Transactional(readOnly = true)
+    public ProductType findById(Long productTypeId) {
+        return productTypeRepository.findById(productTypeId)
+                .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
     }
 
     private void updateOrderDetailsForTransition(OrderDetails orderDetails, ProductTypeTransition transition) {
@@ -149,10 +135,5 @@ public class ProductTypeService {
     private void updateItemProductTypeId(Item item, Long productTypeId) {
         item.setProductTypeId(productTypeId);
         itemRepository.save(item);
-    }
-
-    public ProductType findById(Long productTypeId) {
-        return productTypeRepository.findById(productTypeId)
-                .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
     }
 }
