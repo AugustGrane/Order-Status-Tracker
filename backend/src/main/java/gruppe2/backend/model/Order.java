@@ -33,15 +33,6 @@ public class Order {
     @Column(name = "shipping_url")
     private String shippingUrl;
 
-    @JsonIgnore
-    @ManyToMany
-    @JoinTable(
-        name = "item_mapping",
-        joinColumns = @JoinColumn(name = "order_id"),
-        inverseJoinColumns = @JoinColumn(name = "item_id")
-    )
-    private Set<Item> items = new HashSet<>();
-
     public Order() {}
 
     public Order(Long id, String customerName, boolean priority, String notes, 
@@ -108,13 +99,5 @@ public class Order {
 
     public void setShippingUrl(String shippingUrl) {
         this.shippingUrl = shippingUrl;
-    }
-
-    public Set<Item> getItems() {
-        return items != null ? new HashSet<>(items) : new HashSet<>();
-    }
-
-    public void setItems(Set<Item> items) {
-        this.items = items != null ? new HashSet<>(items) : new HashSet<>();
     }
 }
