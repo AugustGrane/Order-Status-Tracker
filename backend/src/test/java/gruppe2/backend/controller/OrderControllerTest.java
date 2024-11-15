@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -88,7 +89,7 @@ class OrderControllerTest {
         // Create test ProductType and ProductTypeDTO
         testProductType = new ProductType();
         testProductType.setId(1L);
-        testProductTypeDTO = new ProductTypeDTO("Test Type", new Long[]{1L, 2L});
+        testProductTypeDTO = new ProductTypeDTO("Test Type", Arrays.asList(1L, 2L));
 
         // Create test StatusDefinition and StatusDefinitionDTO
         testStatusDefinition = new StatusDefinition();

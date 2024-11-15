@@ -15,7 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +48,7 @@ public class OrderServiceTest {
         orderDetails = new OrderDetails(); // Create order details
         orderDetails.setId(1L);
         orderDetails.setCurrentStepIndex(1);
-        orderDetails.setDifferentSteps(new Long[]{1L, 2L, 3L});
+        orderDetails.setDifferentSteps(Arrays.asList(1L, 2L, 3L));
         updates = new HashMap<>();
         updates.put(1L, LocalDateTime.now());
         orderDetails.setUpdated(updates);
@@ -87,7 +89,7 @@ public class OrderServiceTest {
         assertNotNull(progress);
         assertNotNull(progress.getCurrentStepId());
         assertEquals(orderDetails.getCurrentStepIndex() + 1, progress.getCurrentStep());
-        assertEquals(orderDetails.getDifferentSteps().length, progress.getTotalSteps());
+        assertEquals(orderDetails.getDifferentSteps().size(), progress.getTotalSteps());
         assertEquals(orderDetails.getUpdated(), progress.getStepHistory());
     }
 
@@ -147,7 +149,7 @@ public class OrderServiceTest {
         assertNotNull(result); // Result should contain data
         assertEquals(orderDetails.getId(), result.getId()); // The ID passed should be the ID returned
         assertEquals(1, result.getCurrentStepIndex()); // Should be at step 1
-        assertArrayEquals(new Long[]{1L, 2L, 3L}, result.getDifferentSteps()); // Checking that it has default steps
+        assertEquals(orderDetails.getDifferentSteps(), result.getDifferentSteps()); // Checking that it has default steps
         assertEquals(updates, result.getUpdated()); // Checking that it has the date hashmap and that it matches
     }
 
@@ -174,7 +176,7 @@ public class OrderServiceTest {
         OrderStatus statusResult = orderProgressService.createOrderStatus(orderDetails);
 
         assertNotNull(statusResult); // Result should contain data
-        assertArrayEquals(orderDetails.getDifferentSteps(), statusResult.getSteps()); // Checks that the array of steps are the same in both objects
+        assertEquals(orderDetails.getDifferentSteps(), statusResult.getSteps()); // Checks that the array of steps are the same in both objects
         assertEquals(orderDetails.getCurrentStepIndex(), statusResult.getCurrentStepIndex()); // Checks that current step is the same
         assertEquals(orderDetails.getUpdated(), statusResult.getStatusUpdates()); // Checks that dates are the same
     }
