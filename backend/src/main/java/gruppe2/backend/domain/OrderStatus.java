@@ -2,6 +2,7 @@ package gruppe2.backend.domain;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class OrderStatus {
@@ -9,15 +10,21 @@ public class OrderStatus {
     private int currentStepIndex;
     private final Map<Long, LocalDateTime> statusUpdates;
 
-    public OrderStatus(Long[] steps) {
-        this.steps = steps.clone();
+    public OrderStatus(List<Long> steps) {
+        this.steps = steps.toArray(new Long[0]);
         this.currentStepIndex = 0;
         this.statusUpdates = new HashMap<>();
-        this.statusUpdates.put(steps[0], LocalDateTime.now());
+        this.statusUpdates.put(this.steps[0], LocalDateTime.now());
     }
 
     public OrderStatus(Long[] steps, int currentStepIndex, Map<Long, LocalDateTime> statusUpdates) {
         this.steps = steps.clone();
+        this.currentStepIndex = currentStepIndex;
+        this.statusUpdates = new HashMap<>(statusUpdates);
+    }
+
+    public OrderStatus(List<Long> steps, int currentStepIndex, Map<Long, LocalDateTime> statusUpdates) {
+        this.steps = steps.toArray(new Long[0]);
         this.currentStepIndex = currentStepIndex;
         this.statusUpdates = new HashMap<>(statusUpdates);
     }
@@ -58,12 +65,16 @@ public class OrderStatus {
         return currentStepIndex;
     }
 
+    public Map<Long, LocalDateTime> getStatusUpdates() {
+        return new HashMap<>(statusUpdates);
+    }
+
     public Long[] getSteps() {
         return steps.clone();
     }
 
-    public Map<Long, LocalDateTime> getStatusUpdates() {
-        return new HashMap<>(statusUpdates);
+    public List<Long> getStepsList() {
+        return List.of(steps);
     }
 
     public OrderProgress toProgress() {

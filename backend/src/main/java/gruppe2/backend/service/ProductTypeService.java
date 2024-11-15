@@ -17,6 +17,8 @@ import gruppe2.backend.repository.StatusDefinitionRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,11 +136,12 @@ public class ProductTypeService {
     }
 
     private void updateOrderDetailsForTransition(OrderDetails orderDetails, ProductTypeTransition transition) {
+        List<Long> firstStep = orderDetails.getDifferentSteps();
         OrderStatus newStatus = transition.createNewOrderStatus(
-            orderDetails.getUpdated().get(orderDetails.getDifferentSteps()[0])
+            orderDetails.getUpdated().get(firstStep.get(0))
         );
 
-        orderDetails.setDifferentSteps(newStatus.getSteps());
+        orderDetails.setDifferentSteps(new ArrayList<>(Arrays.asList(newStatus.getSteps())));
         orderDetails.setCurrentStepIndex(newStatus.getCurrentStepIndex());
         orderDetails.setUpdated(newStatus.getStatusUpdates());
         orderDetails.setProduct_type(transition.getTargetProductTypeName());

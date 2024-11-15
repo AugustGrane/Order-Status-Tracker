@@ -8,8 +8,9 @@ import gruppe2.backend.repository.OrderProductTypeRepository;
 import gruppe2.backend.repository.ProductTypeRepository;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SetupOrderDetailsCommand {
@@ -48,14 +49,13 @@ public class SetupOrderDetailsCommand {
             orderDetails.setItemAmount(quantity);
 
             // Set up steps
-            Long[] steps = Arrays.copyOf(productType.getDifferentSteps(),
-                    productType.getDifferentSteps().length);
+            List<Long> steps = productType.getDifferentSteps();
             orderDetails.setDifferentSteps(steps);
             orderDetails.setCurrentStepIndex(0);
 
             // Initialize status updates
             Map<Long, LocalDateTime> statusUpdates = new HashMap<>();
-            statusUpdates.put(steps[0], LocalDateTime.now());
+            statusUpdates.put(steps.get(0), LocalDateTime.now());
             orderDetails.setUpdated(statusUpdates);
 
             orderProductTypeRepository.save(orderDetails);
