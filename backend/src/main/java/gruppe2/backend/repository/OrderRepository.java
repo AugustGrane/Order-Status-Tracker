@@ -11,13 +11,13 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items")
+    @Query("SELECT o FROM Order o")
     List<Order> findAll();
 
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.customerName LIKE %:customerName%")
+    @Query("SELECT o FROM Order o WHERE o.customerName LIKE %:customerName%")
     List<Order> findByCustomerNameContainingIgnoreCase(@Param("customerName") String customerName);
 
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items WHERE o.priority = true")
+    @Query("SELECT o FROM Order o WHERE o.priority = true")
     List<Order> findByPriorityTrue();
     
     @Query("SELECT NEW gruppe2.backend.dto.OrderDashboardDTO(o.id, o.orderCreated, o.priority, o.customerName, o.notes) " +
@@ -25,6 +25,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
            "ORDER BY o.orderCreated ASC")
     List<OrderDashboardDTO> findAllForDashboard();
     
-    @Query("SELECT DISTINCT o FROM Order o LEFT JOIN FETCH o.items ORDER BY o.orderCreated ASC")
+    @Query("SELECT o FROM Order o ORDER BY o.orderCreated ASC")
     List<Order> findAllByOrderByOrderCreatedAsc();
 }

@@ -22,10 +22,6 @@ public class Item {
     @Column(name = "item_image")
     private String image;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "items")
-    private Set<Order> orders = new HashSet<>();
-
     public Item() {}
     
     public Item(Long id, String name, Long productTypeId) {
@@ -34,14 +30,6 @@ public class Item {
         this.productTypeId = productTypeId;
     }
     
-    public Set<Order> getOrders() {
-        return orders != null ? new HashSet<>(orders) : new HashSet<>();
-    }
-
-    public void setOrders(Set<Order> orders) {
-        this.orders = orders != null ? new HashSet<>(orders) : new HashSet<>();
-    }
-
     public String getImage() {
         return image;
     }
