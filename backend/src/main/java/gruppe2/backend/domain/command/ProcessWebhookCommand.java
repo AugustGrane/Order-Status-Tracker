@@ -120,7 +120,7 @@ public class ProcessWebhookCommand {
                         .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
                 ProductType productType = productTypeRepository.findById(item.getProductTypeId())
                         .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
-                processingTimes.put(itemId, productType.getDifferentSteps().length * 10);
+                processingTimes.put(itemId, productType.getDifferentSteps().size() * 10);
             } catch (Exception e) {
                 throw new WebhookProcessingException(
                     itemId,

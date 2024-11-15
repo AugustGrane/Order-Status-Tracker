@@ -8,11 +8,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api")
 public class OrderController {
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
     private final OrderService orderService;
     private final ItemService itemService;
     private final ProductTypeService productTypeService;
@@ -130,12 +133,16 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/get-all-orders")
+    @GetMapping("/orders/dashboard")
     public ResponseEntity<List<OrderDashboardDTO>> getAllOrders() {
         try {
-            return ResponseEntity.ok(orderService.getAllOrders());
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            logger.info("Fetching dashboard orders");
+            List<OrderDashboardDTO> orders = orderService.getAllOrders();
+            logger.info("Successfully fetched {} orders", orders.size());
+            return ResponseEntity.ok(orders);
+        } catch (Exception e) {
+            logger.error("Error fetching dashboard orders", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 

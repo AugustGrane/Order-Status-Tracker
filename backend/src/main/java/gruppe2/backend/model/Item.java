@@ -1,9 +1,14 @@
 package gruppe2.backend.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import java.util.Set;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "items")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Item {
     @Id
     private Long id;
@@ -17,6 +22,10 @@ public class Item {
     @Column(name = "item_image")
     private String image;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "items")
+    private Set<Order> orders = new HashSet<>();
+
     public Item() {}
     
     public Item(Long id, String name, Long productTypeId) {
@@ -25,8 +34,13 @@ public class Item {
         this.productTypeId = productTypeId;
     }
     
-    // Getters and Setters
+    public Set<Order> getOrders() {
+        return orders != null ? new HashSet<>(orders) : new HashSet<>();
+    }
 
+    public void setOrders(Set<Order> orders) {
+        this.orders = orders != null ? new HashSet<>(orders) : new HashSet<>();
+    }
 
     public String getImage() {
         return image;
@@ -36,12 +50,27 @@ public class Item {
         this.image = image;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() { 
+        return id; 
+    }
     
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) { 
+        this.id = id; 
+    }
     
-    public Long getProductTypeId() { return productTypeId; }
-    public void setProductTypeId(Long productTypeId) { this.productTypeId = productTypeId; }
+    public String getName() { 
+        return name; 
+    }
+    
+    public void setName(String name) { 
+        this.name = name; 
+    }
+    
+    public Long getProductTypeId() { 
+        return productTypeId; 
+    }
+    
+    public void setProductTypeId(Long productTypeId) { 
+        this.productTypeId = productTypeId; 
+    }
 }

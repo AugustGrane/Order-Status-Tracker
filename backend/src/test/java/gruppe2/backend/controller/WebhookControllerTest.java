@@ -299,7 +299,7 @@ public class WebhookControllerTest {
         ResponseEntity<WebhookPayload> response = webhookController.handleWebhook(null);
 
         // Assert
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertNull(response.getBody());
         verify(webhookService, never()).createOrderInDatabase(any(WebhookPayload.class));
     }
