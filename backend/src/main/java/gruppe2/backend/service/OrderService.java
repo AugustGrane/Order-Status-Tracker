@@ -10,12 +10,17 @@ import gruppe2.backend.model.*;
 import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.Objects;
 
 @Service
 public class OrderService {
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
     private final OrderRepository orderRepository;
     private final OrderProductTypeRepository orderProductTypeRepository;
     private final ItemService itemService;
@@ -102,7 +107,7 @@ public class OrderService {
             Item item = itemService.findById(itemId);
             ProductType productType = productTypeRepository.findById(item.getProductTypeId())
                     .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
-            processingTimes.put(itemId, productType.getDifferentSteps().length * 10); // Base estimation
+            processingTimes.put(itemId, productType.getDifferentSteps().size() * 10); // Base estimation
         });
         return processingTimes;
     }
@@ -112,19 +117,117 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
         List<OrderDetails> orderDetailsList = orderProductTypeRepository.findByOrderId(orderId);
+        
+        // Get all unique status definition IDs
+        Set<Long> statusIds = orderDetailsList.stream()
+                .flatMap(details -> details.getDifferentSteps().stream())
+                .collect(Collectors.toSet());
+        
+        // Fetch all status definitions in a single query
+        Map<Long, StatusDefinition> statusDefinitionsMap = statusDefinitionRepository.findAllById(statusIds)
+                .stream()
+                .collect(Collectors.toMap(
+                    StatusDefinition::getId,
+                    sd -> sd,
+                    (existing, replacement) -> existing
+                ));
+                
         return orderDetailsList.stream()
-                .map(orderDetailsMapper::toOrderDetailsDTO)
+                .map(details -> orderDetailsMapper.toOrderDetailsDTO(details, statusDefinitionsMap))
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<OrderDashboardDTO> getAllOrders() {
-        List<gruppe2.backend.model.Order> orderEntities = orderRepository.findAllByOrderByOrderCreatedAsc();
-        return orderEntities.stream()
-                .map(order -> {
-                    List<OrderDetails> orderDetails = orderProductTypeRepository.findByOrderId(order.getId());
-                    return orderDetailsMapper.toOrderDashboardDTO(order, orderDetails);
-                })
-                .collect(Collectors.toList());
+        long startTime = System.currentTimeMillis();
+        
+        // Fetch orders with minimal data first
+        logger.info("Starting to fetch dashboard orders");
+        List<OrderDashboardDTO> dashboardDTOs = orderRepository.findAllForDashboard();
+        logger.info("Fetched {} orders in {} ms", dashboardDTOs.size(), System.currentTimeMillis() - startTime);
+        
+        if (dashboardDTOs.isEmpty()) {
+            return dashboardDTOs;
+        }
+        
+        // Bulk load all order details in a single query
+        long detailsStart = System.currentTimeMillis();
+        Map<Long, List<OrderDetailsDTO>> orderDetailsMap = orderProductTypeRepository.findByOrderIdsGrouped(
+            dashboardDTOs.stream()
+                .map(OrderDashboardDTO::getOrderId)
+                .collect(Collectors.toList())
+        );
+        logger.info("Fetched order details in {} ms", System.currentTimeMillis() - detailsStart);
+        
+        // Get all unique product type IDs
+        long productTypeStart = System.currentTimeMillis();
+        Set<Long> productTypeIds = orderDetailsMap.values().stream()
+                .flatMap(List::stream)
+                .map(details -> details.item().getProductTypeId())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+                
+        // Fetch all product types in a single query
+        Map<Long, ProductType> productTypeMap = productTypeRepository.findAllById(productTypeIds)
+                .stream()
+                .collect(Collectors.toMap(
+                    ProductType::getId,
+                    pt -> pt
+                ));
+        logger.info("Fetched {} product types in {} ms", productTypeMap.size(), System.currentTimeMillis() - productTypeStart);
+        
+        // Get all unique status definition IDs from all order details
+        long statusStart = System.currentTimeMillis();
+        Set<Long> allStatusIds = orderDetailsMap.values().stream()
+                .flatMap(List::stream)
+                .flatMap(details -> details.differentSteps().stream())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        
+        // Fetch all status definitions in a single query if we have any
+        Map<Long, StatusDefinition> statusDefinitionsMap = allStatusIds.isEmpty() ? 
+            Collections.emptyMap() :
+            statusDefinitionRepository.findAllByIds(allStatusIds)
+                .stream()
+                .collect(Collectors.toMap(
+                    StatusDefinition::getId,
+                    sd -> sd
+                ));
+        logger.info("Fetched {} status definitions in {} ms", statusDefinitionsMap.size(), System.currentTimeMillis() - statusStart);
+        
+        // Map order details to DTOs and set them in the dashboard DTOs
+        long mappingStart = System.currentTimeMillis();
+        dashboardDTOs.forEach(dto -> {
+            List<OrderDetailsDTO> orderDetails = orderDetailsMap.getOrDefault(dto.getOrderId(), Collections.emptyList());
+            List<OrderDetailsWithStatusDTO> items = orderDetails.stream()
+                    .map(details -> {
+                        // Get product type info if available
+                        String productTypeName = Optional.ofNullable(details.item())
+                            .map(Item::getProductTypeId)
+                            .map(productTypeMap::get)
+                            .map(ProductType::getName)
+                            .orElse(null);
+                            
+                        return new OrderDetailsWithStatusDTO(
+                            details.id(),
+                            details.orderId(),
+                            details.item(),
+                            details.itemAmount(),
+                            productTypeName,
+                            details.currentStepIndex(),
+                            details.differentSteps().stream()
+                                .map(statusDefinitionsMap::get)
+                                .toArray(StatusDefinition[]::new),
+                            details.updated()
+                        );
+                    })
+                    .collect(Collectors.toList());
+            dto.setItems(items);
+        });
+        logger.info("Mapped DTOs in {} ms", System.currentTimeMillis() - mappingStart);
+        
+        logger.info("Total dashboard loading time: {} ms", System.currentTimeMillis() - startTime);
+        return dashboardDTOs;
     }
 
     public StatusDefinition createStatusDefinition(StatusDefinitionDTO dto) {

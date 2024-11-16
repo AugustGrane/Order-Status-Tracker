@@ -4,6 +4,7 @@ import gruppe2.backend.dto.ProductTypeDTO;
 import gruppe2.backend.model.ProductType;
 import gruppe2.backend.repository.ProductTypeRepository;
 import gruppe2.backend.repository.StatusDefinitionRepository;
+import java.util.List;
 
 public class CreateProductTypeCommand {
     private final ProductTypeDTO productTypeDTO;
@@ -29,8 +30,15 @@ public class CreateProductTypeCommand {
         return productTypeRepository.save(productType);
     }
 
-    private void validateStepsExist(Long[] stepIds) {
+    private void validateStepsExist(List<Long> stepIds) {
+        if (stepIds == null || stepIds.isEmpty()) {
+            throw new IllegalArgumentException("Product type must have at least one step");
+        }
+        
         for (Long stepId : stepIds) {
+            if (stepId == null) {
+                throw new IllegalArgumentException("Step ID cannot be null");
+            }
             statusDefinitionRepository.findById(stepId)
                     .orElseThrow(() -> new RuntimeException("Status definition not found: " + stepId));
         }
