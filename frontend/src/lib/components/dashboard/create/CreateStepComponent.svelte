@@ -1,28 +1,23 @@
 <script lang="ts">
     import {onMount} from "svelte";
+    import Dialog from "$lib/components/dialog/Dialog.svelte";
+    import ChooseExistingImageComponent from "$lib/components/dashboard/create/ChooseExistingImageComponent.svelte";
 
     onMount(() => {
     });
 
-    let name: String;
-    let description: String;
-    let image: String;
+    let name: string;
+    let description: string;
+    let image: File;
+    let existingImageDialog: any;
 
     async function handleSubmit() {
-        let newProductionStep = {
-            name,
-            description,
-            image
-        }
 
         try {
-            console.log(newProductionStep);
+            const formData = await populateFormData();
             const response = await fetch('api/status-definitions', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(newProductionStep)
+                body: formData,
             });
         } catch (error) {
             console.error('Error:', error);
@@ -30,21 +25,40 @@
         }
     }
 
+    async function populateFormData() {
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', description);
+        formData.append('image', image);
+        for (const [key, value] of formData.entries()) {
+            console.log(`${key}:`, value);
+        }
+        return formData;
+    }
+    async function showImagePickerDialog(){
+        existingImageDialog.showModal();
+    }
+
 </script>
 
 <div class="dialog-body">
-    <form>
+    <form enctype="multipart/form-data">
         <label for="step-name">Navn på trin</label>
         <input type="text" id="step-name" name="name" bind:value={name} required>
 
-        <label for="step-description">Beskrivelse af trin</label>
+        <label for="step-description">Beskrivelse af trin:  </label>
         <input type="text" id="step-description" name="description" bind:value={description} required>
 
-        <label for="step-image">Billede</label>
-        <input type="text" id="step-image" name="image" bind:value={image} required>
-        <input type="submit" value="Submit" on:click={handleSubmit}>
+        <label for="step-image">Upload bilede</label>
+        <input type="file" id="step-image" name="image" bind:value={image} required>
+        <input type="submit" value="Submit" on:click={populateFormData}>
     </form>
+    <button on:click={showImagePickerDialog}>Vælg eksisterende billede </button>
 </div>
+
+<Dialog title="Vælg et billede" bind:dialog = {existingImageDialog }>
+    <ChooseExistingImageComponent/>
+</Dialog>
 
 <style>
     /* General dialog container styling */
