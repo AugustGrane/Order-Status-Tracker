@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class OrderProgressServiceTest {
         orderDetails = new OrderDetails(); // Create order details
         orderDetails.setId(1L);
         orderDetails.setCurrentStepIndex(1);
-        orderDetails.setDifferentSteps(new Long[]{1L, 7L, 3L});
+        orderDetails.setDifferentSteps(List.of(new Long[]{1L, 7L, 3L}));
         updates = new HashMap<>();
         updates.put(1L, LocalDateTime.now());
         orderDetails.setUpdated(updates);
@@ -86,7 +87,7 @@ public class OrderProgressServiceTest {
         assertNotNull(progress);
         assertNotNull(progress.getCurrentStepId());
         assertEquals(orderDetails.getCurrentStepIndex(), progress.getCurrentStep());
-        assertEquals(orderDetails.getDifferentSteps().length, progress.getTotalSteps());
+        assertEquals(orderDetails.getDifferentSteps().size(), progress.getTotalSteps());
         assertEquals(orderDetails.getUpdated(), progress.getStepHistory());
     }
 
@@ -109,7 +110,7 @@ public class OrderProgressServiceTest {
     @Test
     void moveToNextStep_Failed_AtFinalStep() {
         // Arrange happens beforeEach
-        orderDetails.setCurrentStepIndex(orderDetails.getDifferentSteps().length - 1);
+        orderDetails.setCurrentStepIndex(orderDetails.getDifferentSteps().size() - 1);
 
         // Mockito
         when(orderProductTypeRepository.findById(orderDetails.getId())).thenReturn(Optional.of(orderDetails)); // Used in "findOrderDetails"
@@ -140,7 +141,7 @@ public class OrderProgressServiceTest {
         assertNotNull(progress);
         assertNotNull(progress.getCurrentStepId());
         assertEquals(orderDetails.getCurrentStepIndex(), progress.getCurrentStep());
-        assertEquals(orderDetails.getDifferentSteps().length, progress.getTotalSteps());
+        assertEquals(orderDetails.getDifferentSteps().size(), progress.getTotalSteps());
         assertEquals(orderDetails.getUpdated(), progress.getStepHistory());
     }
 
