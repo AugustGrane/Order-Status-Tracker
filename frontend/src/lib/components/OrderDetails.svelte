@@ -23,15 +23,20 @@
                 <h4>{item.item.name} - {item.itemAmount}</h4>
                 <span class="product-type">{item.productTypeName}</span>
             </div>
-            
-            <div class="progress-steps">
-                {#each item.differentSteps as step, index}
-                    <div class="step" class:active={index <= item.currentStepIndex}>
-                        <div class="step-content">
-                            <div class="step-marker">
-                                <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+
+            <div class="item-content">
+                <div class="progress-steps">
+                    {#each item.differentSteps as step, index}
+                        <div class="step" class:active={index <= item.currentStepIndex}>
+                            <div class="step-content">
+                                <div class="step-marker">
+                                    <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+                                </div>
+                                <span class="step-name">{step.name}</span>
                             </div>
-                            <span class="step-name">{step.name}</span>
+                            {#if index<item.differentSteps.length-1}
+                                <div class="step-line"></div>
+                            {/if}
                         </div>
                     {/each}
                 </div>
