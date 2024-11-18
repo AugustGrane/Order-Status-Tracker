@@ -18,7 +18,7 @@ public class OrderDetails {
     private Long orderId;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "item_id")
+    @JoinColumn(name = "item_id", nullable = true)
     private Item item;
 
     @Column(name = "item_amount")
@@ -33,7 +33,7 @@ public class OrderDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "order_product_type_steps",
-            joinColumns = @JoinColumn(name = "order_product_type_id")
+            joinColumns = @JoinColumn(name = "order_product_type_id", nullable = true)
     )
     @Column(name = "step_id")
     @OrderColumn(name = "step_order")
@@ -42,7 +42,7 @@ public class OrderDetails {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
             name = "order_product_type_updated",
-            joinColumns = @JoinColumn(name = "order_product_type_id")
+            joinColumns = @JoinColumn(name = "order_product_type_id", nullable = true)
     )
     @MapKeyColumn(name = "status_definition_id")
     @Column(name = "updated")

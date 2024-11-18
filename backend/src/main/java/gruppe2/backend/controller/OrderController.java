@@ -171,4 +171,17 @@ public class OrderController {
         }
     }
 
+    @DeleteMapping("/delete-item/{itemId}")
+    public ResponseEntity<String> deleteItem(@PathVariable Long itemId) {
+        if (itemId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Item ID is null");
+        }
+        try {
+            itemService.deleteItem(itemId);
+            return ResponseEntity.ok("Successfully deleted item with ID: " + itemId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 }

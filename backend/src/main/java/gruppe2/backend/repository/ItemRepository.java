@@ -10,4 +10,5 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByProductTypeId(Long productTypeId);
     List<Item> findByNameContainingIgnoreCase(String name);
+    void deleteItemById(Long id);
 }
