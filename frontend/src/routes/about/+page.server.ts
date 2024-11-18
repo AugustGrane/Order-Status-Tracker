@@ -23,7 +23,7 @@ export const actions = {
         const image_path = `frontend/static/uploads/${image.name}`;
 
         // Use event.fetch for server-side HTTP requests in SvelteKit
-        const response = await fetch('/api/status-definitions', {  // Now using event.fetch
+        const response = await fetch('/api/create-status-definition', {  // Now using event.fetch
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
