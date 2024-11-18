@@ -164,6 +164,7 @@ public class ProductTypeService {
 
     public List<ProductTypeProjection> findAllProjectedByName() {
         return productTypeRepository.findAllProjectedBy();
+    }
     public void deleteProductType(Long productTypeId) {
         ProductType productType = productTypeRepository.findById(productTypeId)
                 .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
