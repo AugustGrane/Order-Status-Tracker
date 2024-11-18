@@ -1,6 +1,5 @@
 <script lang="ts">
     export let searchQuery: string;
-    export let sortOption: string;
     export let statusFilter: string;
 </script>
 
@@ -13,11 +12,6 @@
         >
     </div>
     <div class="filter-options">
-        <select bind:value={sortOption}>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="process">Process Size</option>
-        </select>
         <select bind:value={statusFilter}>
             <option value="active">Active Orders</option>
             <option value="completed">Completed Orders</option>
@@ -29,7 +23,7 @@
 <style>
     .filters {
         display: flex;
-        gap: 1rem;
+        gap: 4rem;
         margin-bottom: 1.5rem;
         flex-wrap: wrap;
     }
@@ -40,7 +34,7 @@
     }
 
     .search-bar input {
-        width: 100%;
+        width: 25rem;
         padding: 0.75rem 1rem;
         border: 1px solid #e2e8f0;
         border-radius: 8px;

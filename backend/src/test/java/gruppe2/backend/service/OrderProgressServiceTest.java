@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,7 @@ public class OrderProgressServiceTest {
         orderDetails = new OrderDetails(); // Create order details
         orderDetails.setId(1L);
         orderDetails.setCurrentStepIndex(1);
-        orderDetails.setDifferentSteps(List.of(new Long[]{1L, 7L, 3L}));
+        orderDetails.setDifferentSteps(Arrays.asList(1L, 7L, 3L));
         updates = new HashMap<>();
         updates.put(1L, LocalDateTime.now());
         orderDetails.setUpdated(updates);
