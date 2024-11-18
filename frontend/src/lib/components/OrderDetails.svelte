@@ -14,7 +14,9 @@
                 {#each item.differentSteps as step, index}
                     <div class="step" class:active={index <= item.currentStepIndex}>
                         <div class="step-content">
-                            <div class="step-marker"></div>
+                            <div class="step-marker">
+                                <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+                            </div>
                             <span class="step-name">{step.name}</span>
                         </div>
                         {#if index < item.differentSteps.length - 1}
@@ -82,15 +84,30 @@
     }
 
     .step-marker {
-        width: 1rem;
-        height: 1rem;
+        width: 2rem;
+        height: 2rem;
         border-radius: 50%;
-        background: #e2e8f0;
-        border: 2px solid #f8fafc;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
     }
 
     .step.active .step-marker {
-        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .icon {
+        width: 100%;
+        height: 100%;
+        background-size: contain !important;
+        filter: grayscale(100%) opacity(0.5);
+    }
+
+    .step.active .icon {
+        filter: none;
     }
 
     .step-name {
