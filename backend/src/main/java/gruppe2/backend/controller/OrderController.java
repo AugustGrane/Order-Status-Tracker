@@ -3,6 +3,7 @@ package gruppe2.backend.controller;
 import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.model.*;
+import gruppe2.backend.repository.ProductTypeProjection;
 import gruppe2.backend.service.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
