@@ -222,4 +222,19 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PostMapping("/update-step")
+    public ResponseEntity<OrderProgress> moveToStep(@RequestBody UpdateStepDTO dto) {
+        if (dto.getOrderDetailsId() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(orderProgressService.moveToStep(dto.getOrderDetailsId(), dto.getNewStepIndex()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

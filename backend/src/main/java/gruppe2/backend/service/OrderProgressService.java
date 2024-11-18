@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Math.abs;
+
 @Service
 public class OrderProgressService {
     private final OrderProductTypeRepository orderProductTypeRepository;
@@ -168,4 +170,31 @@ public class OrderProgressService {
             .findFirst()
             .ifPresent(orderProductTypeRepository::delete);
     }
+
+    public OrderProgress moveToStep(Long orderDetailsId, int nextStepIndex) {
+
+        if (orderDetailsId == null || nextStepIndex < 0) {
+            throw new IllegalArgumentException("Invalid input");
+        }
+
+        int currentStep = findOrderDetails(orderDetailsId).getCurrentStepIndex();
+
+        int differenceInSteps = nextStepIndex - currentStep;
+
+        if (differenceInSteps > 0) {
+            for (int i = 0; i < differenceInSteps; i++) {
+                moveToNextStep(orderDetailsId);
+            }
+        } else if (differenceInSteps < 0) {
+            for (int i = 0; i > differenceInSteps; i--) {
+                moveToPreviousStep(orderDetailsId);
+            }
+        }
+
+        return getProgress(orderDetailsId);
+    }
+
+
+
+
 }

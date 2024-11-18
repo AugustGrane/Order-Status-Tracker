@@ -45,6 +45,15 @@ public class OrderStatus {
         recordCurrentStep();
     }
 
+    public void moveToStep(int newStepIndex) {
+        //LAV ERROR HANDELING
+        //if (!canMoveToNextStep()) {
+        //    throw new IllegalStateException("Failed in trying to update the step");
+        //}
+        currentStepIndex = newStepIndex ;
+        recordCurrentStep();
+    }
+
     public void moveToPreviousStep() {
         if (!canMoveToPreviousStep()) {
             throw new IllegalStateException("Already at first step");
