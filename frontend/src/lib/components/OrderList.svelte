@@ -9,20 +9,51 @@
     export let showTooltip: (event: MouseEvent, orderId: number, type?: 'status' | 'notes') => void;
     export let hideTooltip: () => void;
     export let isOrderCompleted: (order: any) => boolean;
+    export let sortField: string;
+    export let sortDirection: 'asc' | 'desc';
 
     function toggleOrder(orderId: number) {
         expandedOrder = expandedOrder === orderId ? null : orderId;
+    }
+
+    function handleSort(field: string) {
+        if (sortField === field) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortField = field;
+            sortDirection = 'desc'; // Default to descending when changing fields
+        }
+    }
+
+    function getSortIcon(field: string): string {
+        if (sortField !== field) return '↕';
+        return sortDirection === 'desc' ? '↓' : '↑';
     }
 </script>
 
 <div class="order-overview">
     <div class="name-bar">
-        <div class="cell">Ordrenummer</div>
-        <div class="cell">Dato</div>
-        <div class="cell">Kundens navn</div>
-        <div class="cell">Status</div>
+        <div class="cell sortable" on:click={() => handleSort('orderId')}>
+            Ordrenummer
+            <span class="sort-icon">{getSortIcon('orderId')}</span>
+        </div>
+        <div class="cell sortable" on:click={() => handleSort('date')}>
+            Dato
+            <span class="sort-icon">{getSortIcon('date')}</span>
+        </div>
+        <div class="cell sortable" on:click={() => handleSort('customerName')}>
+            Kundens navn
+            <span class="sort-icon">{getSortIcon('customerName')}</span>
+        </div>
+        <div class="cell sortable" on:click={() => handleSort('status')}>
+            Status
+            <span class="sort-icon">{getSortIcon('status')}</span>
+        </div>
         <div class="cell">Noter</div>
-        <div class="cell">Prioritet</div>
+        <div class="cell sortable" on:click={() => handleSort('priority')}>
+            Prioritet
+            <span class="sort-icon">{getSortIcon('priority')}</span>
+        </div>
     </div>
 
     {#each orders as order}
@@ -125,11 +156,34 @@
         overflow: hidden;
     }
 
+    .sortable {
+        cursor: pointer;
+        user-select: none;
+        transition: color 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .sortable:hover {
+        color: #1e293b;
+    }
+
+    .sort-icon {
+        font-size: 0.875rem;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+    .sortable:hover .sort-icon {
+        opacity: 1;
+    }
+
     .content {
         width: 100%;
         display: flex;
         align-items: center;
-        min-width: 0; /* This ensures proper text truncation */
+        min-width: 0;
     }
 
     .customer-name {
