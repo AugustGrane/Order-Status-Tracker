@@ -32,7 +32,7 @@ public class OrderController {
         this.orderProgressService = orderProgressService;
     }
 
-    @PostMapping("/items")
+    @PostMapping("/create-item")
     public ResponseEntity<Item> createItem(@RequestBody ItemDTO itemDTO) {
         if (itemDTO == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -44,7 +44,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/orders")
+    @PostMapping("/create-order")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDTO orderDTO) {
         if (orderDTO == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -56,7 +56,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/product-types")
+    @PostMapping("/create-product-type")
     public ResponseEntity<ProductType> createProductType(@RequestBody ProductTypeDTO productTypeDTO) {
         if (productTypeDTO == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -68,7 +68,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/status-definitions")
+    @PostMapping("/create-status-definition")
     public ResponseEntity<StatusDefinition> createStatusDefinition(@RequestBody StatusDefinitionDTO dto) {
         if (dto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
