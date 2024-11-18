@@ -19,24 +19,23 @@
     {#each order.items as item}
         <div class="item">
             <div class="item-header">
-                <h4>{item.item.name}</h4>
+
+                <h4>{item.item.name} - {item.itemAmount}</h4>
                 <span class="product-type">{item.productTypeName}</span>
             </div>
-
-            <div class="item-content">
-                <div class="progress-steps">
-                    {#each item.differentSteps as step, index}
-                        <div class="step" class:active={index <= item.currentStepIndex}>
-                            <div class="step-content">
-                                <div class="step-marker"></div>
-                                <span class="step-name">{step.name}</span>
+            
+            <div class="progress-steps">
+                {#each item.differentSteps as step, index}
+                    <div class="step" class:active={index <= item.currentStepIndex}>
+                        <div class="step-content">
+                            <div class="step-marker">
+                                <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
                             </div>
-                            {#if index < item.differentSteps.length - 1}
-                                <div class="step-line"></div>
-                            {/if}
+                            <span class="step-name">{step.name}</span>
                         </div>
                     {/each}
                 </div>
+          
                 <div class="select-step">
                     <select bind:value={item.currentStepIndex} on:change={(e) => updateStep(item, e.target.value)}>
                         {#each item.differentSteps as step, index}
@@ -44,6 +43,7 @@
                         {/each}
                     </select>
                 </div>
+          
                 <div class="save-button">
                     <button on:click={() => saveItem(item)}>Gem</button>
                 </div>
@@ -115,15 +115,30 @@
     }
 
     .step-marker {
-        width: 1rem;
-        height: 1rem;
+        width: 2rem;
+        height: 2rem;
         border-radius: 50%;
-        background: #e2e8f0;
-        border: 2px solid #f8fafc;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
     }
 
     .step.active .step-marker {
-        background: #3b82f6;
+        border-color: #3b82f6;
+    }
+
+    .icon {
+        width: 100%;
+        height: 100%;
+        background-size: contain !important;
+        filter: grayscale(100%) opacity(0.5);
+    }
+
+    .step.active .icon {
+        filter: none;
     }
 
     .step-name {
