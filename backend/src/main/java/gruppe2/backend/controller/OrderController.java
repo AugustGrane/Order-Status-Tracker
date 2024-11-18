@@ -166,7 +166,8 @@ public class OrderController {
             return ResponseEntity.ok(productTypeService.findAllProjectedByName());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-
+        }
+    }
     @DeleteMapping("/delete-order/{orderId}")
     public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
         if (orderId == null) {
