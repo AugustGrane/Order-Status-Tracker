@@ -15,7 +15,7 @@ export interface OrderDetailsWithStatus {
     orderId: number;
     item: Item;
     itemAmount: number;
-    product_type: string;
+    productTypeName: string;
     currentStepIndex: number;
     differentSteps: StatusDefinition[];
     updated: Record<number, string>;

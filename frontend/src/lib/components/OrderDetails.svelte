@@ -7,7 +7,7 @@
         <div class="item">
             <div class="item-header">
                 <h4>{item.item.name}</h4>
-                <span class="product-type">{item.product_type}</span>
+                <span class="product-type">{item.productTypeName}</span>
             </div>
             
             <div class="progress-steps">
@@ -42,13 +42,13 @@
 
     .item-header {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
         margin-bottom: 1rem;
     }
 
     .item-header h4 {
-        margin: 0;
+        margin-right: 1rem;
         font-size: 1rem;
         color: #1e293b;
     }
