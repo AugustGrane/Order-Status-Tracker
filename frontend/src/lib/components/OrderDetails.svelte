@@ -6,7 +6,7 @@
     {#each order.items as item}
         <div class="item">
             <div class="item-header">
-                <h4>{item.item.name}</h4>
+                <h4>{item.item.name} - {item.itemAmount}</h4>
                 <span class="product-type">{item.product_type}</span>
             </div>
             
