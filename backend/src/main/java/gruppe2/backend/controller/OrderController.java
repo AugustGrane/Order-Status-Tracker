@@ -157,4 +157,18 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PutMapping("/update-step")
+    public ResponseEntity<OrderProgress> moveToStep(@RequestBody Long orderDetailsId, int newStepIndex) {
+        if (orderDetailsId == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        try {
+            return ResponseEntity.ok(orderProgressService.moveToStep(orderDetailsId, newStepIndex));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }

@@ -9,8 +9,8 @@
         console.log(data);
 
         try {
-            const response = await fetch('/api/update-step', {
-                method: 'POST',
+            const response = await fetch('api/update-step', {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },

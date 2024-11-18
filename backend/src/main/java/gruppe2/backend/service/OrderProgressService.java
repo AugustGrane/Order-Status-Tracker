@@ -161,4 +161,39 @@ public class OrderProgressService {
                                 status.getCurrentStepId(),
                                 LocalDateTime.now());
     }
+
+    @Transactional
+    public OrderProgress moveToStep(Long orderDetailsId, int nextStepIndex) {
+        OrderDetails orderDetails = findOrderDetails(orderDetailsId);
+        validateGenericProductType(orderDetails);
+
+        // Create current order status
+        OrderStatus status = createOrderStatus(orderDetails);
+
+        if (!status.canMoveToNextStep()) {
+            throw new IllegalStateException("Cannot move to next step: already at final step");
+        }
+
+        // Move to next step
+        status.moveToStep(nextStepIndex);
+
+        // Create and execute the command
+        UpdateItemStatusCommand command = new UpdateItemStatusCommand(
+                orderDetails.getItem().getId(),
+                status
+        );
+
+        // Create Order domain object and execute command
+        Order order = createOrderFromDetails(orderDetails);
+        command.execute(order);
+
+        // Update persistence
+        updateOrderDetails(orderDetails, status);
+
+        return status.toProgress();
+    }
+
+
+
+
 }
