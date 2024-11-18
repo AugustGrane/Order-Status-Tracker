@@ -164,6 +164,13 @@ public class OrderProgressService {
                                 LocalDateTime.now());
     }
 
+    public void deleteItemFromOrder(Long itemId, Long orderId) {
+        orderProductTypeRepository.findByOrderId(orderId).stream()
+            .filter(orderDetails -> orderDetails.getItem().getId().equals(itemId))
+            .findFirst()
+            .ifPresent(orderProductTypeRepository::delete);
+    }
+
     public OrderProgress moveToStep(Long orderDetailsId, int nextStepIndex) {
 
         if (orderDetailsId == null || nextStepIndex < 0) {

@@ -27,4 +27,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     
     @Query("SELECT o FROM Order o ORDER BY o.orderCreated ASC")
     List<Order> findAllByOrderByOrderCreatedAsc();
+
+    void deleteById(Long id);
 }

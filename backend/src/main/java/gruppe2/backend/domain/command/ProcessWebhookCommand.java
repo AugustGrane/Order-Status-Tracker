@@ -97,7 +97,8 @@ public class ProcessWebhookCommand {
                 item.getName(),
                 item.getProduct_id(),
                 0L, // Generic product type
-                item.getImg().getSrc()
+                item.getImg().getSrc(),
+                false
             );
             
             try {
@@ -120,6 +121,9 @@ public class ProcessWebhookCommand {
                         .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
                 ProductType productType = productTypeRepository.findById(item.getProductTypeId())
                         .orElseThrow(() -> new RuntimeException("Product type not found: " + item.getProductTypeId()));
+                if (item.isDeleted()) {
+                    throw new RuntimeException("Item is deleted. Use another item ID: " + itemId);
+                }
                 processingTimes.put(itemId, productType.getDifferentSteps().size() * 10);
             } catch (Exception e) {
                 throw new WebhookProcessingException(
