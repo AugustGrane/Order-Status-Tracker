@@ -177,8 +177,24 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Item ID is null");
         }
         try {
-            itemService.deleteItem(itemId);
+            itemService.setItemAsDeleted(itemId);   // Doesn't actually delete the item, just marks it as deleted
             return ResponseEntity.ok("Successfully deleted item with ID: " + itemId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete-item-from-order/{itemId}/{orderId}")
+    public ResponseEntity<String> deleteOrderItem(@PathVariable Long itemId, @PathVariable Long orderId) {
+        if (itemId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Item ID is null");
+        }
+        if (orderId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Order ID is null");
+        }
+        try {
+            orderProgressService.deleteItemFromOrder(itemId, orderId);
+            return ResponseEntity.ok("Successfully deleted item " + itemId + " from order " + orderId);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }

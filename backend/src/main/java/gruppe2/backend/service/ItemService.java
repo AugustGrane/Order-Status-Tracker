@@ -30,22 +30,26 @@ public class ItemService {
     }
 
     public Item findById(Long itemId) {
-        return itemRepository.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+
+        if (item.isDeleted()) {
+            throw new RuntimeException("Item is deleted. Use another item ID: " + itemId);
+        }
+        return item;
     }
 
-    @Transactional
-    public void deleteItem(Long itemId) {
+    public void setItemAsDeleted(Long itemId) {
         try {
-            List<OrderDetails> orderDetails = orderProductTypeRepository.findByItemId(itemId);
-            orderProductTypeRepository.deleteAll(orderDetails);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete item relations with ItemID: " + itemId, e);
-        }
-        try {
-            itemRepository.deleteItemById(itemId);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete item with ID: " + itemId, e);
+            Item item = itemRepository.findById(itemId)
+                    .orElseThrow(() -> new RuntimeException("Item not found: " + itemId));
+            if (item.isDeleted()) {
+                throw new RuntimeException("Item is already deleted: " + itemId);
+            }
+            item.setDeleted(true);
+            itemRepository.save(item);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Could not delete item: " + itemId);
         }
     }
 }

@@ -27,6 +27,7 @@ public class CreateItemCommand {
         item.setName(itemDTO.name());
         item.setProductTypeId(itemDTO.productTypeId());
         item.setImage(itemDTO.item_image());
+        item.setDeleted(false);
 
         return itemRepository.save(item);
     }
