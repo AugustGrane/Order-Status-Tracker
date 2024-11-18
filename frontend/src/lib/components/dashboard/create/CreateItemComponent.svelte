@@ -32,7 +32,7 @@
         }
 
         try {
-            const response = await fetch("/api/items", {
+            const response = await fetch("/api/create-item", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json', // Specify that we're sending JSON
