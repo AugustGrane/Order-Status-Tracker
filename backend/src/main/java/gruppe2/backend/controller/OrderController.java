@@ -157,4 +157,18 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @DeleteMapping("/delete-order/{orderId}")
+    public ResponseEntity<String> deleteOrder(@PathVariable Long orderId) {
+        if (orderId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Order ID is null");
+        }
+        try {
+            orderService.deleteOrder(orderId);
+            return ResponseEntity.ok("Successfully deleted order with ID: " + orderId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 }
