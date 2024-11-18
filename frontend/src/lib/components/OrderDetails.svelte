@@ -1,10 +1,36 @@
 <script lang="ts">
     export let order: any;
 
-    function saveItem(item: any) {
-        // Tilføj din logik for at gemme item her
-        console.log("Gemmer item:", item);
+    async function saveItem(item: any) {
+        const data = {
+            orderDetailsId: item.id, // ID på item
+            newStepIndex: item.currentStepIndex, // Det opdaterede trin
+        };
+        console.log(data);
+
+        try {
+            const response = await fetch('/api/update-step', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Fejl ved opdatering af trin for item ID ${item.id}: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('Opdatering succesfuld:', result);
+            alert('Trinnet blev opdateret!');
+
+        } catch (error) {
+            console.error('Fejl ved opdatering:', error);
+            alert('Kunne ikke opdatere trinnet. Prøv igen.');
+        }
     }
+
 
     function updateStep(item: any, newStepIndex: number) {
         // Logik til opdatering af trin, hvis nødvendigt
