@@ -9,11 +9,7 @@ import gruppe2.backend.domain.specification.HasItemSpecification;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.model.ProductType;
-import gruppe2.backend.repository.ItemRepository;
-import gruppe2.backend.repository.OrderProductTypeRepository;
-import gruppe2.backend.repository.OrderRepository;
-import gruppe2.backend.repository.ProductTypeRepository;
-import gruppe2.backend.repository.StatusDefinitionRepository;
+import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,5 +153,9 @@ public class ProductTypeService {
     public ProductType findById(Long productTypeId) {
         return productTypeRepository.findById(productTypeId)
                 .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
+    }
+
+    public List<ProductTypeProjection> findAllProjectedByName() {
+        return productTypeRepository.findAllProjectedBy();
     }
 }

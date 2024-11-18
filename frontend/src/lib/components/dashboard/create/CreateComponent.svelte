@@ -2,7 +2,7 @@
     import {onMount} from "svelte";
     import Dialog from "$lib/components/dialog/Dialog.svelte";
     import CreateStepComponent from "$lib/components/dashboard/create/CreateStepComponent.svelte";
-    import CreateProductionTypeComponent from "$lib/components/dashboard/create/CreateProductionTypeComponent.svelte";
+    import CreateItemComponent from "$lib/components/dashboard/create/CreateItemComponent.svelte";
     onMount(() => {
         const dropdown = document.getElementById("dropdown") as HTMLSelectElement;
 
@@ -57,13 +57,10 @@
 </Dialog>
 
 <Dialog title="Opret Artikel" bind:dialog={itemDialog}>
-    <div class="dialog-body">
-        <p>lav item</p>
-    </div>
+    <CreateItemComponent/>
 </Dialog>
 
 <Dialog title="Opret Produktionstype" bind:dialog={productionTypeDialog}>
-    <CreateProductionTypeComponent/>
 </Dialog>
 
 <Dialog title="Opret Produktionstrin" bind:dialog={productionStepDialog}>
