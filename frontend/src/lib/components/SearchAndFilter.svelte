@@ -29,7 +29,7 @@
 <style>
     .filters {
         display: flex;
-        gap: 1rem;
+        gap: 4rem;
         margin-bottom: 1.5rem;
         flex-wrap: wrap;
     }
