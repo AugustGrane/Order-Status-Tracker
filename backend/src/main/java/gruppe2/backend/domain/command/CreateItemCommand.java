@@ -27,6 +27,7 @@ public class CreateItemCommand {
         item.setName(itemDTO.name());
         item.setProductTypeId(itemDTO.productTypeId());
         item.setImage(itemDTO.item_image());
+        System.out.println(itemDTO);
 
         return itemRepository.save(item);
     }
