@@ -1,5 +1,18 @@
 <script lang="ts">
     export let order: any;
+
+    function saveItem(item: any) {
+        // Tilføj din logik for at gemme item her
+        console.log("Gemmer item:", item);
+    }
+
+    function updateStep(item: any, newStepIndex: number) {
+        // Logik til opdatering af trin, hvis nødvendigt
+        console.log(`Opdaterer trin for ${item.item.name} til ${item.differentSteps[newStepIndex].name}`);
+        item.currentStepIndex = newStepIndex; // Opdatering af det nuværende trin
+    }
+
+
 </script>
 
 <div class="order-items">
@@ -9,19 +22,31 @@
                 <h4>{item.item.name}</h4>
                 <span class="product-type">{item.productTypeName}</span>
             </div>
-            
-            <div class="progress-steps">
-                {#each item.differentSteps as step, index}
-                    <div class="step" class:active={index <= item.currentStepIndex}>
-                        <div class="step-content">
-                            <div class="step-marker"></div>
-                            <span class="step-name">{step.name}</span>
+
+            <div class="item-content">
+                <div class="progress-steps">
+                    {#each item.differentSteps as step, index}
+                        <div class="step" class:active={index <= item.currentStepIndex}>
+                            <div class="step-content">
+                                <div class="step-marker"></div>
+                                <span class="step-name">{step.name}</span>
+                            </div>
+                            {#if index < item.differentSteps.length - 1}
+                                <div class="step-line"></div>
+                            {/if}
                         </div>
-                        {#if index < item.differentSteps.length - 1}
-                            <div class="step-line"></div>
-                        {/if}
-                    </div>
-                {/each}
+                    {/each}
+                </div>
+                <div class="select-step">
+                    <select bind:value={item.currentStepIndex} on:change={(e) => updateStep(item, e.target.value)}>
+                        {#each item.differentSteps as step, index}
+                            <option value={index}>{step.name}</option>
+                        {/each}
+                    </select>
+                </div>
+                <div class="save-button">
+                    <button on:click={() => saveItem(item)}>Gem</button>
+                </div>
             </div>
         </div>
     {/each}
@@ -53,6 +78,13 @@
         color: #1e293b;
     }
 
+    .item-content {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 1rem;
+    }
+
     .product-type {
         font-size: 0.875rem;
         color: #64748b;
@@ -65,6 +97,7 @@
         display: flex;
         align-items: center;
         margin-top: 1rem;
+        width: 70%;
     }
 
     .step {
@@ -115,4 +148,42 @@
     .step.active .step-line {
         background: #3b82f6;
     }
+
+    select {
+        width: 15rem;
+        padding: 0.75rem 2rem 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: white;
+        font-size: 0.9rem;
+        cursor: pointer;
+    }
+
+    .select-step {
+        font-size: 0.875rem;
+        width: 15rem;
+    }
+
+    .save-button {
+    }
+
+    .save-button button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #3b82f6;
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.875rem;
+        padding: 0.75rem 2rem;
+        border: 1px solid #e2e8f0;
+        text-align: center;
+    }
+
+    .save-button button:hover {
+        background: #2563eb;
+    }
+
+
 </style>
