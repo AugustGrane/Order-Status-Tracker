@@ -9,6 +9,8 @@ import gruppe2.backend.domain.specification.HasItemSpecification;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.model.ProductType;
+
+import gruppe2.backend.repository.*;
 import gruppe2.backend.model.StatusDefinition;
 import gruppe2.backend.repository.ItemRepository;
 import gruppe2.backend.repository.OrderProductTypeRepository;
@@ -160,6 +162,8 @@ public class ProductTypeService {
                 .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
     }
 
+    public List<ProductTypeProjection> findAllProjectedByName() {
+        return productTypeRepository.findAllProjectedBy();
     public void deleteProductType(Long productTypeId) {
         ProductType productType = productTypeRepository.findById(productTypeId)
                 .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
