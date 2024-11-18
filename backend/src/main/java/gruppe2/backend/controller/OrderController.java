@@ -158,17 +158,18 @@ public class OrderController {
         }
     }
 
-    @PutMapping("/update-step")
-    public ResponseEntity<OrderProgress> moveToStep(@RequestBody Long orderDetailsId, int newStepIndex) {
-        if (orderDetailsId == null) {
+    @PostMapping("/update-step")
+    public ResponseEntity<OrderProgress> moveToStep(@RequestBody UpdateStepDTO dto) {
+        if (dto.getOrderDetailsId() == null) {
             return ResponseEntity.badRequest().build();
         }
         try {
-            return ResponseEntity.ok(orderProgressService.moveToStep(orderDetailsId, newStepIndex));
+            return ResponseEntity.ok(orderProgressService.moveToStep(dto.getOrderDetailsId(), dto.getNewStepIndex()));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 }

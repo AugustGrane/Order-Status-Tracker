@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.Math.abs;
+
 @Service
 public class OrderProgressService {
     private final OrderProductTypeRepository orderProductTypeRepository;
@@ -162,35 +164,27 @@ public class OrderProgressService {
                                 LocalDateTime.now());
     }
 
-    @Transactional
     public OrderProgress moveToStep(Long orderDetailsId, int nextStepIndex) {
-        OrderDetails orderDetails = findOrderDetails(orderDetailsId);
-        validateGenericProductType(orderDetails);
 
-        // Create current order status
-        OrderStatus status = createOrderStatus(orderDetails);
-
-        if (!status.canMoveToNextStep()) {
-            throw new IllegalStateException("Cannot move to next step: already at final step");
+        if (orderDetailsId == null || nextStepIndex < 0) {
+            throw new IllegalArgumentException("Invalid input");
         }
 
-        // Move to next step
-        status.moveToStep(nextStepIndex);
+        int currentStep = findOrderDetails(orderDetailsId).getCurrentStepIndex();
 
-        // Create and execute the command
-        UpdateItemStatusCommand command = new UpdateItemStatusCommand(
-                orderDetails.getItem().getId(),
-                status
-        );
+        int differenceInSteps = nextStepIndex - currentStep;
 
-        // Create Order domain object and execute command
-        Order order = createOrderFromDetails(orderDetails);
-        command.execute(order);
+        if (differenceInSteps > 0) {
+            for (int i = 0; i < differenceInSteps; i++) {
+                moveToNextStep(orderDetailsId);
+            }
+        } else if (differenceInSteps < 0) {
+            for (int i = 0; i > differenceInSteps; i--) {
+                moveToPreviousStep(orderDetailsId);
+            }
+        }
 
-        // Update persistence
-        updateOrderDetails(orderDetails, status);
-
-        return status.toProgress();
+        return getProgress(orderDetailsId);
     }
 
 

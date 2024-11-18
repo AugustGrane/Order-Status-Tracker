@@ -2,19 +2,21 @@
     export let order: any;
 
     async function saveItem(item: any) {
-        const data = {
-            orderDetailsId: item.id, // ID på item
-            newStepIndex: item.currentStepIndex, // Det opdaterede trin
-        };
-        console.log(data);
+
+        // Data to be sent to the backend
+        let orderDetailsId =  item.id; // ID of the item
+        let newStepIndex = item.currentStepIndex; // Updated step inde
+
+        //console.log(data);
 
         try {
-            const response = await fetch('api/update-step', {
-                method: 'PUT',
+            const response = await fetch('/api/update-step', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({ orderDetailsId, newStepIndex }),
+
             });
 
             if (!response.ok) {
