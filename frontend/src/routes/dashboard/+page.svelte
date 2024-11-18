@@ -11,7 +11,8 @@
     
     let expandedOrder: number | null = null;
     let searchQuery = '';
-    let sortOption = 'newest';
+    let sortField = 'date';
+    let sortDirection: 'asc' | 'desc' = 'desc';
     let statusFilter = 'active'; // Default to active orders
     let activeTooltip: { orderId: number, rect: DOMRect, type: 'status' | 'notes' } | null = null;
     let tooltipTimeout: number;
@@ -99,13 +100,25 @@
         : [];
         
     $: sortedOrders = [...filteredOrders].sort((a, b) => {
-        switch(sortOption) {
-            case 'oldest':
-                return new Date(a.orderCreated).getTime() - new Date(b.orderCreated).getTime();
-            case 'process':
-                return b.items.length - a.items.length;
-            default: // newest
-                return new Date(b.orderCreated).getTime() - new Date(a.orderCreated).getTime();
+        const direction = sortDirection === 'asc' ? 1 : -1;
+        
+        switch(sortField) {
+            case 'orderId':
+                return direction * (a.orderId - b.orderId);
+            case 'date':
+                return direction * (new Date(a.orderCreated).getTime() - new Date(b.orderCreated).getTime());
+            case 'customerName':
+                return direction * a.customerName.localeCompare(b.customerName);
+            case 'status':
+                const aStatus = isOrderCompleted(a);
+                const bStatus = isOrderCompleted(b);
+                return direction * (aStatus === bStatus ? 0 : aStatus ? 1 : -1);
+            case 'priority':
+                const aPriority = a.priority ? 1 : 0;
+                const bPriority = b.priority ? 1 : 0;
+                return direction * (bPriority - aPriority);
+            default:
+                return 0;
         }
     });
 </script>
@@ -130,13 +143,14 @@
 
             <SearchAndFilter
                 bind:searchQuery
-                bind:sortOption
                 bind:statusFilter
             />
 
             <OrderList
                 orders={sortedOrders}
                 bind:expandedOrder
+                bind:sortField
+                bind:sortDirection
                 {showTooltip}
                 {hideTooltip}
                 {isOrderCompleted}

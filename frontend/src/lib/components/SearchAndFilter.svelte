@@ -1,6 +1,5 @@
 <script lang="ts">
     export let searchQuery: string;
-    export let sortOption: string;
     export let statusFilter: string;
 </script>
 
@@ -13,11 +12,6 @@
         >
     </div>
     <div class="filter-options">
-        <select bind:value={sortOption}>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="process">Process Size</option>
-        </select>
         <select bind:value={statusFilter}>
             <option value="active">Active Orders</option>
             <option value="completed">Completed Orders</option>
