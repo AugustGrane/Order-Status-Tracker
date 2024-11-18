@@ -5,5 +5,6 @@ public record ItemDTO(
     String name,
     Long id,
     Long productTypeId,
-    String item_image
+    String item_image,
+    Boolean isDeleted
 ) {}
