@@ -67,6 +67,7 @@ public class OrderItem {
         updatedItem.setName(item.getName());
         updatedItem.setImage(item.getImage());
         updatedItem.setProductTypeId(productTypeId);
+        updatedItem.setDeleted(item.isDeleted());
         
         return new OrderItem(updatedItem, quantity, newProductTypeName, newStatus);
     }
@@ -117,13 +118,14 @@ public class OrderItem {
     @Override
     public String toString() {
         return String.format(
-            "OrderItem{itemId=%d, name='%s', quantity=%d, productType='%s', currentStep=%d/%d}",
+            "OrderItem{itemId=%d, name='%s', quantity=%d, productType='%s', currentStep=%d/%d, isDeleted=%b}",
             item.getId(),
             item.getName(),
             quantity,
             productTypeName,
             getCurrentStepIndex() + 1,
-            getTotalSteps()
+            getTotalSteps(),
+            item.isDeleted()
         );
     }
 }

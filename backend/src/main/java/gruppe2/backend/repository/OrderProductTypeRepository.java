@@ -56,4 +56,6 @@ public interface OrderProductTypeRepository extends JpaRepository<OrderDetails, 
         return findOrderDetailsDTOsByOrderIds(orderIds).stream()
             .collect(Collectors.groupingBy(dto -> dto.orderId()));
     }
+
+    void deleteAllItemsByOrderId(Long orderId);
 }

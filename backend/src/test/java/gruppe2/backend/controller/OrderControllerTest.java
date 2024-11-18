@@ -84,7 +84,7 @@ class OrderControllerTest {
         // Create test Item and ItemDTO
         testItem = new Item();
         testItem.setId(1L);
-        testItemDTO = new ItemDTO("Test Item", 1L, 1L, "test-image.jpg");
+        testItemDTO = new ItemDTO("Test Item", 1L, 1L, "test-image.jpg", false);
 
         // Create test ProductType and ProductTypeDTO
         testProductType = new ProductType();

@@ -48,7 +48,7 @@ public class ItemServiceTest {
 
     @Test
     void createItem_ShouldCreateAndReturnItem() {
-        ItemDTO itemDTO = new ItemDTO("Test Item", 1001L, 1L, "src");
+        ItemDTO itemDTO = new ItemDTO("Test Item", 1001L, 1L, "src", false);
 
         ProductType productType = new ProductType();
         productType.setId(1L);

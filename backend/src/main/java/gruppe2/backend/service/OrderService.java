@@ -7,6 +7,7 @@ import gruppe2.backend.domain.specification.OrderInvariantsSpecification;
 import gruppe2.backend.mapper.OrderMapper;
 import gruppe2.backend.mapper.OrderDetailsMapper;
 import gruppe2.backend.model.*;
+import gruppe2.backend.model.Order;
 import gruppe2.backend.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,5 +234,15 @@ public class OrderService {
     public StatusDefinition createStatusDefinition(StatusDefinitionDTO dto) {
         CreateStatusDefinitionCommand command = new CreateStatusDefinitionCommand(dto, statusDefinitionRepository);
         return command.execute();
+    }
+
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found: " + orderId));
+        // Delete the relations
+        orderProductTypeRepository.deleteAllItemsByOrderId(orderId);
+        // Delete the order
+        orderRepository.deleteById(orderId);
     }
 }

@@ -9,6 +9,7 @@ import gruppe2.backend.domain.specification.HasItemSpecification;
 import gruppe2.backend.model.Item;
 import gruppe2.backend.model.OrderDetails;
 import gruppe2.backend.model.ProductType;
+import gruppe2.backend.model.StatusDefinition;
 import gruppe2.backend.repository.ItemRepository;
 import gruppe2.backend.repository.OrderProductTypeRepository;
 import gruppe2.backend.repository.OrderRepository;
@@ -157,5 +158,16 @@ public class ProductTypeService {
     public ProductType findById(Long productTypeId) {
         return productTypeRepository.findById(productTypeId)
                 .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
+    }
+
+    public void deleteProductType(Long productTypeId) {
+        ProductType productType = productTypeRepository.findById(productTypeId)
+                .orElseThrow(() -> new RuntimeException("Product type not found: " + productTypeId));
+        productTypeRepository.delete(productType);
+    }
+    public void deleteStatusDefinition(Long statusDefinitionId) {
+        StatusDefinition statusDefinition = statusDefinitionRepository.findById(statusDefinitionId)
+                .orElseThrow(() -> new RuntimeException("Status definition not found: " + statusDefinitionId));
+        statusDefinitionRepository.delete(statusDefinition);
     }
 }

@@ -22,6 +22,9 @@ public class Item {
     @Column(name = "item_image")
     private String image;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     public Item() {}
     
     public Item(Long id, String name, Long productTypeId) {
@@ -56,6 +59,14 @@ public class Item {
     
     public Long getProductTypeId() { 
         return productTypeId; 
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
     
     public void setProductTypeId(Long productTypeId) { 
