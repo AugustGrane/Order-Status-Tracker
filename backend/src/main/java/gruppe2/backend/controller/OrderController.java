@@ -184,4 +184,16 @@ public class OrderController {
         }
     }
 
+    @DeleteMapping("/delete-product-type/{productTypeId}")
+    public ResponseEntity<String> deleteProductType(@PathVariable Long productTypeId) {
+        if (productTypeId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid request: Product type ID is null");
+        }
+        try {
+            productTypeService.deleteProductType(productTypeId);
+            return ResponseEntity.ok("Successfully deleted product type with ID: " + productTypeId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }
