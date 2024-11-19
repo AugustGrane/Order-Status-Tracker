@@ -1,6 +1,5 @@
 import { writeFile, readdir } from 'fs/promises';
 
-
 export const actions = {
     upload: async ({ request, fetch }) => {
         try {
