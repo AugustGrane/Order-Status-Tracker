@@ -3,11 +3,10 @@ package gruppe2.backend.service;
 import gruppe2.backend.dto.ItemDTO;
 import gruppe2.backend.domain.command.CreateItemCommand;
 import gruppe2.backend.model.Item;
-import gruppe2.backend.model.OrderDetails;
+import gruppe2.backend.repository.ItemProjection;
 import gruppe2.backend.repository.ItemRepository;
 import gruppe2.backend.repository.ProductTypeRepository;
 import gruppe2.backend.repository.OrderProductTypeRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -50,6 +49,14 @@ public class ItemService {
             itemRepository.save(item);
         } catch (RuntimeException e) {
             throw new RuntimeException("Could not delete item: " + itemId);
+        }
+    }
+
+    public List<ItemProjection> findAllByOrderByIdAsc() {
+        try {
+            return itemRepository.findAllByOrderByIdAsc();
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Could not fetch all items: " + e);
         }
     }
 }
