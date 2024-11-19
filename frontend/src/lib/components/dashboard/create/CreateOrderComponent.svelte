@@ -1,7 +1,7 @@
 <script lang="ts">
     import {onMount} from "svelte";
 
-    let id: number;
+    let id: number | undefined;
     let customerName: string = '';
     let priority: boolean = false;
     let notes: string = '';
@@ -36,8 +36,6 @@
 
         const plainItems = Object.fromEntries(items);
 
-        console.log(items);
-
         let orderDTO = {
             id,
             customerName,
@@ -57,10 +55,22 @@
 
             if (response.ok) {
                 console.log('Form submitted successfully:', orderDTO);
-                alert('Item submitted successfully!');
+                alert('Ordren blev oprettet!');
+
+                selectedItems = []; // clear both selection array and items array for a new order
+                items.clear();
+                addNewSelection(); // Initialize the first index again
+
+                setTimeout(() => { // To clear the input fields
+                    id = undefined;
+                    customerName = '';
+                    priority = false;
+                    notes = '';
+                }, 100);
+
             } else {
-                console.error('Failed to submit the item:', await response.text());
-                alert('Failed to submit the item.');
+                console.error('Noget gik galt under oprettelse af ordren: ', await response.text());
+                alert('Noget gik galt under oprettelse af ordren.');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -71,7 +81,6 @@
     function addNewSelection() {
         selectedItems = [...selectedItems, { itemId: 0, quantity: 0 }]; // For dynamic updating of the selectedItems array
     }
-
 
 </script>
 
@@ -86,28 +95,44 @@
         <label for="priority">Prioriteret ordre</label>
         <input type="checkbox" id="costumer-name" name="name" bind:checked={priority}>
 
-        <label for="notes">Valgfrie noter</label>
-        <input type="text" id="costumer-name" name="name" bind:value={notes} required>
+        <label for="notes">Noter</label>
+        <input type="text" id="costumer-name" name="name" bind:value={notes}>
 
         <div>
             {#each selectedItems as selectedItem, index}
                 <div id="item-and-quantity">
-                    <label for="items">Artikel {index + 1}</label>
-                    <select id="item" name="name" bind:value={selectedItem.itemId} required>
-                        <option value="0" disabled>Ny artikel</option>
-                        {#each itemsArray as item}
-                            <option value="{item.id}">{item.id} - {item.name}</option>
-                        {/each}
-                    </select>
+                    {#if index === 0}
+                        <label for="items">Artikel {index + 1}</label>
+                        <select id="item" name="name" bind:value={selectedItem.itemId} required>
+                            <option value="0" disabled>Ny artikel</option>
+                            {#each itemsArray as item}
+                                <option value="{item.id}">{item.id} - {item.name}</option>
+                            {/each}
+                        </select>
+                    {:else}
+                        <div class="remove-div">
+                            <label for="items">Artikel {index + 1}</label>
+                            <button type="button" class="remove-item" on:click={() => { selectedItems = selectedItems.filter((_, i) => i !== index); }}>
+                                Fjern artikel
+                            </button>
+                        </div>
+                        <select id="item" name="name" bind:value={selectedItem.itemId}>
+                            <option value="0" disabled>Ny artikel</option>
+                            {#each itemsArray as item}
+                                <option value="{item.id}">{item.id} - {item.name}</option>
+                            {/each}
+                        </select>
+                    {/if}
+
 
                     <input type="number" id="quantity" name="quantity" bind:value={selectedItem.quantity} />
                 </div>
             {/each}
 
-            <button type="button" on:click={addNewSelection}>Tilføj en artikel og antal</button>
+            <button type="button" class="add-item" on:click={addNewSelection}>Tilføj en artikel og antal</button>
         </div>
 
-        <input type="submit" value="Submit">
+        <input type="submit" value="Opret ordre">
     </form>
 </div>
 
@@ -161,8 +186,7 @@
     }
 
     /* Submit button */
-    form input[type="submit"],
-    form button[type="button"] {
+    form input[type="submit"] {
         background-color: #007bff;
         color: white;
         border: none;
@@ -173,16 +197,51 @@
         transition: background-color 0.3s ease;
     }
 
+    form button.add-item {
+        background-color: #69D84F;
+        color: white;
+        border: none;
+        padding: 7px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: background-color 0.3s ease;
+    }
+
+    form button.remove-item {
+        background-color: #FF0000;
+        color: white;
+        border: none;
+        padding: 7px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .remove-div {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: -15px;
+    }
+
+    form button.remove-item:hover {
+        background-color: #d70000;
+    }
+
+    form button.add-item:hover {
+        background-color: #42b328;
+    }
+
     /* Submit and button hover effect */
-    form input[type="submit"]:hover,
-    form button[type="button"]:hover {
+    form input[type="submit"]:hover {
         background-color: #0056b3;
     }
 
     /* Submit and button active state */
     form input[type="submit"]:active,
     form button[type="button"]:active {
-        background-color: #003d80;
+        background-color: #90EE90;
     }
 
     /* Responsive adjustments */
