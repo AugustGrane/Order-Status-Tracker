@@ -53,6 +53,7 @@ public class OrderService {
     @Transactional
     public gruppe2.backend.model.Order createOrder(OrderDTO orderDTO) {
         // Get processing times for items
+        System.out.println("HALLO: " + orderDTO.items());
         Map<Long, Integer> processingTimes = getProcessingTimes(orderDTO.items().keySet());
         
         // Create domain objects
