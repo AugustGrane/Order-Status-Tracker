@@ -34,12 +34,16 @@
                 items.set(item.itemId, item.quantity);
             });
 
+        const plainItems = Object.fromEntries(items);
+
+        console.log(items);
+
         let orderDTO = {
             id,
             customerName,
             priority,
             notes,
-            items
+            items: plainItems
         }
 
         try {
