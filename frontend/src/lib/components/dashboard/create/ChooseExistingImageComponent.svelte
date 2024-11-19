@@ -1,27 +1,53 @@
-<!--<script lang="ts">-->
-<!--    import { onMount } from "svelte";-->
+<script lang="ts">
+    import { onMount } from "svelte";
 
-<!--    let images: string[] = []; // Initialize an array to store image URLs-->
+    let filesGet: string[] = [];
+    let errorGet: string | null = null;
 
-<!--    onMount(async () => {-->
-<!--        try {-->
-<!--            const response = await fetch("api/get-images"); // Fetch images from Spring Boot API-->
-<!--            if (!response.ok) {-->
-<!--                throw new Error(`Failed to fetch images: ${response.statusText}`);-->
-<!--            }-->
-<!--            images = await response.json(); // Assume the API returns an array of image URLs-->
-<!--        } catch (error) {-->
-<!--            console.error(error);-->
-<!--        }-->
-<!--    });-->
-<!--</script>-->
 
-<!--<div>-->
-<!--    {#if images.length > 0}-->
-<!--        {#each images as image}-->
-<!--            <img src={image} alt="Image" />-->
-<!--        {/each}-->
-<!--    {:else}-->
-<!--        <p>Loading images...</p>-->
-<!--    {/if}-->
-<!--</div>-->
+    // Get all the step images
+    onMount(async () => {
+        try {
+            // Fetch the list of uploaded files
+            const response = await fetch('/about'); // Adjust the URL if necessary
+            const data = await response.json();
+
+            if (data.success) {
+                filesGet = data.files.map((file: string) => `/uploads/${file}`); // Generate full URLs
+            } else {
+                errorGet = data.error || 'Failed to fetch files.';
+            }
+        } catch (err) {
+            errorGet = 'An unexpected error occurred.';
+        }
+    });
+</script>
+
+{#if errorGet}
+    <div class="error">Error: {errorGet}</div>
+{:else}
+    <div>
+        <h2>Uploaded Images</h2>
+        <div class="image-grid">
+            {#each filesGet as file}
+                <img src={file} alt="Uploaded file" loading="lazy" />
+            {/each}
+        </div>
+    </div>
+{/if}
+
+<style>
+    .image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 10px;
+    }
+
+    img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+</style>
