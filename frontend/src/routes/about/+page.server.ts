@@ -1,6 +1,5 @@
 import { writeFile, readdir } from 'fs/promises';
-import path from "path";
-import { json } from '@sveltejs/kit'
+
 
 export const actions = {
     upload: async ({ request, fetch }) => {
@@ -68,14 +67,3 @@ export const actions = {
     },
     // Define a GET function to list uploaded filenames
 };
-
-export async function GET() {
-    try {
-        const uploadsDir = path.resolve('./static/uploads'); // Adjust path if necessary
-        const files = await readdir(uploadsDir);
-        return json({ success: true, files });
-    } catch (error) {
-        console.error('Error fetching uploads:', error);
-        return json({ success: false, error: 'Failed to fetch uploaded files.' }, { status: 500 });
-    }
-}
