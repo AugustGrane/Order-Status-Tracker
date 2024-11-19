@@ -1,5 +1,6 @@
 <script lang="ts">
     import Dialog from "$lib/components/dialog/Dialog.svelte";
+    import ChooseExistingImageComponent from "$lib/components/dashboard/create/ChooseExistingImageComponent.svelte";
 
     let name: string;
     let description: string;
@@ -29,6 +30,7 @@
 </div>
 
 <Dialog title="Choose an Image" bind:dialog={existingImageDialog}>
+    <ChooseExistingImageComponent/>
 </Dialog>
 
 <style>
