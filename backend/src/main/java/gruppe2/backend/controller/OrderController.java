@@ -3,6 +3,7 @@ package gruppe2.backend.controller;
 import gruppe2.backend.dto.*;
 import gruppe2.backend.domain.OrderProgress;
 import gruppe2.backend.model.*;
+import gruppe2.backend.repository.ItemProjection;
 import gruppe2.backend.repository.ProductTypeProjection;
 import gruppe2.backend.service.*;
 import org.springframework.http.HttpStatus;
@@ -143,6 +144,15 @@ public class OrderController {
             return ResponseEntity.ok(orders);
         } catch (Exception e) {
             logger.error("Error fetching dashboard orders", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/get-all-items")
+    public ResponseEntity<List<ItemProjection>> getAllItems() {
+        try {
+            return ResponseEntity.ok(itemService.findAllByOrderByIdAsc());
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

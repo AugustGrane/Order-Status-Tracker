@@ -19,7 +19,6 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to fetch product types.');
         }
     });
 
