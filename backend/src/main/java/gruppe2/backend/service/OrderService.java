@@ -246,4 +246,10 @@ public class OrderService {
         // Delete the order
         orderRepository.deleteById(orderId);
     }
+
+    @Transactional(readOnly = true)
+    public List<StatusDefinition> getAllStatusDefinitions() {
+        return statusDefinitionRepository.findAll();
+    }
+
 }

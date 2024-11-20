@@ -61,11 +61,14 @@ public class OrderController {
     @PostMapping("/create-product-type")
     public ResponseEntity<ProductType> createProductType(@RequestBody ProductTypeDTO productTypeDTO) {
         if (productTypeDTO == null) {
+            System.out.println("sdssss " + productTypeDTO);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
+
         try {
             return ResponseEntity.ok(productTypeService.createProductType(productTypeDTO));
         } catch (RuntimeException e) {
+            System.out.println("eeeee " + productTypeDTO);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
@@ -244,6 +247,16 @@ public class OrderController {
             return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/get-all-status-definitions")
+    public ResponseEntity<List<StatusDefinition>> getAllStatusDefinitions() {
+        try {
+            List<StatusDefinition> statusDefinitions = orderService.getAllStatusDefinitions();
+            return ResponseEntity.ok(statusDefinitions);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
