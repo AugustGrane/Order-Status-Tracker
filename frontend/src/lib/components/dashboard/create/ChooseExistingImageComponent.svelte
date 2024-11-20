@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-    let filesGet: string[] = [];
-    let errorGet: string | null = null;
+    export let chosenImage: string = "";
 
+    let allStepImageNames: string[] = [];
+    let error: string | null = null;
 
     // Get all the step images
     onMount(async () => {
@@ -13,24 +14,32 @@
             const data = await response.json();
 
             if (data.success) {
-                filesGet = data.files.map((file: string) => `/uploads/${file}`); // Generate full URLs
+                allStepImageNames = data.files.map((file: string) => `/uploads/${file}`); // Generate full URLs
             } else {
-                errorGet = data.error || 'Failed to fetch files.';
+                error = data.error || 'Failed to fetch files.';
             }
         } catch (err) {
-            errorGet = 'An unexpected error occurred.';
+            error = 'An unexpected error occurred.';
         }
     });
+
+    function  handleImageClick(image: string){
+        chosenImage = image;
+        console.log(chosenImage);
+    }
+
 </script>
 
-{#if errorGet}
-    <div class="error">Error: {errorGet}</div>
+{#if error}
+    <div class="error">Error: {error}</div>
 {:else}
     <div>
         <h2>Uploaded Images</h2>
         <div class="image-grid">
-            {#each filesGet as file}
-                <img src={file} alt="Uploaded file" loading="lazy" />
+            {#each allStepImageNames as image}
+                <button on:click={() => handleImageClick(image)} class="image-button">
+                    <img src={image} alt="Uploaded file" loading="lazy" />
+                </button>
             {/each}
         </div>
     </div>
