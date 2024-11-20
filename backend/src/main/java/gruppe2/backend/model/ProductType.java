@@ -1,10 +1,10 @@
 package gruppe2.backend.model;
 
 import jakarta.persistence.*;
-import org.hibernate.usertype.UserType;
-
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "product_types")
@@ -16,30 +16,24 @@ public class ProductType {
     @Column(name = "name")
     private String name;
 
-    @ElementCollection
-    @CollectionTable(name = "product_type_steps",
-                    joinColumns = @JoinColumn(name = "product_type_id"))
-    @Column(name = "step_id")
-    @OrderColumn(name = "step_order")
-    private List<Long> differentSteps = new ArrayList<>();
+    @OneToMany(mappedBy = "productType", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("differentStepsOrder ASC, stepOrder ASC")
+    private List<ProductTypeStep> steps = new ArrayList<>();
 
     public ProductType() {}
 
-    public ProductType(Long id, String name, List<Long> differentSteps) {
+    public ProductType(Long id, String name, List<Long> stepIds) {
         this.id = id;
         this.name = name;
-        this.differentSteps = differentSteps != null ? new ArrayList<>(differentSteps) : new ArrayList<>();
+        setSteps(stepIds);
     }
 
     // Constructor for backward compatibility
-    public ProductType(Long id, String name, Long[] differentSteps) {
+    public ProductType(Long id, String name, Long[] stepIds) {
         this.id = id;
         this.name = name;
-        this.differentSteps = new ArrayList<>();
-        if (differentSteps != null) {
-            for (Long step : differentSteps) {
-                this.differentSteps.add(step);
-            }
+        if (stepIds != null) {
+            setSteps(Arrays.asList(stepIds));
         }
     }
 
@@ -50,17 +44,38 @@ public class ProductType {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public List<Long> getDifferentSteps() { return differentSteps != null ? new ArrayList<>(differentSteps) : new ArrayList<>(); }
-    public void setDifferentSteps(List<Long> differentSteps) { this.differentSteps = differentSteps != null ? new ArrayList<>(differentSteps) : new ArrayList<>(); }
+    // For backward compatibility with existing code
+    public List<Long> getDifferentSteps() {
+        return steps.stream()
+                   .map(ProductTypeStep::getStepId)
+                   .collect(Collectors.toList());
+    }
+
+    public void setDifferentSteps(List<Long> stepIds) {
+        setSteps(stepIds);
+    }
+
+    private void setSteps(List<Long> stepIds) {
+        // Clear existing steps
+        this.steps.clear();
+        
+        // Add new steps
+        if (stepIds != null) {
+            for (int i = 0; i < stepIds.size(); i++) {
+                ProductTypeStep step = new ProductTypeStep(this, stepIds.get(i), i);
+                this.steps.add(step);
+            }
+        }
+    }
     
     // Backward compatibility methods
-    public Long[] getDifferentStepsArray() { return differentSteps.toArray(new Long[0]); }
-    public void setDifferentSteps(Long[] differentSteps) { 
-        this.differentSteps = new ArrayList<>();
-        if (differentSteps != null) {
-            for (Long step : differentSteps) {
-                this.differentSteps.add(step);
-            }
+    public Long[] getDifferentStepsArray() { 
+        return getDifferentSteps().toArray(new Long[0]); 
+    }
+    
+    public void setDifferentSteps(Long[] stepIds) { 
+        if (stepIds != null) {
+            setSteps(Arrays.asList(stepIds));
         }
     }
 }
