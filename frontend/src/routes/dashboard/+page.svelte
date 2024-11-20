@@ -5,6 +5,7 @@
     import StatisticsGrid from '$lib/components/StatisticsGrid.svelte';
     import SearchAndFilter from '$lib/components/SearchAndFilter.svelte';
     import OrderList from '$lib/components/OrderList.svelte';
+    import CreateComponent from "$lib/components/dashboard/create/CreateComponent.svelte";
     
     export let data: PageData;
     const orders = data.orders;
@@ -128,6 +129,7 @@
         <div class="navbar">
             <div class="logo"></div>
             <h1 class="title">Dashboard</h1>
+            <CreateComponent/>
         </div>
 
         <div class="container">
