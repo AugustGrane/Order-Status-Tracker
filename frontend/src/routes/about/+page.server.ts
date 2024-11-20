@@ -1,4 +1,4 @@
-import { writeFile } from 'fs/promises';
+import { writeFile, readdir } from 'fs/promises';
 
 export const actions = {
     upload: async ({ request, fetch }) => {
@@ -11,8 +11,11 @@ export const actions = {
                 return { success: false, error: 'No valid image file provided' };
             }
 
+            // Create unique image id
+            const imageId = new Date().getTime();
+
             // Write the image content to a file
-            const filePath = `./static/uploads/${image.name}`;
+            const filePath = `./static/uploads/${imageId}_${image.name}`;
             try {
                 await writeFile(filePath, new Uint8Array(await image.arrayBuffer()));
             } catch (fileError) {
@@ -59,5 +62,7 @@ export const actions = {
             console.error('Unexpected error:', error);
             return { success: false, error: 'An unexpected error occurred.' };
         }
+
     },
+    // Define a GET function to list uploaded filenames
 };

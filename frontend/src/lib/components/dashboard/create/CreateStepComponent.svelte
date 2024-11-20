@@ -1,9 +1,11 @@
 <script lang="ts">
     import Dialog from "$lib/components/dialog/Dialog.svelte";
+    import ChooseExistingImageComponent from "$lib/components/dashboard/create/ChooseExistingImageComponent.svelte";
 
     let name: string;
     let description: string;
     let existingImageDialog: any;
+    let chosenImage:string = "";
 
     async function showImagePickerDialog(){
         existingImageDialog.showModal();
@@ -11,7 +13,7 @@
 
 </script>
 
-<div class="dialog-body" >
+<div class="dialog-body">
     <form enctype="multipart/form-data"
           action="?/upload"
           method="post">
@@ -22,15 +24,30 @@
         <input type="text" id="step-description" name="description" bind:value={description} required>
 
         <label for="step-image">Upload billede</label>
-        <input type="file" id="step-image" name="image" accept=".png, .jpg" required>
+        <input type="file" id="step-image" name="image" accept=".png, .jpg">
+
+        <!-- Hidden input to store the chosen image URL -->
+        <input type="hidden" name="chosenImage" value={chosenImage}>
+
         <input type="submit" value="Submit">
+        
+        <!-- Button to open the image picker -->
+        <button type="button" on:click={showImagePickerDialog}>Vælg et eksisterende billede</button>
+
+        <!-- Display the chosen image -->
+        {#if chosenImage}
+            <div class="chosen-image">
+                <h3>Selected Image:</h3>
+                <img src={chosenImage} alt="Chosen Image">
+            </div>
+        {/if}
+
     </form>
-    <button on:click={showImagePickerDialog}>Vælg et eksisterende </button>
 </div>
 
 <Dialog title="Choose an Image" bind:dialog={existingImageDialog}>
+    <ChooseExistingImageComponent bind:chosenImage/>
 </Dialog>
-
 <style>
     /* General dialog container styling */
     .dialog-body {
@@ -98,8 +115,15 @@
             font-size: 0.9rem;
         }
     }
+
+    /* Chosen image preview */
+    .chosen-image img {
+        max-width: 100%;
+        height: auto;
+        margin-top: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
 </style>
-
-
 
 
