@@ -8,7 +8,7 @@
         // Data to be sent to the backend
         let orderDetailsId =  item.id; // ID of the item
         let newStepIndex = item.currentStepIndex; // Updated step index
-        
+
         try {
             const response = await fetch('/api/update-step', {
                 method: 'POST',
