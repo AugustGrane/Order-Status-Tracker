@@ -132,14 +132,15 @@
 
         <div class="container">
             <StatisticsGrid
-                {totalOrders}
-                {activeOrders}
-                {completedOrders}
                 {priorityOrders}
-                {ordersCompletedToday}
+                {activeOrders}
                 {averageProcessingTime}
-                {productTypeStats}
+                {totalOrders}
             />
+            <!--{ordersCompletedToday}-->
+<!--                {completedOrders}-->
+<!--                {productTypeStats}-->
+<!--            />-->
 
             <SearchAndFilter
                 bind:searchQuery

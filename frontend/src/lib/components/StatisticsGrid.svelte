@@ -1,49 +1,33 @@
 <script lang="ts">
-    export let totalOrders: number;
-    export let activeOrders: number;
-    export let completedOrders: number;
-    export let priorityOrders: number;
-    export let ordersCompletedToday: number;
-    export let averageProcessingTime: number;
+    export let totalOrders: number | undefined;
+    export let activeOrders: number | undefined;
+    export let completedOrders: number | undefined;
+    export let priorityOrders: number | undefined;
+    export let ordersCompletedToday: number | undefined;
+    export let averageProcessingTime: number | undefined;
     export let productTypeStats: Array<{type: string, count: number}>;
 </script>
 
 <div class="statistics-grid">
+    {#if priorityOrders !== undefined}
     <div class="stat-card">
-        <div class="stat-icon">📊</div>
-        <div class="stat-content">
-            <h3>Total Orders</h3>
-            <p class="stat-value">{totalOrders}</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">⚡</div>
-        <div class="stat-content">
-            <h3>Active Orders</h3>
-            <p class="stat-value">{activeOrders}</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-content">
-            <h3>Completed Orders</h3>
-            <p class="stat-value">{completedOrders}</p>
-        </div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-icon">🔥</div>
+        <div class="stat-icon">🔥️</div>
         <div class="stat-content">
             <h3>Priority Orders</h3>
             <p class="stat-value">{priorityOrders}</p>
         </div>
     </div>
+    {/if}
+    {#if activeOrders !== undefined}
     <div class="stat-card">
-        <div class="stat-icon">📅</div>
+        <div class="stat-icon">📦</div>
         <div class="stat-content">
-            <h3>Completed Today</h3>
-            <p class="stat-value">{ordersCompletedToday}</p>
+            <h3>Active Orders</h3>
+            <p class="stat-value">{activeOrders}</p>
         </div>
     </div>
+    {/if}
+    {#if averageProcessingTime !== undefined}
     <div class="stat-card">
         <div class="stat-icon">⏱️</div>
         <div class="stat-content">
@@ -51,6 +35,35 @@
             <p class="stat-value">{averageProcessingTime} days</p>
         </div>
     </div>
+    {/if}
+    {#if ordersCompletedToday !== undefined}
+    <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-content">
+            <h3>Completed Today</h3>
+            <p class="stat-value">{ordersCompletedToday}</p>
+        </div>
+    </div>
+    {/if}
+    {#if totalOrders !== undefined}
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+            <h3>Total Orders</h3>
+            <p class="stat-value">{totalOrders}</p>
+        </div>
+    </div>
+    {/if}
+    {#if completedOrders !== undefined}
+    <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+            <h3>Completed Orders</h3>
+            <p class="stat-value">{completedOrders}</p>
+        </div>
+    </div>
+    {/if}
+    {#if productTypeStats !== undefined}
     <div class="stat-card span-2">
         <div class="stat-icon">📈</div>
         <div class="stat-content">
@@ -65,6 +78,7 @@
             </div>
         </div>
     </div>
+    {/if}
 </div>
 
 <style>
@@ -82,7 +96,7 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         display: flex;
         align-items: flex-start;
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
     .span-2 {
@@ -90,7 +104,10 @@
     }
 
     .stat-icon {
+        display: flex;
         font-size: 1.5rem;
+        align-items: center;
+        height: 50%;
     }
 
     .stat-content {
