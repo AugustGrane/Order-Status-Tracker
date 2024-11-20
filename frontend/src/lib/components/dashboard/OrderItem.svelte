@@ -1,14 +1,14 @@
 <script lang="ts">
-    export let order: any;
+    export let item: any;
+    let isUpdated: boolean;
+    $: isUpdated;
 
     async function saveItem(item: any) {
 
         // Data to be sent to the backend
         let orderDetailsId =  item.id; // ID of the item
-        let newStepIndex = item.currentStepIndex; // Updated step inde
-
-        //console.log(data);
-
+        let newStepIndex = item.currentStepIndex; // Updated step index
+        
         try {
             const response = await fetch('/api/update-step', {
                 method: 'POST',
@@ -25,7 +25,7 @@
 
             const result = await response.json();
             console.log('Opdatering succesfuld:', result);
-            alert('Trinnet blev opdateret!');
+            //alert('Trinnet blev opdateret!');
 
         } catch (error) {
             console.error('Fejl ved opdatering:', error);
@@ -40,58 +40,53 @@
         item.currentStepIndex = newStepIndex; // Opdatering af det nuværende trin
     }
 
-
 </script>
 
-<div class="order-items">
-    {#each order.items as item}
-        <div class="item">
-            <div class="item-header">
+<div class="item">
+    <div class="item-header">
 
-                <h4>{item.item.name} - {item.itemAmount}</h4>
-                <span class="product-type">{item.productTypeName}</span>
-            </div>
+        <h4>{item.item.name} - {item.itemAmount}</h4>
+        <span class="product-type">{item.productTypeName}</span>
+    </div>
 
-            <div class="item-content">
-                <div class="progress-steps">
-                    {#each item.differentSteps as step, index}
-                        <div class="step" class:active={index <= item.currentStepIndex}>
-                            <div class="step-content">
-                                <div class="step-marker">
-                                    <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
-                                </div>
-                                <span class="step-name">{step.name}</span>
-                            </div>
-                            {#if index<item.differentSteps.length-1}
-                                <div class="step-line"></div>
-                            {/if}
+    <div class="item-content">
+        <div class="progress-steps">
+            {#each item.differentSteps as step, index}
+                <div class="step" class:active={index <= item.currentStepIndex}>
+                    <div class="step-content">
+                        <div class="step-marker">
+                            <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
                         </div>
-                    {/each}
+                        <span class="step-name">{step.name}</span>
+                    </div>
+                    {#if index<item.differentSteps.length-1}
+                        <div class="step-line"></div>
+                    {/if}
                 </div>
-          
-                <div class="select-step">
-                    <select bind:value={item.currentStepIndex} on:change={(e) => updateStep(item, e.target.value)}>
-                        {#each item.differentSteps as step, index}
-                            <option value={index}>{step.name}</option>
-                        {/each}
-                    </select>
-                </div>
-          
-                <div class="save-button">
-                    <button on:click={() => saveItem(item)}>Gem</button>
-                </div>
-            </div>
+            {/each}
         </div>
-    {/each}
+
+        <div class="select-step">
+            <select bind:value={item.currentStepIndex} on:change={(e) => {
+                        updateStep(item, e.target.value);
+                        isUpdated = true;
+                    }}>
+                {#each item.differentSteps as step, index}
+                    <option value={index}>{step.name}</option>
+                {/each}
+            </select>
+        </div>
+
+        <div class="save-button">
+            <button class:activated={isUpdated} on:click={() => {
+                        saveItem(item);
+                        isUpdated = false;
+                    }}>Gem</button>
+        </div>
+    </div>
 </div>
 
 <style>
-    .order-items {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-    }
-
     .item {
         background: white;
         border-radius: 8px;
@@ -212,15 +207,13 @@
         width: 15rem;
     }
 
-    .save-button {
-    }
-
     .save-button button {
         display: flex;
         justify-content: center;
         align-items: center;
-        background: #3b82f6;
-        color: white;
+        background: #ffffff;
+        color: black;
+        opacity: 100%;
         border-radius: 8px;
         cursor: pointer;
         font-size: 0.875rem;
@@ -230,8 +223,15 @@
     }
 
     .save-button button:hover {
-        background: #2563eb;
+        background: #ededed;
     }
 
+    .activated {
+        background: #3b82f6 !important;
+        color: white !important;
+    }
 
+    .activated:hover {
+        background: #2563eb !important;
+    }
 </style>

@@ -4,11 +4,11 @@
     import { fade } from 'svelte/transition';
     import StatisticsGrid from '$lib/components/StatisticsGrid.svelte';
     import SearchAndFilter from '$lib/components/SearchAndFilter.svelte';
-    import OrderList from '$lib/components/OrderList.svelte';
-    
+    import OrderList from '$lib/components/dashboard/OrderList.svelte';
+
     export let data: PageData;
     const orders = data.orders;
-    
+
     let expandedOrder: number | null = null;
     let searchQuery = '';
     let sortField = 'date';
@@ -35,7 +35,7 @@
     }
 
     function isOrderCompleted(order) {
-        return order.items.every(item => 
+        return order.items.every(item =>
             item.currentStepIndex === item.differentSteps.length - 1
         );
     }
@@ -49,22 +49,22 @@
         const today = new Date().toDateString();
         return isOrderCompleted(order) && new Date(order.orderCreated).toDateString() === today;
     }).length : 0;
-    
+
     $: averageProcessingTime = orders ? calculateAverageProcessingTime(orders) : 0;
-    
+
     $: productTypeStats = orders ? calculateProductTypeStats(orders) : [];
 
     function calculateAverageProcessingTime(orders) {
         const completedOrders = orders.filter(order => isOrderCompleted(order));
-        
+
         if (completedOrders.length === 0) return 0;
-        
+
         const totalTime = completedOrders.reduce((sum, order) => {
             const created = new Date(order.orderCreated);
             const now = new Date();
             return sum + (now.getTime() - created.getTime());
         }, 0);
-        
+
         return Math.round(totalTime / completedOrders.length / (1000 * 60 * 60 * 24)); // Convert to days
     }
 
@@ -76,13 +76,13 @@
                 typeCount[type] = (typeCount[type] || 0) + 1;
             });
         });
-        
+
         return Object.entries(typeCount)
             .sort(([,a], [,b]) => b - a)
             .slice(0, 3)
             .map(([type, count]) => ({ type, count }));
     }
-    
+
     $: filteredOrders = orders
         ? orders.filter(order => {
             // First apply status filter
@@ -98,10 +98,10 @@
             );
         })
         : [];
-        
+
     $: sortedOrders = [...filteredOrders].sort((a, b) => {
         const direction = sortDirection === 'asc' ? 1 : -1;
-        
+
         switch(sortField) {
             case 'orderId':
                 return direction * (a.orderId - b.orderId);
