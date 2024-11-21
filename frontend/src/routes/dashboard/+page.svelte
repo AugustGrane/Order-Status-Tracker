@@ -127,7 +127,7 @@
     <div class="background">
         <div class="navbar">
             <div class="logo"></div>
-            <h1 class="title">Dashboard</h1>
+            <h1 class="title">Kontrolpanel</h1>
         </div>
 
         <div class="container">
