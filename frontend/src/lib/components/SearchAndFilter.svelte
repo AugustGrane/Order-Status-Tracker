@@ -7,15 +7,15 @@
     <div class="search-bar">
         <input
             type="text"
-            placeholder="Search by order number, customer name, or product..."
+            placeholder="Søg efter ordrenummer, kundenavn eller produkt..."
             bind:value={searchQuery}
         >
     </div>
     <div class="filter-options">
         <select bind:value={statusFilter}>
-            <option value="active">Active Orders</option>
-            <option value="completed">Completed Orders</option>
-            <option value="all">All Orders</option>
+            <option value="active">Aktive Ordre</option>
+            <option value="completed">Afsluttede Ordre</option>
+            <option value="all">Alle Ordre</option>
         </select>
     </div>
 </div>
