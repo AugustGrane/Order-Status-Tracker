@@ -254,4 +254,20 @@
         display: flex;
         align-items: center;
     }
+
+    @media (max-width: 1300px) {
+        .name-bar, .order-header {
+            grid-template-columns: minmax(130px, 1fr) minmax(100px, 1fr) minmax(200px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr);
+        }
+        .cell {
+            padding: 0.50rem;
+        }
+        .content {
+            font-size: 0.875rem;
+        }
+        .status-indicator, .priority-tag {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+    }
 </style>
