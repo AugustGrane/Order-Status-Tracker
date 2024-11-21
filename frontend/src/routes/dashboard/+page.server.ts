@@ -15,14 +15,17 @@ export const actions = {
             const imageId = new Date().getTime();
             const imagePath: string =  imageId + "_" + image.name;
 
-            // Write the image content to a file
-            const filePath = `./static/uploads/${imagePath}`;
-            try {
-                await writeFile(filePath, new Uint8Array(await image.arrayBuffer()));
-            } catch (fileError) {
-                console.error('File save error:', fileError);
-                return { success: false, error: 'Failed to save the file to the server.' };
+            if(data.get('uploadedImage')){
+                // Write the image content to a file
+                const filePath = `./static/uploads/${imagePath}`;
+                try {
+                    await writeFile(filePath, new Uint8Array(await image.arrayBuffer()));
+                } catch (fileError) {
+                    console.error('File save error:', fileError);
+                    return { success: false, error: 'Failed to save the file to the server.' };
+                }
             }
+
 
             // Extract and validate additional form data
             const name = data.get('name');
@@ -37,6 +40,7 @@ export const actions = {
             }
 
             const image_full_path = `frontend/static/uploads/${imagePath}`;
+
 
             // POST new step/status definition to Spring backend
             try {
