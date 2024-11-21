@@ -13,9 +13,10 @@ export const actions = {
 
             // Create unique image id
             const imageId = new Date().getTime();
+            const imagePath: string =  imageId + "_" + image.name;
 
             // Write the image content to a file
-            const filePath = `./static/uploads/${imageId}_${image.name}`;
+            const filePath = `./static/uploads/${imagePath}`;
             try {
                 await writeFile(filePath, new Uint8Array(await image.arrayBuffer()));
             } catch (fileError) {
@@ -35,8 +36,7 @@ export const actions = {
                 return { success: false, error: 'Description is required and must be a string.' };
             }
 
-            // Create image path for sending to the database
-            const image_path = `frontend/static/uploads/${image.name}`;
+            const image_full_path = `frontend/static/uploads/${imagePath}`;
 
             // POST new step/status definition to Spring backend
             try {
@@ -45,7 +45,7 @@ export const actions = {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ name, description, image: image_path }),
+                    body: JSON.stringify({ name, description, image: image_full_path }),
                 });
 
                 if (!response.ok) {
