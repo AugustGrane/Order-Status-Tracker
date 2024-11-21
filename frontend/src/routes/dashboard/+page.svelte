@@ -4,7 +4,8 @@
     import { fade } from 'svelte/transition';
     import StatisticsGrid from '$lib/components/dashboard/StatisticsGrid.svelte';
     import SearchAndFilter from '$lib/components/dashboard/SearchAndFilter.svelte';
-    import OrderList from '$lib/components/dashboard/OrderList.svelte';
+    import CreateComponent from "$lib/components/dashboard/create/CreateComponent.svelte";
+    import OrderList from "$lib/components/dashboard/OrderList.svelte";
 
     export let data: PageData;
     const orders = data.orders;
@@ -264,9 +265,12 @@
         .background {
             padding: 0.1rem;
         }
+        .navbar {
+            margin: 0.5rem 0;
+        }
 
         .container {
-            padding: 1rem;
+            padding: 0.5rem 1rem;
         }
 
         .title {

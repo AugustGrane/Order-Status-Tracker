@@ -10,7 +10,7 @@
     onMount(async () => {
         try {
             // Fetch the list of uploaded files
-            const response = await fetch('/about'); // Adjust the URL if necessary
+            const response = await fetch('/dashboard'); // Adjust the URL if necessary
             const data = await response.json();
 
             if (data.success) {
