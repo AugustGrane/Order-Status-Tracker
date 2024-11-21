@@ -8,6 +8,10 @@
 
     // Get all the step images
     onMount(async () => {
+        await fetchData();
+    });
+
+    async function fetchData() {
         try {
             // Fetch the list of uploaded files
             const response = await fetch('/about'); // Adjust the URL if necessary
@@ -21,11 +25,12 @@
         } catch (err) {
             error = 'An unexpected error occurred.';
         }
-    });
+    }
 
     function  handleImageClick(image: string){
         chosenImage = image;
         console.log(chosenImage);
+        fetchData();
     }
 
 </script>

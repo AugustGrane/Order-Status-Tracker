@@ -11,6 +11,10 @@
     let itemsArray: any[] = []; // For items being fetched
 
     onMount(async () => {
+        await fetchData();
+    });
+
+    async function fetchData() {
         try {
             const response = await fetch("/api/get-all-items");
 
@@ -23,7 +27,7 @@
         } catch (error) {
             console.error('Error:', error);
         }
-    });
+    }
 
     async function handleSubmit(event: Event) {
         event.preventDefault(); // Prevent the default form submission behavior
@@ -72,6 +76,7 @@
                 console.error('Noget gik galt under oprettelse af ordren: ', await response.text());
                 alert('Noget gik galt under oprettelse af ordren.');
             }
+            await fetchData();
         } catch (error) {
             console.error('Error:', error);
             alert('Failed to submit data.');
