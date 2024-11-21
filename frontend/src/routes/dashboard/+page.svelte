@@ -129,6 +129,7 @@
         <div class="navbar">
             <div class="logo"></div>
             <h1 class="title">Dashboard</h1>
+            <CreateComponent/>
         </div>
 
         <div class="container">
