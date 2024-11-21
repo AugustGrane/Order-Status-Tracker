@@ -264,9 +264,12 @@
         .background {
             padding: 0.1rem;
         }
+        .navbar {
+            margin: 0.5rem 0;
+        }
 
         .container {
-            padding: 1rem;
+            padding: 0.5rem 1rem;
         }
 
         .title {
