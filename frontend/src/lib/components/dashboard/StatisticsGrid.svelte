@@ -141,4 +141,23 @@
         font-size: 0.9rem;
         color: #666;
     }
+
+    @media (max-width: 1300px) {
+        .statistics-grid {
+            grid-template-columns: repeat(auto-fit, minmax(100px, 9fr));
+            gap: 0.5rem;
+        }
+        .stat-card {
+            padding: 1rem;
+        }
+        .stat-icon {
+            font-size: 1.3rem;
+        }
+        .stat-content h3 {
+            font-size: 0.8rem;
+        }
+        .stat-value {
+            font-size: 1.2rem;
+        }
+    }
 </style>

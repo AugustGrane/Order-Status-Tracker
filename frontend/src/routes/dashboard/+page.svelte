@@ -2,7 +2,7 @@
     import type { PageData } from './$types';
     import { portal } from './portal';
     import { fade } from 'svelte/transition';
-    import StatisticsGrid from '$lib/components/StatisticsGrid.svelte';
+    import StatisticsGrid from '$lib/components/dashboard/StatisticsGrid.svelte';
     import SearchAndFilter from '$lib/components/SearchAndFilter.svelte';
     import OrderList from '$lib/components/dashboard/OrderList.svelte';
 
@@ -258,5 +258,19 @@
         color: #334155;
         font-size: 0.875rem;
         line-height: 1.5;
+    }
+
+    @media (max-width: 1300px) {
+        .background {
+            padding: 0.1rem;
+        }
+
+        .container {
+            padding: 1rem;
+        }
+
+        .title {
+            font-size: 1.25rem;
+        }
     }
 </style>

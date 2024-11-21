@@ -53,13 +53,24 @@
         <div class="progress-steps">
             {#each item.differentSteps as step, index}
                 <div class="step" class:active={index <= item.currentStepIndex}>
-                    <div class="step-content">
-                        <div class="step-marker">
-                            <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+                    {#if index < item.differentSteps.length - 1}
+                        <div class="step-content">
+                            <div class="step-marker">
+                                <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+                            </div>
+                            <span class="step-name">{step.name}</span>
                         </div>
-                        <span class="step-name">{step.name}</span>
-                    </div>
-                    {#if index<item.differentSteps.length-1}
+                    {:else}
+                        <div class="step-wrapper">
+                            <div class="step-content">
+                                <div class="step-marker">
+                                    <div class="icon" style="background: url('/{step.image.replace('frontend/static/', '')}') no-repeat center;"></div>
+                                </div>
+                                <span class="step-name">{step.name}</span>
+                            </div>
+                        </div>
+                    {/if}
+                    {#if index < item.differentSteps.length - 1}
                         <div class="step-line"></div>
                     {/if}
                 </div>
@@ -124,27 +135,32 @@
     .progress-steps {
         display: flex;
         align-items: center;
-        margin-top: 1rem;
+        justify-content: space-between;
+        gap: 0.5rem;
         width: 70%;
+        transition: all 0.3s ease;
     }
 
     .step {
         flex: 1;
         display: flex;
-        align-items: center;
+        width: fit-content;
+        align-self: stretch;
     }
 
     .step-content {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
         z-index: 1;
+        align-self: stretch;
+        flex-grow: 1;
+        gap: 0.3rem;
     }
 
     .step-marker {
-        width: 2rem;
-        height: 2rem;
+        width: 2.75rem;
+        height: 2.75rem;
         border-radius: 50%;
         background: #f8fafc;
         border: 2px solid #e2e8f0;
@@ -161,7 +177,7 @@
     .icon {
         width: 100%;
         height: 100%;
-        background-size: contain !important;
+        background-size: 2rem !important;
         filter: grayscale(100%) opacity(0.5);
     }
 
@@ -170,10 +186,10 @@
     }
 
     .step-name {
-        font-size: 0.75rem;
+        font-size: 0.85rem;
         color: #64748b;
         text-align: center;
-        max-width: 100px;
+        width: 100px;
     }
 
     .step.active .step-name {
@@ -182,10 +198,13 @@
     }
 
     .step-line {
-        flex: 1;
+        position: relative;
         height: 2px;
         background: #e2e8f0;
-        margin: 0 0.5rem;
+        margin-top: 25px;
+        transition: all 0.3s ease;
+        flex-grow: 6;
+        min-width: 80px;
     }
 
     .step.active .step-line {
@@ -233,5 +252,35 @@
 
     .activated:hover {
         background: #2563eb !important;
+    }
+
+    @media (max-width: 1300px){
+        .item-content {
+            gap: 0.2rem;
+        }
+        .step-content {
+            gap: 0.2rem;
+        }
+        .step-name {
+            width: 60px;
+            font-size: 0.65rem;
+        }
+        .step-line {
+            min-width: 20px;
+            margin-top: 15px;
+        }
+        .step-marker {
+            width: 2rem;
+            height: 2rem;
+        }
+        .icon {
+            background-size: 1.5rem !important;
+        }
+        select {
+            width: 11.5rem;
+        }
+        .save-button button {
+            padding: 0.85rem 1.5rem;
+        }
     }
 </style>
