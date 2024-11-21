@@ -86,23 +86,23 @@
 
 <div class="dialog-body">
     <form on:submit={handleSubmit}>
-        <label for="order-id">ID på ordren</label>
+        <label for="order-id">ID på ordren:</label>
         <input type="number" id="order-id" name="name" bind:value={id} required>
 
-        <label for="costumer-name">Navn på kunde</label>
+        <label for="costumer-name">Navn på kunde:</label>
         <input type="text" id="costumer-name" name="name" bind:value={customerName} required>
 
-        <label for="priority">Prioriteret ordre</label>
+        <label for="priority">Prioriteret ordre:</label>
         <input type="checkbox" id="costumer-name" name="name" bind:checked={priority}>
 
-        <label for="notes">Noter</label>
+        <label for="notes">Noter:</label>
         <input type="text" id="costumer-name" name="name" bind:value={notes}>
 
         <div>
             {#each selectedItems as selectedItem, index}
                 <div id="item-and-quantity">
                     {#if index === 0}
-                        <label for="items">Artikel {index + 1}</label>
+                        <label for="items">Artikel {index + 1}:</label>
                         <select id="item" name="name" bind:value={selectedItem.itemId} required>
                             <option value="0" disabled>Ny artikel</option>
                             {#each itemsArray as item}
@@ -111,7 +111,7 @@
                         </select>
                     {:else}
                         <div class="remove-div">
-                            <label for="items">Artikel {index + 1}</label>
+                            <label for="items">Artikel {index + 1}:</label>
                             <button type="button" class="remove-item" on:click={() => { selectedItems = selectedItems.filter((_, i) => i !== index); }}>
                                 Fjern artikel
                             </button>
@@ -128,11 +128,12 @@
                     <input type="number" id="quantity" name="quantity" bind:value={selectedItem.quantity} />
                 </div>
             {/each}
-
-            <button type="button" class="add-item" on:click={addNewSelection}>Tilføj en artikel og antal</button>
+            <div class="add-item-div">
+                <button type="button" class="add-item" on:click={addNewSelection}>Tilføj en artikel og antal</button>
+            </div>
         </div>
 
-        <input type="submit" value="Opret ordre">
+        <input type="submit" value="Opret">
     </form>
 </div>
 
@@ -151,6 +152,11 @@
         margin-bottom: 8px;
         font-weight: bold;
         color: #333;
+    }
+
+    .add-item-div {
+        margin-top: -20px;
+        margin-bottom: 10px;
     }
 
     /* Form input fields */

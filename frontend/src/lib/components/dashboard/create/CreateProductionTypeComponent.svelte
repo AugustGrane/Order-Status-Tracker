@@ -71,7 +71,7 @@
         <label for="type-name">Navn på produktionstype:</label>
         <input type="text" id="type-name" bind:value={name} required />
 
-        <label for="statusDefinition">Tilføj en status definition:</label>
+        <label for="statusDefinition">Tilføj produktionstrin:</label>
         <div id="status-select-container">
             <select id="statusDefinition" name="statusDefinition" on:change={(e) => addStatusDefinition(Number(e.target.value))}>
                 <option value="" disabled selected>Vælg en status definition</option>
@@ -82,16 +82,16 @@
         </div>
 
         <div id="selected-statuses-container">
-            <h3>Valgte status definitioner:</h3>
+            <h3>Valgte Produktionstrin:</h3>
             {#each selectedStatuses as status, index}
                 <div class="selected-status">
-                    <span>{status.name}</span>
-                    <button type="button" on:click={() => removeStatusDefinition(index)}>Fjern</button>
+                    <span>Trin {index + 1}: {status.name}</span>
+                    <button type="button" class="remove-btn" on:click={() => removeStatusDefinition(index)}>Fjern</button>
                 </div>
             {/each}
         </div>
 
-        <input type="submit" value="Opret produkttype" />
+        <input type="submit" value="Opret" />
     </form>
 </div>
 
@@ -102,9 +102,6 @@
         margin: 2rem auto;
         padding: 2rem;
         box-sizing: border-box;
-        background-color: #f9f9f9;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
 
     /* Form labels */
@@ -172,18 +169,19 @@
         border-radius: 5px;
     }
 
-    .selected-status button {
-        background-color: #dc3545;
+    .selected-status .remove-btn {
+        background-color: #FF0000;
         color: white;
         border: none;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 12px;
+        border-radius: 5px;
         cursor: pointer;
-        font-size: 0.9rem;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
     }
 
-    .selected-status button:hover {
-        background-color: #c82333;
+    .selected-status .remove-btn:hover {
+        background-color: #d70000;
     }
 
     @media (max-width: 600px) {

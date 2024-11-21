@@ -46,10 +46,10 @@
 <label for="dropdown"> Opret</label><br>
 <select id="dropdown" bind:value={selectedValue} on:change={displaycomponent}>
     <option value="default">Vælg</option>
-    <option value="order">Opret ordre</option>
-    <option value="item">Opret artikel</option>
-    <option value="production-type">Opret produkttype</option>
-    <option value="step">Opret produktionstrin</option>
+    <option value="order">Opret Ordre</option>
+    <option value="item">Opret Artikel</option>
+    <option value="production-type">Opret Produktionstype</option>
+    <option value="step">Opret Produktionstrin</option>
 </select>
 
 <Dialog title="Opret Ordre" bind:dialog={orderDialog}>

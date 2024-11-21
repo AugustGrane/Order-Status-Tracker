@@ -55,20 +55,20 @@
 
 <div class="dialog-body">
     <form on:submit={handleSubmit}>
-        <label for="item-name">Navn på artikel</label>
+        <label for="item-name">Navn på artikel:</label>
         <input type="text" id="item-name" name="name" bind:value={name} required>
 
-        <label for="item-id">ID på artikel</label>
+        <label for="item-id">ID på artikel:</label>
         <input type="number" id="item-id" name="name" bind:value={id} required>
 
-        <label for="productType">Vælg produktionstype</label>
+        <label for="productType">Vælg produktionstype:</label>
         <select id="productType" name="productType" bind:value={productTypeId} required>
             {#each productTypes as type}
                 <option value={type.id}>{type.name}</option>
             {/each}
         </select>
 
-        <input type="submit" value="Submit">
+        <input type="submit" value="Opret">
     </form>
 </div>
 
