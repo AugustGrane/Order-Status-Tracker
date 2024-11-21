@@ -17,20 +17,21 @@
     <form enctype="multipart/form-data"
           action="?/upload"
           method="post">
-        <label for="step-name">Navn på trin</label>
+        <label for="step-name">Navn på trin:</label>
         <input type="text" id="step-name" name="name" bind:value={name} required>
 
         <label for="step-description">Beskrivelse af trin:  </label>
         <input type="text" id="step-description" name="description" bind:value={description} required>
 
-        <label for="step-image">Upload billede</label>
-        <input type="file" id="step-image" name="image" accept=".png, .jpg">
+        <label for="step-image">Upload billede:</label>
+        <div class="submit-div">
+            <input type="file" id="step-image" name="image" accept=".png, .jpg">
+            <input type="submit" value="Opret">
+        </div>
 
         <!-- Hidden input to store the chosen image URL -->
         <input type="hidden" name="chosenImage" value={chosenImage}>
 
-        <input type="submit" value="Submit">
-        
         <!-- Button to open the image picker -->
         <button type="button" on:click={showImagePickerDialog}>Vælg et eksisterende billede</button>
 
@@ -54,6 +55,7 @@
         max-width: 500px;
         margin: 2rem auto;
         padding: 2rem;
+        box-sizing: border-box;
     }
 
     /* Form labels */
@@ -67,13 +69,14 @@
     /* Form inputs */
     form input[type="text"] {
         width: 100%;
-        padding: 10px;
+        padding: 10px; /* This ensures equal space inside the input field */
         margin-bottom: 20px;
         border-radius: 5px;
         border: 1px solid #ccc;
         font-size: 1rem;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         transition: border-color 0.3s ease;
+        box-sizing: border-box; /* Ensures padding doesn't affect the overall width */
     }
 
     /* Focus effect on input fields */
@@ -123,6 +126,13 @@
         margin-top: 1rem;
         border: 1px solid #ccc;
         border-radius: 4px;
+    }
+
+    .submit-div {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin-bottom: -25px;
     }
 </style>
 

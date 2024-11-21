@@ -13,7 +13,7 @@
     <div class="stat-card">
         <div class="stat-icon">🔥️</div>
         <div class="stat-content">
-            <h3>Priority Orders</h3>
+            <h3>Prioritetsordre</h3>
             <p class="stat-value">{priorityOrders}</p>
         </div>
     </div>
@@ -22,7 +22,7 @@
     <div class="stat-card">
         <div class="stat-icon">📦</div>
         <div class="stat-content">
-            <h3>Active Orders</h3>
+            <h3>Aktive Ordre</h3>
             <p class="stat-value">{activeOrders}</p>
         </div>
     </div>
@@ -31,8 +31,8 @@
     <div class="stat-card">
         <div class="stat-icon">⏱️</div>
         <div class="stat-content">
-            <h3>Avg. Processing Time</h3>
-            <p class="stat-value">{averageProcessingTime} days</p>
+            <h3>Gennemsnitlig Behandlingstid</h3>
+            <p class="stat-value">{averageProcessingTime} dage</p>
         </div>
     </div>
     {/if}
@@ -40,7 +40,7 @@
     <div class="stat-card">
         <div class="stat-icon">📅</div>
         <div class="stat-content">
-            <h3>Completed Today</h3>
+            <h3>Afsluttet i Dag</h3>
             <p class="stat-value">{ordersCompletedToday}</p>
         </div>
     </div>
@@ -49,7 +49,7 @@
     <div class="stat-card">
         <div class="stat-icon">📊</div>
         <div class="stat-content">
-            <h3>Total Orders</h3>
+            <h3>Antal Ordre</h3>
             <p class="stat-value">{totalOrders}</p>
         </div>
     </div>
@@ -58,7 +58,7 @@
     <div class="stat-card">
         <div class="stat-icon">✅</div>
         <div class="stat-content">
-            <h3>Completed Orders</h3>
+            <h3>Afsluttede Ordrer</h3>
             <p class="stat-value">{completedOrders}</p>
         </div>
     </div>
