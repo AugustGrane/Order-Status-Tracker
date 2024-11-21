@@ -9,6 +9,10 @@
 
 
     onMount(async () => {
+        await fetchData();
+    });
+
+    async function fetchData() {
         try {
             const response = await fetch("/api/get-all-producttypes");
 
@@ -20,7 +24,7 @@
         } catch (error) {
             console.error('Error:', error);
         }
-    });
+    }
 
     async function handleSubmit(event: Event) {
         event.preventDefault(); // Prevent the default form submission behavior
@@ -41,14 +45,15 @@
 
             if (response.ok) {
                 console.log('Form submitted successfully:', itemDTO);
-                alert('Item submitted successfully!');
+                alert('Artiklen blev oprettet!');
             } else {
                 console.error('Failed to submit the item:', await response.text());
-                alert('Failed to submit the item.');
+                alert('Noget gik galt under oprettelse af artiklen.');
             }
+            await fetchData();
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to submit data.');
+            alert('Noget gik galt under oprettelse af artiklen.');
         }
     }
 </script>

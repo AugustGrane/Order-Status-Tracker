@@ -6,6 +6,10 @@
     let selectedStatuses: { id: number; name: string }[] = [];
 
     onMount(async () => {
+        await fetchData();
+    });
+
+    async function fetchData() {
         try {
             const response = await fetch('/api/get-all-status-definitions');
             if (response.ok) {
@@ -16,7 +20,7 @@
         } catch (error) {
             console.error('Error fetching status definitions:', error);
         }
-    });
+    }
 
     function addStatusDefinition(statusDefinitionId: any) {
         const selected = statusDefinitions.find(sd => sd.id === statusDefinitionId);
@@ -54,14 +58,15 @@
 
             if (response.ok) {
                 console.log('ProductType created successfully:', productTypeDTO);
-                alert('Product type created successfully!');
+                alert('Produktionstype blev oprettet!');
             } else {
                 console.error('Error creating product type:', await response.text());
-                alert('Failed to create product type.');
+                alert('Noget gik galt under oprettelse af produktionstypen.');
             }
+            await fetchData();
         } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred while creating the product type.');
+            alert('Noget gik galt under oprettelse af produktionstypen.');
         }
     }
 </script>
