@@ -3,7 +3,7 @@
     import { portal } from './portal';
     import { fade } from 'svelte/transition';
     import StatisticsGrid from '$lib/components/dashboard/StatisticsGrid.svelte';
-    import SearchAndFilter from '$lib/components/SearchAndFilter.svelte';
+    import SearchAndFilter from '$lib/components/dashboard/SearchAndFilter.svelte';
     import OrderList from '$lib/components/dashboard/OrderList.svelte';
 
     export let data: PageData;

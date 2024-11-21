@@ -148,7 +148,7 @@
         color: #000;
         text-align: center;
         font-family: var(--font-primary);
-        font-size: 1.5rem;
+        font-size: 1.75rem;
         font-weight: 600;
     }
 
@@ -232,7 +232,7 @@
     /* Responsive adjustments */
     @media (max-width: 768px) {
         .title {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
         }
         .logo {
             width: 8rem;
@@ -246,18 +246,21 @@
             display: flex;
             padding: 1.5vw;
             border-radius: 0.5vw;
-            font-size: 1rem;
             font-weight: 250;
         }
         .input-field {
             display: block;
             padding: 2vw;
-            font-size: 1rem;
             margin-bottom: 1rem;
+        }
+        .button, .input-field {
+            font-size: 1rem;
+            border-radius: 7px;
         }
         .focus-box {
             width: 80%;
             min-width: 220px;
+            padding: 2rem;
         }
     }
 </style>

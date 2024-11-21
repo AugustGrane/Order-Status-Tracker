@@ -74,6 +74,7 @@
     .dialog-title {
         flex-grow: 1;
         text-align: center;
+        font-size: 1.6rem;
     }
 
     .close-button {
