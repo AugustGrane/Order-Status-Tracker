@@ -5,45 +5,27 @@
     let name: string;
     let description: string;
     let existingImageDialog: any;
-    let chosenImage: string = ""; // For existing images
-    let uploadedImage: File | null = null; // For uploaded images
+    let chosenImage:string = "";
 
-    async function showImagePickerDialog() {
+    async function showImagePickerDialog(){
         existingImageDialog.showModal();
     }
 
-    // Clear the chosen image if a file is uploaded
-    function handleFileUpload(event: Event) {
-        const target = event.target as HTMLInputElement;
-        if (target.files && target.files[0]) {
-            uploadedImage = target.files[0];
-            chosenImage = ""; // Clear the chosen image field
-        }
-    }
-
-    // Clear the uploaded file when an existing image is chosen
-    $: if (chosenImage) {
-        uploadedImage = null;
-    }
 </script>
 
 <div class="dialog-body">
-    <form enctype="multipart/form-data" action="?/upload" method="post">
+    <form enctype="multipart/form-data"
+          action="?/upload"
+          method="post">
         <label for="step-name">Navn på trin:</label>
         <input type="text" id="step-name" name="name" bind:value={name} required>
 
-        <label for="step-description">Beskrivelse af trin:</label>
+        <label for="step-description">Beskrivelse af trin:  </label>
         <input type="text" id="step-description" name="description" bind:value={description} required>
 
         <label for="step-image">Upload billede:</label>
         <div class="submit-div">
-            <input
-                    type="file"
-                    id="step-image"
-                    name="uploadedImage"
-                    accept=".png, .jpg"
-                    on:change={handleFileUpload}
-            >
+            <input type="file" id="step-image" name="image" accept=".png, .jpg">
             <input type="submit" value="Opret">
         </div>
 
@@ -60,13 +42,13 @@
                 <img src={chosenImage} alt="Chosen Image">
             </div>
         {/if}
+
     </form>
 </div>
 
 <Dialog title="Choose an Image" bind:dialog={existingImageDialog}>
     <ChooseExistingImageComponent bind:chosenImage/>
 </Dialog>
-
 <style>
     /* General dialog container styling */
     .dialog-body {
@@ -87,14 +69,14 @@
     /* Form inputs */
     form input[type="text"] {
         width: 100%;
-        padding: 10px;
+        padding: 10px; /* This ensures equal space inside the input field */
         margin-bottom: 20px;
         border-radius: 5px;
         border: 1px solid #ccc;
         font-size: 1rem;
         box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
         transition: border-color 0.3s ease;
-        box-sizing: border-box;
+        box-sizing: border-box; /* Ensures padding doesn't affect the overall width */
     }
 
     /* Focus effect on input fields */

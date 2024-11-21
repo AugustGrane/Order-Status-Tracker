@@ -1,3 +1,4 @@
+
 <script lang="ts">
     import { onMount } from "svelte";
 
@@ -13,14 +14,12 @@
 
     async function fetchData() {
         try {
+            // Fetch the list of uploaded files
             const response = await fetch('/dashboard'); // Adjust the URL if necessary
             const data = await response.json();
 
             if (data.success) {
-                // Filter out invalid files like .DS_Store
-                allStepImageNames = data.files
-                    .filter((file: string) => /\.(png|jpg|jpeg|gif|webp)$/i.test(file))
-                    .map((file: string) => `/uploads/${file}`); // Generate full URLs
+                allStepImageNames = data.files.map((file: string) => `/uploads/${file}`); // Generate full URLs
             } else {
                 error = data.error || 'Failed to fetch files.';
             }
