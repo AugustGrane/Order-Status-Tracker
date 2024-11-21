@@ -13,7 +13,7 @@
     export let firstItem: boolean = false;
     let toggleTooltip: boolean = false;
 
-    $: cleanIconPath = icon.replace('frontend/static/', '');
+    $: cleanIconPath = icon.replace('frontend/static/uploads/', '');
 
     onMount(() => {
         toggleTooltip = window.innerWidth <= 1000;
