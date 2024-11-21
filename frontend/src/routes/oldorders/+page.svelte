@@ -120,7 +120,7 @@
         width: 10%;
         max-width: 100px; /* Limit max size */
         aspect-ratio: 2 / 1; /* Ensure it scales proportionally */
-        background-image: url('/gtryk_logo.png');
+        background-image: url('/uploads/gtryk_logo.png');
         background-size: cover;
     }
 

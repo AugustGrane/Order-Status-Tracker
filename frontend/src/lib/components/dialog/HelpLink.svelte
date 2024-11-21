@@ -46,7 +46,7 @@
     }
 
     .question-circle {
-        background-image: url("/Question mark icon.png"), linear-gradient(transparent, transparent);
+        background-image: url("/uploads/Question mark icon.png"), linear-gradient(transparent, transparent);
         display: inline-flex;
         align-items: center;
         justify-content: center;
