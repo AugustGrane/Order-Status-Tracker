@@ -74,7 +74,7 @@
                               class:completed={isOrderCompleted(order)}
                               on:mouseenter={(e) => showTooltip(e, order.orderId, 'status')}
                               on:mouseleave={hideTooltip}>
-                            {isOrderCompleted(order) ? 'Completed' : 'In Progress'}
+                            {isOrderCompleted(order) ? 'Afsluttet' : 'Under behandling'}
                         </span>
                     </div>
                 </div>
@@ -95,7 +95,7 @@
                 <div class="cell">
                     <div class="content">
                         {#if order.priority}
-                            <span class="priority-tag">High</span>
+                            <span class="priority-tag">Vigtig</span>
                         {/if}
                     </div>
                 </div>
