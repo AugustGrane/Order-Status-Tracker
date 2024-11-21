@@ -16,7 +16,7 @@
 <Dialog title="Hvor finder jeg mit ordrenummer?" bind:dialog>
     <div class="dialog-body">
         <p>Ordrenummeret kan findes i den ordrebekræftelse du har modtaget fra os på mail.</p>
-        <p class="note">Tryk ESC eller × for at lukke dette vindue.</p>
+        <p>Hvis du ønsker yderligere hjælp, kan du kontakte Gtryk på info@gtryk.dk</p>
     </div>
 </Dialog>
 
@@ -28,14 +28,22 @@
         --font-primary: 'Roboto', Arial, sans-serif;
     }
 
+    u {
+        font-size: 1rem;
+    }
+
+    .dialog-body {
+        margin: 2rem 0;
+        font-family: var(--font-primary);
+        font-size: 1.2rem;
+    }
+
     .help-link {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
         color: #4d56cd;
         cursor: pointer;
-        font-family: var(--font-primary);
-        font-size: 16px;
         background: none;
         border: none;
         padding: 0;
@@ -60,6 +68,9 @@
     }
 
     @media(max-width: 768px) {
+        u {
+            font-size: 0.85rem;
+        }
         .question-circle {
             width: 12px;
             height: 12px;
