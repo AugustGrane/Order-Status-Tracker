@@ -1,7 +1,9 @@
 <script lang="ts">
     export let item: any;
     let isUpdated: boolean;
+    let oldStepIndex: number = item.currentStepIndex;
     $: isUpdated;
+    $: oldStepIndex;
 
     async function saveItem(item: any) {
 
@@ -35,9 +37,8 @@
 
 
     function updateStep(item: any, newStepIndex: number) {
-        // Logik til opdatering af trin, hvis nødvendigt
-        console.log(`Opdaterer trin for ${item.item.name} til ${item.differentSteps[newStepIndex].name}`);
-        item.currentStepIndex = newStepIndex; // Opdatering af det nuværende trin
+        isUpdated = oldStepIndex != newStepIndex;
+        item.currentStepIndex = newStepIndex;
     }
 
 </script>
@@ -80,7 +81,6 @@
         <div class="select-step">
             <select bind:value={item.currentStepIndex} on:change={(e) => {
                         updateStep(item, e.target.value);
-                        isUpdated = true;
                     }}>
                 {#each item.differentSteps as step, index}
                     <option value={index}>{step.name}</option>
@@ -89,9 +89,10 @@
         </div>
 
         <div class="save-button">
-            <button class:activated={isUpdated} on:click={() => {
+            <button class:activated={isUpdated} disabled={!isUpdated} on:click={() => {
                         saveItem(item);
                         isUpdated = false;
+                        oldStepIndex = item.currentStepIndex;
                     }}>Gem</button>
         </div>
     </div>
@@ -234,20 +235,16 @@
         color: black;
         opacity: 100%;
         border-radius: 8px;
-        cursor: pointer;
         font-size: 0.875rem;
         padding: 0.75rem 2rem;
         border: 1px solid #e2e8f0;
         text-align: center;
     }
 
-    .save-button button:hover {
-        background: #ededed;
-    }
-
     .activated {
         background: #3b82f6 !important;
         color: white !important;
+        cursor: pointer;
     }
 
     .activated:hover {

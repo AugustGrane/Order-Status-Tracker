@@ -55,9 +55,8 @@
             <span class="sort-icon">{getSortIcon('priority')}</span>
         </div>
     </div>
-
     {#each orders as order}
-        <div class="order">
+        <div class="order" class:focus={expandedOrder === order.orderId}>
             <div class="order-header" on:click={() => toggleOrder(order.orderId)}>
                 <div class="cell">
                     <span class="content">{order.orderId}</span>
@@ -145,6 +144,10 @@
 
     .order-header:hover {
         background-color: #f8fafc;
+    }
+
+    .focus {
+        border: 0.5px solid #015ecc;
     }
 
     .cell {
