@@ -140,7 +140,7 @@
     .logo {
         width: 12rem;
         height: 7rem;
-        background: url('/gtryk_logo.png') no-repeat center;
+        background: url('/uploads/gtryk_logo.png') no-repeat center;
         background-size: contain;
     }
 

@@ -151,7 +151,7 @@
         height: 7rem;
         margin: 18px;
         object-fit: cover;
-        background: url('/gtryk_logo.png') no-repeat center;
+        background: url('/uploads/gtryk_logo.png') no-repeat center;
         background-size: contain;
     }
 
