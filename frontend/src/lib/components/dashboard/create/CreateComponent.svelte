@@ -5,6 +5,9 @@
     import CreateItemComponent from "$lib/components/dashboard/create/CreateItemComponent.svelte";
     import CreateOrderComponent from "$lib/components/dashboard/create/CreateOrderComponent.svelte";
     import CreateProductionTypeComponent from "$lib/components/dashboard/create/CreateProductionTypeComponent.svelte";
+
+    export let orders;
+
     onMount(() => {
         const dropdown = document.getElementById("dropdown") as HTMLSelectElement;
 
@@ -53,11 +56,11 @@
 </select>
 
 <Dialog title="Opret Ordre" bind:dialog={orderDialog}>
-    <CreateOrderComponent/>
+    <CreateOrderComponent orders={orders}/>
 </Dialog>
 
 <Dialog title="Opret Artikel" bind:dialog={itemDialog}>
-    <CreateItemComponent/>
+    <CreateItemComponent orders={orders}/>
 </Dialog>
 
 <Dialog title="Opret Produktionstype" bind:dialog={productionTypeDialog}>

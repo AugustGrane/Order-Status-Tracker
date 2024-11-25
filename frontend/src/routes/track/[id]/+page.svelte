@@ -176,6 +176,7 @@
     .order-box-main {
         align-items: flex-start;
         padding: 30px 40px;
+        margin-bottom: 60px;
         background-color: #fdfdfd;
         border-radius: 15px;
         overflow: hidden;
