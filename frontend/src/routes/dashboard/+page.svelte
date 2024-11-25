@@ -127,7 +127,6 @@
 <main>
     <div class="background">
         <div class="navbar">
-            <div class="logo"></div>
             <h1 class="title">Kontrolpanel</h1>
             <CreateComponent/>
         </div>
@@ -207,6 +206,7 @@
         align-items: center;
         gap: 1rem;
         margin-bottom: 2rem;
+        justify-content: space-between;
     }
 
     .title {
