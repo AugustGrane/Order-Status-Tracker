@@ -1,4 +1,7 @@
 <script lang="ts">
+    import type {PageData} from "../../../../../.svelte-kit/types/src/routes/dashboard/$types";
+
+    export let orders;
     import {onMount} from "svelte";
 
     let id: number | undefined;
@@ -49,6 +52,10 @@
         }
 
         try {
+            if (idExists(id)) {
+                throw new Error('ID already exists');
+            }
+
             const response = await fetch("/api/create-order", {
                 method: 'POST',
                 headers: {
@@ -79,8 +86,17 @@
             await fetchData();
         } catch (error) {
             console.error('Error:', error);
-            alert('Failed to submit data.');
+            alert('Failed to submit data');
         }
+    }
+
+    function idExists(id: number) {
+        for (const order of orders) {
+            if (order.orderId === id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function addNewSelection() {

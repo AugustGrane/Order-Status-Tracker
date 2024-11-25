@@ -128,7 +128,7 @@
     <div class="background">
         <div class="navbar">
             <h1 class="title">Kontrolpanel</h1>
-            <CreateComponent/>
+            <CreateComponent orders={orders}/>
         </div>
 
         <div class="container">

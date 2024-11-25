@@ -1,9 +1,10 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
-
+    export let orders;
     let name: string = '';
     let id: number;
+    let itemsArray: any[] = [];
     let productTypes: any[] = []; // Declare it as an array of strings
     let productTypeId: number; // Assuming the selected product type is a string
 
@@ -24,10 +25,23 @@
         } catch (error) {
             console.error('Error:', error);
         }
+
+        try {
+            const response = await fetch("/api/get-all-items");
+
+            if (response.ok) {
+                itemsArray = await response.json();
+            } else {
+                throw new Error('Failed to fetch items');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
     }
 
     async function handleSubmit(event: Event) {
         event.preventDefault(); // Prevent the default form submission behavior
+
         let itemDTO = {
             name,
             id,
@@ -35,6 +49,10 @@
         }
 
         try {
+            if (idExists(id)) {
+                throw new Error('ID already exists');
+            }
+
             const response = await fetch("/api/create-item", {
                 method: 'POST',
                 headers: {
@@ -56,6 +74,18 @@
             alert('Noget gik galt under oprettelse af artiklen.');
         }
     }
+
+    function idExists(id: number) {
+        for (const item of itemsArray) {
+            if (item.id === id) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
 </script>
 
 <div class="dialog-body">
