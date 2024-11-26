@@ -36,9 +36,10 @@
     .search-bar input {
         width: 25rem;
         padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
+        border: 2px solid #e2e8f0;
         border-radius: 8px;
         font-size: 0.9rem;
+        background-color: #f9fafb;
     }
 
     .filter-options {
@@ -58,6 +59,12 @@
         background-repeat: no-repeat;
         background-position: right 0.5rem center;
         background-size: 1.2em;
+        transition: background-color 0.2s, box-shadow 0.2s;
+    }
+
+    select:hover {
+        background-color: #f8f8f8;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
     }
 
     select:focus, .search-bar input:focus {
