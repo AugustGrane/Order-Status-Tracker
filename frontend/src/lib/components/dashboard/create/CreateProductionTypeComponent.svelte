@@ -1,7 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
 
+    export let dialog: any;
     let name: string = '';
+    let selectedStatusId = '';
     let statusDefinitions: { id: number; name: string }[] = [];
     let selectedStatuses: { id: number; name: string }[] = [];
 
@@ -59,6 +61,18 @@
             if (response.ok) {
                 console.log('ProductType created successfully:', productTypeDTO);
                 alert('Produktionstype blev oprettet!');
+
+                setTimeout(() => { // To clear the input fields
+                    name = '';
+                    statusDefinitions = [];
+                    selectedStatuses = [];
+                    differentSteps = [];
+                    selectedStatusId = '';
+                }, 100);
+
+                if (dialog) {
+                    dialog.close(); // Close the dialog after submission
+                }
             } else {
                 console.error('Error creating product type:', await response.text());
                 alert('Noget gik galt under oprettelse af produktionstypen.');
@@ -78,8 +92,8 @@
 
         <label for="statusDefinition">Tilføj produktionstrin:</label>
         <div id="status-select-container">
-            <select id="statusDefinition" name="statusDefinition" on:change={(e) => addStatusDefinition(Number(e.target.value))}>
-                <option value="" disabled selected>Vælg en status definition</option>
+            <select id="statusDefinition" name="statusDefinition" on:change={(e) => addStatusDefinition(Number(e.target.value))} bind:value={selectedStatusId}>
+                <option value="" disabled selected>Vælg produktionstrin</option>
                 {#each statusDefinitions as definition}
                     <option value={definition.id}>{definition.name}</option>
                 {/each}

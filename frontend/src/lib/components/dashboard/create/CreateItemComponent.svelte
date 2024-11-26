@@ -2,11 +2,12 @@
     import { onMount } from "svelte";
 
     export let orders;
+    export let dialog: any;
     let name: string = '';
-    let id: number;
+    let id: number | undefined;
     let itemsArray: any[] = [];
     let productTypes: any[] = []; // Declare it as an array of strings
-    let productTypeId: number; // Assuming the selected product type is a string
+    let productTypeId: number | undefined; // Assuming the selected product type is a string
 
 
     onMount(async () => {
@@ -64,6 +65,16 @@
             if (response.ok) {
                 console.log('Form submitted successfully:', itemDTO);
                 alert('Artiklen blev oprettet!');
+
+                setTimeout(() => { // To clear the input fields
+                    name = '';
+                    id = undefined;
+                    productTypeId = undefined;
+                }, 100);
+
+                if (dialog) {
+                    dialog.close(); // Close the dialog after submission
+                }
             } else {
                 console.error('Failed to submit the item:', await response.text());
                 alert('Noget gik galt under oprettelse af artiklen.');
@@ -126,7 +137,7 @@
     /* Form input fields */
     form input[id="item-name"],
     form select {
-        width: 95%;
+        width: 100%;
         padding: 10px;
         margin-bottom: 20px;
         border-radius: 5px;
@@ -138,7 +149,7 @@
 
     form input[id="item-id"],
     form select {
-        width: 95%;
+        width: 100%;
         padding: 10px;
         margin-bottom: 20px;
         border-radius: 5px;
