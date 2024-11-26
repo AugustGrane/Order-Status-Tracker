@@ -3,6 +3,7 @@
     import { quintOut } from 'svelte/easing';
     import { fade } from 'svelte/transition';
     import OrderDetails from './OrderDetails.svelte';
+    import DeleteOrder from "./DeleteOrder.svelte";
 
     export let orders: any[];
     export let expandedOrder: number | null;
@@ -57,7 +58,10 @@
     </div>
     {#each orders as order}
         <div class="order" class:focus={expandedOrder === order.orderId}>
-            <div class="order-header" on:click={() => toggleOrder(order.orderId)}>
+            <button class="order-header" href="#" on:click={(e) => {
+                e.preventDefault();
+                toggleOrder(order.orderId);
+            }}>
                 <div class="cell">
                     <span class="content">{order.orderId}</span>
                 </div>
@@ -68,7 +72,7 @@
                     <span class="content customer-name">{order.customerName}</span>
                 </div>
                 <div class="cell">
-                    <div class="content">
+                    <div class="content" style="justify-content: center">
                         <span class="status-indicator" 
                               class:completed={isOrderCompleted(order)}
                               on:mouseenter={(e) => showTooltip(e, order.orderId, 'status')}
@@ -92,13 +96,18 @@
                     </div>
                 </div>
                 <div class="cell">
-                    <div class="content">
+                    <div class="content" style="justify-content: center">
                         {#if order.priority}
                             <span class="priority-tag">Vigtig</span>
                         {/if}
                     </div>
                 </div>
-            </div>
+                <div class="cell">
+                    <div class="content" style="justify-content: center">
+                        <DeleteOrder orderId={order.orderId} />
+                    </div>
+                </div>
+            </button>
 
             {#if expandedOrder === order.orderId}
                 <div class="order-details" transition:slide={{duration: 300, easing: quintOut}}>
@@ -119,7 +128,7 @@
 
     .name-bar {
         display: grid;
-        grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(200px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(120px, 1fr);
+        grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(200px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(100px, 0.6fr) minmax(30px, 0.35fr);
         background: #f8fafc;
         font-weight: 600;
         font-size: 0.9rem;
@@ -137,9 +146,14 @@
 
     .order-header {
         display: grid;
-        grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(200px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(120px, 1fr);
+        grid-template-columns: minmax(120px, 1fr) minmax(120px, 1fr) minmax(200px, 2fr) minmax(140px, 1fr) minmax(140px, 1fr) minmax(100px, 0.6fr) minmax(30px, 0.35fr);
         cursor: pointer;
         transition: background-color 0.2s;
+        background: none;
+        border: none;
+        padding: 0;
+        text-align: left;
+        width: 100%;
     }
 
     .order-header:hover {
@@ -260,7 +274,7 @@
 
     @media (max-width: 1300px) {
         .name-bar, .order-header {
-            grid-template-columns: minmax(130px, 1fr) minmax(100px, 1fr) minmax(200px, 2fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(100px, 1fr);
+            grid-template-columns: minmax(130px, 1fr) minmax(100px, 1fr) minmax(140px, 1.5fr) minmax(120px, 1fr) minmax(120px, 1fr) minmax(90px, 0.6fr) minmax(30px, 0.35fr);
         }
         .cell {
             padding: 0.50rem;

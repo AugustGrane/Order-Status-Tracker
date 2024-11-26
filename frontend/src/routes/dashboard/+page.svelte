@@ -6,6 +6,7 @@
     import SearchAndFilter from '$lib/components/dashboard/SearchAndFilter.svelte';
     import CreateComponent from "$lib/components/dashboard/create/CreateComponent.svelte";
     import OrderList from "$lib/components/dashboard/OrderList.svelte";
+    import DeleteOrder from "$lib/components/dashboard/DeleteOrder.svelte";
 
     export let data: PageData;
     const orders = data.orders;
@@ -128,6 +129,7 @@
     <div class="background">
         <div class="navbar">
             <h1 class="title">Kontrolpanel</h1>
+            <img class="gtryk_logo" alt="Gtryk_logo" src="/uploads/gtryk_logo.png">
             <CreateComponent orders={orders}/>
         </div>
 
@@ -138,10 +140,6 @@
                 {averageProcessingTime}
                 {totalOrders}
             />
-            <!--{ordersCompletedToday}-->
-<!--                {completedOrders}-->
-<!--                {productTypeStats}-->
-<!--            />-->
 
             <SearchAndFilter
                 bind:searchQuery
@@ -194,31 +192,35 @@
         font-family: 'Inter', sans-serif;
         background-color: #f1f5f9;
         color: #1e293b;
+        padding: 2rem;
     }
 
     .background {
         min-height: 100vh;
-        padding: 2rem;
     }
 
     .navbar {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
         justify-content: space-between;
+        margin-bottom: 3rem;
     }
 
     .title {
-        margin: 0;
         font-size: 1.5rem;
         font-weight: 600;
         color: #0f172a;
     }
 
+    .gtryk_logo {
+        width: 128px;
+        height: 63px;
+    }
+
     .container {
         max-width: 1400px;
         margin: 0 auto;
+        padding: 0;
     }
 
     .tooltip-overlay {
@@ -263,15 +265,12 @@
     }
 
     @media (max-width: 1300px) {
-        .background {
-            padding: 0.1rem;
+        :global(body) {
+            padding: 2rem;
+
         }
         .navbar {
-            margin: 0.5rem 0;
-        }
-
-        .container {
-            padding: 0.5rem 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .title {
