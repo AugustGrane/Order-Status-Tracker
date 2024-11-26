@@ -55,15 +55,15 @@
 </select>
 
 <Dialog title="Opret Ordre" bind:dialog={orderDialog}>
-    <CreateOrderComponent orders={orders}/>
+    <CreateOrderComponent orders={orders} bind:dialog={orderDialog}/>
 </Dialog>
 
 <Dialog title="Opret Artikel" bind:dialog={itemDialog}>
-    <CreateItemComponent orders={orders}/>
+    <CreateItemComponent orders={orders} bind:dialog={itemDialog}/>
 </Dialog>
 
 <Dialog title="Opret Produktionstype" bind:dialog={productionTypeDialog}>
-    <CreateProductionTypeComponent/>
+    <CreateProductionTypeComponent bind:dialog={productionTypeDialog}/>
 </Dialog>
 
 <Dialog title="Opret Produktionstrin" bind:dialog={productionStepDialog}>

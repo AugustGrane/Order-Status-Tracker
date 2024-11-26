@@ -2,6 +2,7 @@
     import type {PageData} from "../../../../../.svelte-kit/types/src/routes/dashboard/$types";
 
     export let orders;
+    export let dialog: any;
     import {onMount} from "svelte";
 
     let id: number | undefined;
@@ -79,11 +80,14 @@
                     notes = '';
                 }, 100);
 
+                if (dialog) {
+                    dialog.close(); // Close the dialog after submission
+                }
+
             } else {
                 console.error('Noget gik galt under oprettelse af ordren: ', await response.text());
                 alert('Noget gik galt under oprettelse af ordren.');
             }
-            await fetchData();
         } catch (error) {
             console.error('Error:', error);
             alert('Failed to submit data');
