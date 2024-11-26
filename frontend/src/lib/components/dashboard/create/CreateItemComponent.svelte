@@ -71,6 +71,7 @@
                     id = undefined;
                     productTypeId = undefined;
                 }, 100);
+                window.location.reload();
 
                 if (dialog) {
                     dialog.close(); // Close the dialog after submission

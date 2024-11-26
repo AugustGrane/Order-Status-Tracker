@@ -69,10 +69,10 @@
                     differentSteps = [];
                     selectedStatusId = '';
                 }, 100);
-
                 if (dialog) {
                     dialog.close(); // Close the dialog after submission
                 }
+                window.location.reload();
             } else {
                 console.error('Error creating product type:', await response.text());
                 alert('Noget gik galt under oprettelse af produktionstypen.');

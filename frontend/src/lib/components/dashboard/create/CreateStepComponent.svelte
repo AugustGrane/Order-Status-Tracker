@@ -11,6 +11,11 @@
         existingImageDialog.showModal();
     }
 
+    async function refresh(){
+        if(name && description){
+            window.location.reload();
+        }
+    }
 </script>
 
 <div class="dialog-body">
@@ -26,7 +31,7 @@
         <label for="step-image">Upload billede:</label>
         <div class="submit-div">
             <input type="file" id="step-image" name="image" accept=".png, .jpg">
-            <input type="submit" value="Opret">
+            <input type="submit" value="Opret" on:click={refresh}>
         </div>
 
         <!-- Hidden input to store the chosen image URL -->
