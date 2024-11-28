@@ -12,7 +12,7 @@
     <div class="dialog-body">
         <div class="icon-wrapper">
             <div class="icon"
-                 style="background: url('/Shipping%20icon.png') no-repeat center;">
+                 style="background: url('/uploads/Shipping%20icon.png') no-repeat center;">
             </div>
         </div>
         <p>Din ordre er nu på vej til din adresse!</p>
