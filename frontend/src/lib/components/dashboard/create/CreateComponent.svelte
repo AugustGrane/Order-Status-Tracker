@@ -75,7 +75,7 @@
         padding: 0.75rem 2rem 0.75rem 1rem;
         border-radius: 8px;
         color: #ffffff;
-        background-color: #4caf50;
+        background-color: #00A500;
         font-size: 0.9rem;
         cursor: pointer;
         appearance: none;
@@ -88,7 +88,7 @@
     }
 
     .dropdown:hover {
-        background-color: #45a049; /* Slightly darker green on hover */
+        background-color: #009700; /* Slightly darker green on hover */
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 </style>
